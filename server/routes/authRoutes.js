@@ -56,6 +56,33 @@ router.get('/tournaments', firebaseAuth, async (req, res) => {
     }
 });
 
+// 2.2 Delete Tournament
+router.delete('/tournaments/:id', firebaseAuth, async (req, res) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Access Denied: Only admins can delete tournaments.' });
+    }
+
+    try {
+        const tournamentId = req.params.id;
+        const tournament = await Tournament.findById(tournamentId);
+
+        if (!tournament) {
+            return res.status(404).json({ message: 'Tournament not found' });
+        }
+
+        // 1. Delete the Tournament document
+        await Tournament.findByIdAndDelete(tournamentId);
+
+        // 2. Delete associated user assignments (Cascade)
+        await TournamentUser.deleteMany({ tournament: tournamentId });
+
+        res.json({ success: true, message: 'Tournament deleted successfully' });
+    } catch (err) {
+        console.error('Delete Tournament Error:', err);
+        res.status(500).json({ message: 'Failed to delete tournament' });
+    }
+});
+
 // 2.5 Create Tournament
 router.post('/create-tournament', firebaseAuth, async (req, res) => {
     const { name, accessCode, selectionMode } = req.body;

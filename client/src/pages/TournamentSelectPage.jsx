@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trophy, Lock, ArrowRight, Activity, Plus } from 'lucide-react';
+import { Trophy, Lock, ArrowRight, Activity, Plus, Trash2 } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_BASE_URL || 'https://auction-arena-server.onrender.com';
+import { API_BASE_URL as API_URL } from '../config';
 
 
 const TournamentSelectPage = () => {
@@ -142,6 +142,31 @@ const TournamentSelectPage = () => {
         }
     };
 
+    const handleDeleteTournament = async (e, tournamentId) => {
+        e.stopPropagation(); // Prevent card click
+        if (!window.confirm('Are you sure you want to delete this tournament? This action cannot be undone.')) {
+            return;
+        }
+
+        const token = sessionStorage.getItem('firebase_token');
+        try {
+            const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${tournamentId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (res.ok) {
+                setTournaments(prev => prev.filter(t => t._id !== tournamentId));
+            } else {
+                alert('Failed to delete tournament');
+            }
+        } catch (err) {
+            alert('Error deleting tournament');
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
             <div className="bg-white p-8 rounded-3xl shadow-xl w-full max-w-2xl border border-gray-100">
@@ -203,7 +228,18 @@ const TournamentSelectPage = () => {
                                         <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">{t.status}</span>
                                     </div>
                                 </div>
-                                <ArrowRight className="text-gray-300 group-hover:text-blue-500 transition" />
+                                <div className="flex items-center gap-2">
+                                    {userRole === 'admin' && (
+                                        <button
+                                            onClick={(e) => handleDeleteTournament(e, t._id)}
+                                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition"
+                                            title="Delete Tournament"
+                                        >
+                                            <Trash2 size={20} />
+                                        </button>
+                                    )}
+                                    <ArrowRight className="text-gray-300 group-hover:text-blue-500 transition" />
+                                </div>
                             </div>
                         ))}
 
