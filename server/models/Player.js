@@ -50,6 +50,15 @@ const playerSchema = new mongoose.Schema({
     set: {
         type: Number,
         default: 1
+    },
+    // Future Rule Validation Field
+    // 1: Openers (1-2)
+    // 2: Middle Order (3-4)
+    // 3: Lower Middle Order (5-7)
+    // 4: Lower Order (8-11)
+    battingPositionGroup: {
+        type: Number,
+        default: null
     }
 }, {
     timestamps: true

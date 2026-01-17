@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
-import { LayoutDashboard, Gavel, Users, UserCircle, Menu, X, BookOpen, LogOut, Wallet, Shield, Trophy } from 'lucide-react';
+import { LayoutDashboard, Gavel, Users, UserCircle, Menu, X, BookOpen, LogOut, Wallet, Shield, Trophy, Check } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
@@ -56,6 +56,7 @@ const MainLayout = () => {
         { name: 'Players', path: '/players', icon: Users },
         { name: 'Teams', path: '/teams', icon: Users },
         { name: 'Rules', path: '/rules', icon: BookOpen },
+        { name: 'Playing XI', path: '/select-playing-xi', icon: Check },
     ];
 
     // Conditionally add Admin Link

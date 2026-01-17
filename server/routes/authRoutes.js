@@ -413,6 +413,74 @@ router.post('/admin/login', firebaseAuth, async (req, res) => {
         console.error("Admin Login Error:", err);
         res.status(500).json({ message: 'Admin login failed' });
     }
-});
+    // 7. Save Playing XI
+    router.post('/tournaments/:id/playing11', firebaseAuth, async (req, res) => {
+        const { playerIds } = req.body;
+        const tournamentId = req.params.id;
+        const userId = req.user._id;
 
-export default router;
+        if (!Array.isArray(playerIds) || playerIds.length !== 11) {
+            // For now, we only enforce that it is an array. The user prompt said:
+            // "Allow selecting exactly 11 players... For now... DO NOT enforce rules yet"
+            // But logic says we should probably check if it's 11 for a "Playing XI".
+            // However, user said "This page is ONLY for selection UI".
+            // Let's enforce 11 as a basic check, or at least max 11.
+            if (playerIds.length !== 11) {
+                return res.status(400).json({ message: 'You must select exactly 11 players.' });
+            }
+        }
+
+        try {
+            // 1. Get User's Team in this Tournament
+            const userAssignment = await TournamentUser.findOne({ tournament: tournamentId, user: userId });
+            if (!userAssignment || !userAssignment.teamCode) {
+                return res.status(403).json({ message: 'You do not have a team in this tournament.' });
+            }
+
+            // 2. Find the Team Document
+            const team = await Team.findOne({ code: userAssignment.teamCode });
+            if (!team) return res.status(404).json({ message: 'Team not found.' });
+
+            // 3. Update Playing 11
+            // Verify (loosely) that these players belong to the team (playersBought)?
+            // User said "DO NOT enforce rules yet", but data integrity is important.
+            // Let's just save it for now to follow instructions strictly about "structural + UI preparation".
+            team.playing11 = playerIds;
+            await team.save();
+
+            res.json({ success: true, message: 'Playing XI saved successfully', playing11: team.playing11 });
+
+        } catch (err) {
+            console.error("Save Playing XI Error:", err);
+            res.status(500).json({ message: 'Failed to save Playing XI' });
+        }
+    });
+
+    // 8. Get Playing XI (or Squad with status)
+    router.get('/tournaments/:id/my-squad', firebaseAuth, async (req, res) => {
+        const tournamentId = req.params.id;
+        const userId = req.user._id;
+
+        try {
+            const userAssignment = await TournamentUser.findOne({ tournament: tournamentId, user: userId });
+            if (!userAssignment || !userAssignment.teamCode) {
+                return res.status(403).json({ message: 'No team assigned.' });
+            }
+
+            const team = await Team.findOne({ code: userAssignment.teamCode }).populate('playersBought').populate('playing11');
+            if (!team) return res.status(404).json({ message: 'Team not found.' });
+
+            res.json({
+                success: true,
+                players: team.playersBought,
+                playing11: team.playing11, // Array of objects
+                teamCode: team.code
+            });
+
+        } catch (err) {
+            console.error("Get My Squad Error:", err);
+            res.status(500).json({ message: 'Failed to fetch squad' });
+        }
+    });
+
+    export default router;

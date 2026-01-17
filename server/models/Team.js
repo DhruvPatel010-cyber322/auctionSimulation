@@ -28,6 +28,10 @@ const teamSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Player'
     }],
+    playing11: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Player'
+    }],
     squadSize: {
         type: Number,
         default: 0
