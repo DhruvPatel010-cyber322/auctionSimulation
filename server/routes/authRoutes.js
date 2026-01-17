@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import User from '../models/User.js';
 import Tournament from '../models/Tournament.js';
 import TournamentUser from '../models/TournamentUser.js';
+import Player from '../models/Player.js';
 import Team from '../models/Team.js'; // Singleton Team Model
 import { TEAMS } from '../data/teams.js'; // Static configs
 import { firebaseAuth } from '../middleware/firebaseAuth.js';
@@ -416,21 +417,37 @@ router.post('/admin/login', firebaseAuth, async (req, res) => {
 });
 
 // 7. Save Playing XI
+// Helper: Validate Batting Position
+const validateBattingPositionRules = (player, position) => {
+    // If group is null, allow (per requirements)
+    if (!player.battingPositionGroup) return { valid: true };
+
+    const group = player.battingPositionGroup;
+    let requiredGroup = null;
+
+    if (position >= 1 && position <= 2) requiredGroup = 1;      // Openers
+    else if (position >= 3 && position <= 4) requiredGroup = 2; // Middle
+    else if (position >= 5 && position <= 7) requiredGroup = 3; // Lower Middle
+    else if (position >= 8 && position <= 11) requiredGroup = 4;// Lower Order
+
+    if (requiredGroup && group !== requiredGroup) {
+        const groupName = group === 1 ? "Opener" : group === 2 ? "Middle Order" : group === 3 ? "Lower Middle" : "Tail";
+        const reqName = requiredGroup === 1 ? "Openers" : requiredGroup === 2 ? "Middle Order" : requiredGroup === 3 ? "Lower Middle" : "Lower Order";
+        return {
+            valid: false,
+            message: `Player ${player.name} (${groupName}) cannot bat at position ${position} (${reqName} required)`
+        };
+    }
+    return { valid: true };
+};
+
+// 7. Save Playing XI
 router.post('/tournaments/:id/playing11', firebaseAuth, async (req, res) => {
-    const { playerIds } = req.body;
+    const { playerIds } = req.body; // Legacy payload
+    const newPayload = Array.isArray(req.body) ? req.body : null; // New payload [ { playerId, battingPosition } ]
+
     const tournamentId = req.params.id;
     const userId = req.user._id;
-
-    if (!Array.isArray(playerIds) || playerIds.length !== 11) {
-        // For now, we only enforce that it is an array. The user prompt said:
-        // "Allow selecting exactly 11 players... For now... DO NOT enforce rules yet"
-        // But logic says we should probably check if it's 11 for a "Playing XI".
-        // However, user said "This page is ONLY for selection UI".
-        // Let's enforce 11 as a basic check, or at least max 11.
-        if (playerIds.length !== 11) {
-            return res.status(400).json({ message: 'You must select exactly 11 players.' });
-        }
-    }
 
     try {
         // 1. Get User's Team in this Tournament
@@ -439,15 +456,49 @@ router.post('/tournaments/:id/playing11', firebaseAuth, async (req, res) => {
             return res.status(403).json({ message: 'You do not have a team in this tournament.' });
         }
 
-        // 2. Find the Team Document
+        // 2. Resolve Player IDs to Save
+        let finalPlayerIds = [];
+
+        if (newPayload) {
+            // --- NEW VALIDATION FLOW ---
+            if (newPayload.length !== 11) {
+                return res.status(400).json({ message: 'You must select exactly 11 players.' });
+            }
+
+            const inputIds = newPayload.map(p => p.playerId);
+            const players = await Player.find({ _id: { $in: inputIds } });
+
+            // Create map for easy lookup
+            const playerMap = new Map(players.map(p => [p._id.toString(), p]));
+
+            for (const item of newPayload) {
+                const player = playerMap.get(item.playerId);
+                if (!player) return res.status(400).json({ message: `Player not found: ${item.playerId}` });
+
+                // Run Validation
+                const result = validateBattingPositionRules(player, item.battingPosition);
+                if (!result.valid) {
+                    return res.status(400).json({ message: result.message });
+                }
+            }
+            finalPlayerIds = inputIds; // If all valid, use these IDs
+
+        } else if (playerIds) {
+            // --- LEGACY FLOW (No Rule Validation) ---
+            if (!Array.isArray(playerIds) || playerIds.length !== 11) {
+                return res.status(400).json({ message: 'You must select exactly 11 players.' });
+            }
+            finalPlayerIds = playerIds;
+        } else {
+            return res.status(400).json({ message: 'Invalid payload format.' });
+        }
+
+        // 3. Find Team and Save
         const team = await Team.findOne({ code: userAssignment.teamCode });
         if (!team) return res.status(404).json({ message: 'Team not found.' });
 
-        // 3. Update Playing 11
-        // Verify (loosely) that these players belong to the team (playersBought)?
-        // User said "DO NOT enforce rules yet", but data integrity is important.
-        // Let's just save it for now to follow instructions strictly about "structural + UI preparation".
-        team.playing11 = playerIds;
+        // (Optional: Verify these players assume to 'playersBought' check omitted per prev instructions, simple save)
+        team.playing11 = finalPlayerIds;
         await team.save();
 
         res.json({ success: true, message: 'Playing XI saved successfully', playing11: team.playing11 });
