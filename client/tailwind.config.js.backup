@@ -1,0 +1,16 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+    content: [
+        "./index.html",
+        "./src/**/*.{js,ts,jsx,tsx}",
+    ],
+    theme: {
+        extend: {
+            colors: {
+                'auction-primary': '#1d4ed8', // Example primary color
+                'auction-secondary': '#9333ea',
+            }
+        },
+    },
+    plugins: [],
+}

@@ -1,0 +1,274 @@
+import React, { useState, useEffect } from 'react';
+import { useSocket } from '../context/SocketContext';
+import { useAuth } from '../context/AuthContext';
+import { Users, Wallet, Trophy, Gavel, ArrowRight, Clock, AlertCircle, LogOut, Plane } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { TEAM_COLORS } from '../constants/teamColors';
+import { getTeams } from '../services/api';
+import { toCr } from '../utils/formatCurrency';
+
+const DashboardPage = () => {
+    const { socket } = useSocket();
+    const { user, logout } = useAuth();
+    const [stats, setStats] = useState({
+        budget: 120, // 120 Cr
+        squadCount: 0,
+        overseasCount: 0,
+        totalSpent: 0
+    });
+    const [auctionStatus, setAuctionStatus] = useState({
+        currentPlayer: null,
+        currentBid: 0,
+        highestBidder: null,
+        timer: 30,
+        isSold: false
+    });
+
+    // Get static team info for ID/Name
+    const teamId = user?.id || user?.code;
+    const teamColor = TEAM_COLORS[teamId?.toLowerCase()] || '#2563eb';
+
+    useEffect(() => {
+        if (!socket) return;
+
+        // Fetch initial state via API for reliability
+        const fetchTeamData = async () => {
+            if (teamId) {
+                try {
+                    const teams = await getTeams();
+                    const myData = teams.find(t => t.id?.toLowerCase() === teamId?.toLowerCase());
+                    if (myData) {
+                        setStats({
+                            budget: myData.remainingPurse,
+                            squadCount: myData.squadSize,
+                            overseasCount: myData.overseasCount,
+                            totalSpent: 120 - myData.remainingPurse
+                        });
+                    }
+                } catch (err) {
+                    console.error("Failed to fetch team data via API", err);
+                }
+            }
+        };
+        fetchTeamData();
+
+        // Request latest state immediately on mount (fixes navigation desync)
+        socket.emit('auction:request_sync');
+
+        const handleUpdate = (state) => {
+            // 1. Update Global Auction Status
+            setAuctionStatus({
+                currentPlayer: state.currentPlayer,
+                currentBid: state.currentBid,
+                highestBidder: state.highestBidder,
+                timer: state.timer,
+                isSold: state.isSold
+            });
+
+            // 2. Find MY updated team stats from the array
+            // Socket sync is still real-time source of truth
+            if (state.teams && teamId) {
+                const myData = state.teams.find(t => t.id?.toLowerCase() === teamId?.toLowerCase());
+                if (myData) {
+                    setStats({
+                        budget: myData.budget || myData.remainingPurse, // Handle both structures if mixed
+                        squadCount: myData.squadCount || myData.squadSize || 0,
+                        overseasCount: myData.overseasCount || 0,
+                        totalSpent: 120 - (myData.budget || myData.remainingPurse)
+                    });
+                }
+            }
+        };
+
+        // Listen for sync and state events
+        socket.on('auction:sync', handleUpdate);
+        socket.on('auction:state', handleUpdate);
+
+        // Listen for team-specific updates (e.g., after player sold)
+        socket.on('team:update', (update) => {
+            if (update.teamCode?.toLowerCase() === teamId?.toLowerCase()) {
+                setStats(prev => ({
+                    ...prev,
+                    budget: update.remainingPurse,
+                    squadCount: update.squadSize,
+                    overseasCount: update.overseasCount
+                }));
+            }
+        });
+
+        // Also listen for detailed events for immediate feedback
+        socket.on('auctionStart', (data) => {
+            setAuctionStatus(prev => ({ ...prev, currentPlayer: data.currentPlayer, currentBid: data.currentBid, isSold: false }));
+        });
+        socket.on('bidPlaced', ({ amount, team }) => {
+            // Optional: visual flair
+        });
+
+        return () => {
+            socket.off('auction:sync');
+            socket.off('auction:state');
+            socket.off('team:update');
+            socket.off('auctionStart');
+            socket.off('bidPlaced');
+        };
+    }, [socket, teamId]);
+
+    // Calculate progress
+    const pursePercentage = (stats.budget / 120) * 100;
+    const squadPercentage = (stats.squadCount / 25) * 100;
+
+    return (
+        <div className="space-y-8 animate-in fade-in duration-500">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-black text-gray-900 tracking-tight">Team Dashboard</h1>
+                    <p className="text-gray-500">Real-time overview of your auction status.</p>
+                </div>
+
+                {/* Admin Quick Link */}
+                {user?.role === 'admin' && (
+                    <Link to="/admin" className="px-5 py-2.5 bg-red-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-red-500/30 hover:bg-red-700 transition flex items-center gap-2">
+                        <Gavel size={18} />
+                        Admin Controls
+                    </Link>
+                )}
+            </div>
+
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+
+                {/* STATS CARDS ROW */}
+                <div className="col-span-1 md:col-span-2 lg:col-span-4 grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* PURSE CARD (Requested "Proper Card") */}
+                    <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-all">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <Wallet size={80} className="text-green-600" />
+                        </div>
+                        <div>
+                            <p className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Remaining Purse</p>
+                            <h3 className="text-4xl font-black text-gray-900 tracking-tight">
+                                ₹{toCr(stats.budget)} <span className="text-lg text-gray-400 font-bold">Cr</span>
+                            </h3>
+                        </div>
+                        <div className="mt-4">
+                            <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                                <div
+                                    className="h-full bg-gradient-to-r from-green-500 to-emerald-400 transition-all duration-1000 ease-out"
+                                    style={{ width: `${pursePercentage}%` }}
+                                ></div>
+                            </div>
+                            <p className="text-xs font-bold text-gray-400 mt-2 text-right">
+                                {pursePercentage.toFixed(0)}% Budget Left
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* SQUAD CARD */}
+                    <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-all">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <Users size={80} className="text-blue-600" />
+                        </div>
+                        <div>
+                            <p className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Squad Size</p>
+                            <h3 className="text-4xl font-black text-gray-900 tracking-tight">
+                                {stats.squadCount}<span className="text-lg text-gray-400 font-bold">/25</span>
+                            </h3>
+                        </div>
+                        <div className="mt-4">
+                            <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                                <div
+                                    className="h-full bg-gradient-to-r from-blue-500 to-indigo-400 transition-all duration-1000 ease-out"
+                                    style={{ width: `${(stats.squadCount / 25) * 100}%` }}
+                                ></div>
+                            </div>
+                            <p className="text-xs font-bold text-gray-400 mt-2 text-right">
+                                Min 18 to Qualify
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* OVERSEAS CARD */}
+                    <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-all">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <Trophy size={80} className="text-purple-600" />
+                        </div>
+                        <div>
+                            <p className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Overseas Slots</p>
+                            <h3 className="text-4xl font-black text-gray-900 tracking-tight">
+                                {stats.overseasCount}<span className="text-lg text-gray-400 font-bold">/8</span>
+                            </h3>
+                        </div>
+                        <div className="mt-4">
+                            <div className="flex gap-1">
+                                {[...Array(8)].map((_, i) => (
+                                    <div
+                                        key={i}
+                                        className={`h-2 flex-1 rounded-full ${i < stats.overseasCount ? 'bg-purple-500' : 'bg-gray-100'}`}
+                                    ></div>
+                                ))}
+                            </div>
+                            <p className="text-xs font-bold text-gray-400 mt-2 text-right">
+                                {8 - stats.overseasCount} Slots Left
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* LIVE STATUS CARD */}
+                <div className="col-span-1 md:col-span-2 bg-gray-900 text-white p-8 rounded-3xl shadow-xl relative overflow-hidden flex flex-col justify-between">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+
+                    <div className="relative z-10 flex justify-between items-start">
+                        <div>
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                                <span className="text-xs font-bold uppercase tracking-widest text-gray-400">Live Auction</span>
+                            </div>
+                            <h3 className="text-2xl font-bold">
+                                {auctionStatus.currentPlayer ? (
+                                    <>
+                                        Current Player: <span className="text-blue-400 flex items-center gap-2">
+                                            {auctionStatus.currentPlayer.name}
+                                            {auctionStatus.currentPlayer.isOverseas && <Plane size={20} className="text-blue-300" />}
+                                        </span>
+                                    </>
+                                ) : (
+                                    "Waiting for next player..."
+                                )}
+                            </h3>
+                        </div>
+                        {auctionStatus.currentPlayer && (
+                            <div className="text-right">
+                                <p className="text-xs font-bold text-gray-400 uppercase mb-1">Current Bid</p>
+                                <p className="text-3xl font-black">₹{auctionStatus.currentBid.toFixed(2)} Cr</p>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="relative z-10 mt-6 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            {auctionStatus.highestBidder && (
+                                <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg border border-white/10">
+                                    <div className="w-2 h-2 rounded-full bg-green-400"></div>
+                                    <span className="text-xs font-bold">Bid: {auctionStatus.highestBidder.name}</span>
+                                </div>
+                            )}
+                        </div>
+
+                        <Link to="/auction" className="px-6 py-3 bg-white text-gray-900 rounded-xl font-bold text-sm hover:bg-gray-100 transition-colors flex items-center gap-2 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transform duration-200">
+                            Join Auction <ArrowRight size={16} />
+                        </Link>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+        </div>
+    );
+};
+
+export default DashboardPage;

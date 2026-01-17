@@ -1,0 +1,251 @@
+SrNo,Name,Role,Country,Base Price (Cr),Status,Sold Price,Sold To,Image,Is Overseas
+1,"MS Dhoni",Wicket Keeper,India,0.2,SOLD,0.2,MI,https://documents.iplt20.com/ipl/IPLHeadshot2025/57.png,No
+2,"Sanju Samson",Wicket Keeper,India,0.2,UNSOLD,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+3,"Ruturaj Gaikwad",Batsman,India,0.2,SOLD,0.2,MI,https://documents.iplt20.com/ipl/IPLHeadshot2025/102.png,No
+4,"Dewald Brevis",Batsman,Overseas,0.75,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/797.png,Yes
+5,"Ayush Mhatre",Batsman,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/3497.png,No
+6,"Kartik Sharma",Wicket Keeper,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+7,"Sarfaraz Khan",Batsman,India,0.75,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+8,"Urvil Patel",Wicket Keeper,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/1486.png,No
+9,"Anshul Kamboj",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/3106.png,No
+10,"Jamie Overton",All-Rounder,Overseas,1.5,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/1216.png,Yes
+11,"Ramakrishna Ghosh",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/3559.png,No
+12,"Prashant Veer",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+13,"Matthew William Short",All-Rounder,Overseas,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+14,"Aman Khan",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+15,"Zak Foulkes",All-Rounder,New Zealand,0.75,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+16,"Shivam Dube",All-Rounder,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/211.png,No
+17,"Khaleel Ahmed",Bowler,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/8.png,No
+18,"Noor Ahmad",Bowler,Overseas,2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/975.png,Yes
+19,"Mukesh Choudhary",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/970.png,No
+20,"Nathan Ellis",Bowler,Overseas,1.25,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/633.png,Yes
+21,"Shreyas Gopal",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/192.png,No
+22,"Gurjapneet Singh",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/2256.png,No
+23,"Akeal Hosein",Bowler,West Indies,2,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+24,"Matt Henry",Bowler,New Zealand,2,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+25,"Rahul Chahar",Bowler,India,1,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+26,"KL Rahul",Wicket Keeper,India,2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/19.png,No
+27,"Karun Nair",Batsman,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/131.png,No
+28,"David Miller",Batsman,South Africa,2,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+29,"Ben Duckett",Wicket Keeper,England,2,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+30,"Pathum Nissanka",Batsman,Sri Lanka,0.75,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+31,"Sahil Parakh",Batsman,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+32,"Prithvi Shaw",Batsman,India,0.75,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2024/51.png,No
+33,"Abishek Porel",Wicket Keeper,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/1580.png,No
+34,"Tristan Stubbs",Wicket Keeper,Overseas,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/1017.png,Yes
+35,"Axar Patel",All-Rounder,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/110.png,No
+36,"Sameer Rizvi",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/1229.png,No
+37,"Ashutosh Sharma",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/3109.png,No
+38,"Vipraj Nigam",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/3560.png,No
+39,"Ajay Mandal",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/1931.png,No
+40,"Tripurana Vijay",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/3563.png,No
+41,"Madhav Tiwari",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/3561.png,No
+42,"Auqib Dar",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+43,"Nitish Rana",All-Rounder,India,1.5,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+44,"Mitchell Starc",Bowler,Overseas,2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/31.png,Yes
+45,"T. Natarajan",Bowler,India,2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/224.png,No
+46,"Mukesh Kumar",Bowler,India,2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/1462.png,No
+47,"Dushmantha Chameera",Bowler,Overseas,0.75,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/608.png,Yes
+48,"Lungisani Ngidi",Bowler,South Africa,2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2023/99.png,Yes
+49,"Kyle Jamieson",Bowler,New Zealand,2,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+50,"Kuldeep Yadav",Bowler,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/14.png,No
+51,"Shubman Gill",Batsman,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/62.png,No
+52,"Jos Buttler",Wicket Keeper,Overseas,2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/182.png,Yes
+53,"Kumar Kushagra",Wicket Keeper,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/3101.png,No
+54,"Anuj Rawat",Wicket Keeper,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/534.png,No
+55,"Tom Banton",Wicket Keeper,England,2,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+56,"Glenn Phillips",Batsman,Overseas,2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/635.png,Yes
+57,"Nishant Sindhu",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/791.png,No
+58,"Washington Sundar",All-Rounder,India,2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/20.png,No
+59,"Mohd. Arshad Khan",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/988.png,No
+60,"Sai Kishore",All-Rounder,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/544.png,No
+61,"Jayant Yadav",All-Rounder,India,0.75,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/165.png,No
+62,"Jason Holder",All-Rounder,West Indies,2,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+63,"Sai Sudharsan",All-Rounder,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/976.png,No
+64,"Shahrukh Khan",All-Rounder,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/590.png,No
+65,"Kagiso Rabada",Bowler,Overseas,2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/116.png,Yes
+66,"Mohammed Siraj",Bowler,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/63.png,No
+67,"Prasidh Krishna",Bowler,India,2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/150.png,No
+68,"Manav Suthar",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/2443.png,No
+69,"Gurnoor Singh Brar",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/1231.png,No
+70,"Ishant Sharma",Bowler,India,0.75,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/50.png,No
+71,"Ashok Sharma",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+72,"Prithvi Raj Yarra",Bowler,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+73,"Luke Wood",Bowler,England,0.75,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+74,"Rahul Tewatia",Bowler,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/120.png,No
+75,"Rashid Khan",Bowler,Overseas,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/218.png,Yes
+76,"Ajinkya Rahane",Batsman,India,1.5,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/44.png,No
+77,"Rinku Singh",Batsman,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/152.png,No
+78,"Angkrish Raghuvanshi",Batsman,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/787.png,No
+79,"Manish Pandey",Batsman,India,0.75,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/16.png,No
+80,"Cameron Green",Batsman,Australia,2,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+81,"Finn Allen",Wicket Keeper,New Zealand,2,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+82,"Tejasvi Singh",Wicket Keeper,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+83,"Rahul Tripathi",Batsman,India,0.75,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+84,"Tim Seifert",Wicket Keeper,New Zealand,1.5,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+85,"Rovman Powell",Batsman,Overseas,1.5,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/329.png,Yes
+86,"Anukul Roy",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/160.png,No
+87,"Sarthak Ranjan",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+88,"Daksh Kamra",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+89,"Rachin Ravindra",All-Rounder,New Zealand,2,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+90,"Ramandeep Singh",All-Rounder,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/991.png,No
+91,"Vaibhav Arora",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/583.png,No
+92,"Matheesha Pathirana",Bowler,Sri Lanka,2,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+93,"Kartik Tyagi",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+94,"Prashant Solanki",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+95,"Mustafizur Rahman",Bowler,Bangladesh,2,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+96,"Akash Deep",Bowler,India,1,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+97,"Harshit Rana",Bowler,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/1013.png,No
+98,"Umran Malik",Bowler,India,0.75,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+99,"Sunil Narine",Bowler,Overseas,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/156.png,Yes
+100,"Varun Chakaravarthy",Bowler,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/140.png,No
+101,"Rishabh Pant",Wicket Keeper,India,2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/18.png,No
+102,"Aiden Markram",Batsman,Overseas,2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/287.png,Yes
+103,"Himmat Singh",Batsman,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/203.png,No
+104,"Matthew Breetzke",Batsman,Overseas,0.75,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/2805.png,Yes
+105,"Mukul Choudhary",Wicket Keeper,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+106,"Akshat Raghuwanshi",Batsman,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+107,"Josh Inglis",Wicket Keeper,Australia,2,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+108,"Nicholas Pooran",Wicket Keeper,Overseas,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/136.png,Yes
+109,"Mitchell Marsh",All-Rounder,Overseas,2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/40.png,Yes
+110,"Abdul Samad",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/525.png,No
+111,"Shahbaz Ahamad",All-Rounder,India,1,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/523.png,No
+112,"Arshin Kulkarni",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/2788.png,No
+113,"Wanindu Hasaranga",All-Rounder,Sri Lanka,2,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+114,"Ayush Badoni",All-Rounder,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/985.png,No
+115,"Mohammad Shami",Bowler,India,2,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+116,"Avesh Khan",Bowler,India,2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/109.png,No
+117,"M. Siddharth",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/532.png,No
+118,"Digvesh Singh",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/3565.png,No
+119,"Akash Singh",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/535.png,No
+120,"Prince Yadav",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/1225.png,No
+121,"Arjun Tendulkar",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+122,"Anrich Nortje",Bowler,South Africa,2,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+123,"Naman Tiwari",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+124,"Mayank Yadav",Bowler,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2024/987.png,No
+125,"Mohsin Khan",Bowler,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2024/541.png,No
+126,"Rohit Sharma",Batsman,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/6.png,No
+127,"Surya Kumar Yadav",Batsman,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/174.png,No
+128,"Robin Minz",Wicket Keeper,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/3103.png,No
+129,"Sherfane Rutherford",Batsman,Overseas,1.5,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+130,"Ryan Rickelton",Wicket Keeper,Overseas,1,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/743.png,Yes
+131,"Quinton de Kock",Wicket Keeper,Overseas,2,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+132,"Danish Malewar",Batsman,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+133,"N. Tilak Varma",Batsman,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/993.png,No
+134,"Hardik Pandya",All-Rounder,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/54.png,No
+135,"Naman Dhir",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/3107.png,No
+136,"Mitchell Santner",All-Rounder,Overseas,2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/75.png,Yes
+137,"Raj Angad Bawa",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/781.png,No
+138,"Atharva Ankolekar",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+139,"Mayank Rawat",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+140,"Corbin Bosch",All-Rounder,Overseas,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+141,"Will Jacks",All-Rounder,Overseas,2,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+142,"Shardul Thakur",All-Rounder,India,2,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+143,"Trent Boult",Bowler,Overseas,2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/66.png,Yes
+144,"Mayank Markande",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+145,"Deepak Chahar",Bowler,India,2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/91.png,No
+146,"Ashwani Kumar",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/3569.png,No
+147,"Raghu Sharma",Bowler,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/3869.png,No
+148,"Mohammad Izhar",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+149,"Allah Ghazanfar",Bowler,Overseas,0.75,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+150,"Jasprit Bumrah",Bowler,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/9.png,No
+151,"Shreyas Iyer",Batsman,India,2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/12.png,No
+152,"Nehal Wadhera",Batsman,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/1541.png,No
+153,"Vishnu Vinod",Wicket Keeper,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/581.png,No
+154,"Harnoor Pannu",Batsman,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/784.png,No
+155,"Pyla Avinash",Batsman,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/3573.png,No
+156,"Prabhsimran Singh",Wicket Keeper,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/137.png,No
+157,"Shashank Singh",Batsman,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/191.png,No
+158,"Marcus Stoinis",All-Rounder,Overseas,2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/23.png,Yes
+159,"Harpreet Brar",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/130.png,No
+160,"Marco Jansen",All-Rounder,Overseas,1.25,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/586.png,Yes
+161,"Azmatullah Omarzai",All-Rounder,Overseas,1.5,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/1354.png,Yes
+162,"Priyansh Arya",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/3571.png,No
+163,"Musheer Khan",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/2813.png,No
+164,"Suryansh Shedge",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/2146.png,No
+165,"Mitch Owen",Batsman,Overseas,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/3870.png,Yes
+166,"Cooper Connolly",All-Rounder,Australia,2,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+167,"Ben Dwarshuis",All-Rounder,Australia,1,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+168,"Arshdeep Singh",Bowler,India,2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/125.png,No
+169,"Yuzvendra Chahal",Bowler,India,2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/10.png,No
+170,"Vyshak Vijaykumar",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/2034.png,No
+171,"Yash Thakur",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/1550.png,No
+172,"Xavier Bartlett",Bowler,Overseas,0.75,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/3572.png,Yes
+173,"Pravin Dubey",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/548.png,No
+174,"Vishal Nishad",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+175,"Lockie Ferguson",Bowler,Overseas,2,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+176,"Shubham Dubey",Batsman,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/3112.png,No
+177,"Vaibhav Suryavanshi",Batsman,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/3498.png,No
+178,"Donovan Ferreira",Wicket Keeper,Overseas,0.75,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+179,"Lhuan-dre Pretorius",Batsman,Overseas,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/2827.png,Yes
+180,"Ravi Singh",Wicket Keeper,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+181,"Aman Rao Perala",Batsman,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+182,"Shimron Hetmyer",Batsman,Overseas,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/210.png,Yes
+183,"Yashasvi Jaiswal",Batsman,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/533.png,No
+184,"Dhruv Jurel",Wicket Keeper,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/1004.png,No
+185,"Riyan Parag",Batsman,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/189.png,No
+186,"Yudhvir Singh Charak",All-Rounder,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/587.png,No
+187,"Ravindra Jadeja",All-Rounder,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+188,"Sam Curran",All-Rounder,Overseas,2,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+189,"Jofra Archer",Bowler,Overseas,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/181.png,Yes
+190,"Tushar Deshpande",Bowler,India,1,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/539.png,No
+191,"Kwena Maphaka",Bowler,Overseas,0.75,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/801.png,Yes
+192,"Ravi Bishnoi",Bowler,India,2,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+193,"Sushant Mishra",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+194,"Yash Raj Punja",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+195,"Vignesh Puthur",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+196,"Brijesh Sharma",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+197,"Adam Milne",Bowler,New Zealand,2,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+198,"Kuldeep Sen",Bowler,India,0.75,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2024/1005.png,No
+199,"Sandeep Sharma",Bowler,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2024/220.png,No
+200,"Nandre Burger",Bowler,Overseas,1.25,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2024/2806.png,Yes
+201,"Rajat Patidar",Batsman,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/597.png,No
+202,"Devdutt Padikkal",Batsman,India,2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/200.png,No
+203,"Virat Kohli",Batsman,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/2.png,No
+204,"Phil Salt",Wicket Keeper,Overseas,2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/1220.png,Yes
+205,"Jitesh Sharma",Wicket Keeper,India,1,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/1000.png,No
+206,"Jordan Cox",Wicket Keeper,England,0.75,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+207,"Krunal Pandya",All-Rounder,India,2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/17.png,No
+208,"Swapnil Singh",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/1483.png,No
+209,"Tim David",All-Rounder,Overseas,2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/636.png,Yes
+210,"Romario Shepherd",All-Rounder,Overseas,1.5,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/371.png,Yes
+211,"Jacob Bethell",All-Rounder,Overseas,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/869.png,Yes
+212,"Venkatesh Iyer",All-Rounder,India,2,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+213,"Satvik Deswal",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+214,"Mangesh Yadav",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+215,"Vicky Ostwal",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+216,"Vihaan Malhotra",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+217,"Kanishk Chouhan",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+218,"Josh Hazlewood",Bowler,Overseas,2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/36.png,Yes
+219,"Rasikh Dar",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/172.png,No
+220,"Suyash Sharma",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/1932.png,No
+221,"Bhuvneshwar Kumar",Bowler,India,2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/15.png,No
+222,"Nuwan Thushara",Bowler,Overseas,0.75,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/813.png,Yes
+223,"Abhinandan Singh",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/3574.png,No
+224,"Jacob Duffy",Bowler,New Zealand,2,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+225,"Yash Dayal",Bowler,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/978.png,No
+226,"Ishan Kishan",Wicket Keeper,India,2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/164.png,No
+227,"Aniket Verma",Batsman,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/3576.png,No
+228,"Smaran Ravichandran",Batsman,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/3752.png,No
+229,"Salil Arora",Wicket Keeper,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+230,"Heinrich Klaasen",Wicket Keeper,Overseas,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/202.png,Yes
+231,"Travis Head",Batsman,Overseas,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/37.png,Yes
+232,"Harshal Patel",All-Rounder,India,2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/114.png,No
+233,"Kamindu Mendis",All-Rounder,Overseas,0.75,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/627.png,Yes
+234,"Harsh Dubey",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/1494.png,No
+235,"Brydon Carse",All-Rounder,Overseas,1,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+236,"Shivang Kumar",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+237,"Krains Fuletra",All-Rounder,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+238,"Liam Livingstone",All-Rounder,England,2,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+239,"Jack Edwards",All-Rounder,Australia,0.5,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,Yes
+240,"Abhishek Sharma",All-Rounder,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/212.png,No
+241,"Nitish Kumar Reddy",All-Rounder,India,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/1944.png,No
+242,"Pat Cummins",Bowler,Overseas,0.2,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/33.png,Yes
+243,"Zeeshan Ansari",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/3575.png,No
+244,"Jaydev Unadkat",Bowler,India,1,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/180.png,No
+245,"Eshan Malinga",Bowler,Overseas,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/IPLHeadshot2025/3339.png,Yes
+246,"Sakib Hussain",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+247,"Onkar Tarmale",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+248,"Amit Kumar",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+249,"Praful Hinge",Bowler,India,0.3,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
+250,"Shivam Mavi",Bowler,India,0.75,AVAILABLE,,,https://documents.iplt20.com/ipl/assets/images/Default-Men.png,No
