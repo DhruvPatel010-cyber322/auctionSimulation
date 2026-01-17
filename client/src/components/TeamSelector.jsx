@@ -49,7 +49,7 @@ const TeamSelector = ({ teams, selectedTeam, onSelect }) => {
                     return (
                         <button
                             key={uniqueKey}
-                            disabled={isTaken}
+                            disabled={isTaken && !team.isMyTeam}
                             onClick={() => onSelect(team)}
                             // Define CSS variable for the specific team color
                             style={{
@@ -97,20 +97,28 @@ const TeamSelector = ({ teams, selectedTeam, onSelect }) => {
 
                                 {/* Bottom: Info & Status */}
                                 <div className="text-center w-full mb-6 z-10">
-                                    {isTaken ? (
-                                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-500/10 border border-red-500/20">
-                                            <span className="w-2 h-2 rounded-full bg-red-500"></span>
-                                            <span className="text-xs font-bold text-red-500 uppercase tracking-widest">Taken</span>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <h3 className="text-gray-400 font-medium text-sm uppercase tracking-widest mb-3 line-clamp-1 group-hover/card:text-white transition-colors">
-                                                {team.name}
-                                            </h3>
-                                            {/* Animated Underline */}
-                                            <div className="h-1 w-8 mx-auto rounded-full bg-slate-700 group-hover/card:w-16 group-hover/card:bg-[var(--team-color)] transition-all duration-300"></div>
-                                        </>
-                                    )}
+                                    {/* Bottom: Info & Status */}
+                                    <div className="text-center w-full mb-6 z-10">
+                                        {team.isMyTeam ? (
+                                            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-green-500/10 border border-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.3)]">
+                                                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                                                <span className="text-xs font-bold text-green-500 uppercase tracking-widest">Your Team</span>
+                                            </div>
+                                        ) : isTaken ? (
+                                            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-500/10 border border-red-500/20">
+                                                <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                                                <span className="text-xs font-bold text-red-500 uppercase tracking-widest">Taken</span>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <h3 className="text-gray-400 font-medium text-sm uppercase tracking-widest mb-3 line-clamp-1 group-hover/card:text-white transition-colors">
+                                                    {team.name}
+                                                </h3>
+                                                {/* Animated Underline */}
+                                                <div className="h-1 w-8 mx-auto rounded-full bg-slate-700 group-hover/card:w-16 group-hover/card:bg-[var(--team-color)] transition-all duration-300"></div>
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </button>
