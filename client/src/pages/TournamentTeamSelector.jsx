@@ -4,6 +4,9 @@ import { useAuth } from '../context/AuthContext';
 import { Shield, ArrowRight, Trophy, User, Check, X as XIcon, Edit2 } from 'lucide-react';
 import TeamSelector from '../components/TeamSelector';
 
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+
 const TournamentTeamSelector = () => {
     const { id: tournamentId } = useParams();
     const navigate = useNavigate();
@@ -33,7 +36,7 @@ const TournamentTeamSelector = () => {
                 const fetchUpdate = async () => {
                     const firebaseToken = sessionStorage.getItem('firebase_token');
                     try {
-                        const res = await fetch(`http://localhost:5000/api/v2/auth/tournaments/${tournamentId}/teams`, {
+                        const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${tournamentId}/teams`, {
                             headers: { 'Authorization': `Bearer ${firebaseToken}` }
                         });
                         if (res.ok) {
@@ -69,7 +72,7 @@ const TournamentTeamSelector = () => {
 
             try {
                 // Fetch teams specific to this tournament with "isTaken" status
-                const res = await fetch(`http://localhost:5000/api/v2/auth/tournaments/${tournamentId}/teams`, {
+                const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${tournamentId}/teams`, {
                     headers: { 'Authorization': `Bearer ${firebaseToken}` }
                 });
                 const data = await res.json();
@@ -115,7 +118,7 @@ const TournamentTeamSelector = () => {
         }
 
         try {
-            const res = await fetch(`http://localhost:5000/api/v2/auth/tournaments/${tournamentId}/select-team`, {
+            const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${tournamentId}/select-team`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${firebaseToken}`,
@@ -147,7 +150,7 @@ const TournamentTeamSelector = () => {
         setAssignLoading(true);
         const firebaseToken = sessionStorage.getItem('firebase_token');
         try {
-            const res = await fetch(`http://localhost:5000/api/v2/auth/tournaments/${tournamentId}/assign-team`, {
+            const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${tournamentId}/assign-team`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${firebaseToken}`,

@@ -3,6 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trophy, Lock, ArrowRight, Activity, Plus } from 'lucide-react';
 
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+
 const TournamentSelectPage = () => {
     const navigate = useNavigate();
     const [tournaments, setTournaments] = useState([]);
@@ -35,8 +38,8 @@ const TournamentSelectPage = () => {
             try {
                 // Parallel fetch: Tournaments and User Info
                 const [tourRes, userRes] = await Promise.all([
-                    fetch('http://localhost:5000/api/v2/auth/tournaments', { headers: { 'Authorization': `Bearer ${token}` } }),
-                    fetch('http://localhost:5000/api/v2/auth/login', { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } })
+                    fetch(`${API_URL}/api/v2/auth/tournaments`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch(`${API_URL}/api/v2/auth/login`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } })
                 ]);
 
                 if (tourRes.ok) {
@@ -72,7 +75,7 @@ const TournamentSelectPage = () => {
 
         const token = sessionStorage.getItem('firebase_token');
         try {
-            const res = await fetch(`http://localhost:5000/api/v2/auth/tournaments/${selectedTournament._id}/join`, {
+            const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${selectedTournament._id}/join`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -107,7 +110,7 @@ const TournamentSelectPage = () => {
 
         const token = sessionStorage.getItem('firebase_token');
         try {
-            const res = await fetch('http://localhost:5000/api/v2/auth/create-tournament', {
+            const res = await fetch(`${API_URL}/api/v2/auth/create-tournament`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -243,7 +246,7 @@ const TournamentSelectPage = () => {
                                         if (!newUsername.trim()) return;
                                         const token = sessionStorage.getItem('firebase_token');
                                         try {
-                                            const res = await fetch('http://localhost:5000/api/v2/auth/set-username', {
+                                            const res = await fetch(`${API_URL}/api/v2/auth/set-username`, {
                                                 method: 'POST',
                                                 headers: {
                                                     'Authorization': `Bearer ${token}`,

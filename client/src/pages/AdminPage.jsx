@@ -6,6 +6,9 @@ import { controlTimer, endTurn, nextPlayer, getPlayers, requeuePlayer } from '..
 import { toCr } from '../utils/formatCurrency';
 import TeamSelector from '../components/TeamSelector';
 
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+
 const AdminPage = () => {
     const { socket } = useSocket();
     const { login, logout, user, isAuthenticated: isAuth } = useAuth();
@@ -62,7 +65,7 @@ const AdminPage = () => {
         if (!firebaseToken) return;
 
         try {
-            const res = await fetch('http://localhost:5000/api/v2/auth/tournaments', {
+            const res = await fetch(`${API_URL}/api/v2/auth/tournaments`, {
                 headers: { 'Authorization': `Bearer ${firebaseToken}` }
             });
             const data = await res.json();
@@ -87,7 +90,7 @@ const AdminPage = () => {
             try {
                 // We use the same endpoint as the selector: /tournaments/:id/teams
                 // It returns { teams: [...], joinedUsers: [...] } if admin
-                const res = await fetch(`http://localhost:5000/api/v2/auth/tournaments/${selectedTournamentId}/teams`, {
+                const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${selectedTournamentId}/teams`, {
                     headers: { 'Authorization': `Bearer ${firebaseToken}` }
                 });
                 const data = await res.json();
@@ -198,7 +201,7 @@ const AdminPage = () => {
 
         const firebaseToken = sessionStorage.getItem('firebase_token');
         try {
-            const res = await fetch(`http://localhost:5000/api/v2/auth/tournaments/${selectedTournamentId}/assign-team`, {
+            const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${selectedTournamentId}/assign-team`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${firebaseToken}`,

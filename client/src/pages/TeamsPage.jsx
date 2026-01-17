@@ -8,6 +8,9 @@ import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 import { PLAYER_SETS } from '../constants/playerSets'; // Optional if needed for categories
 
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+
 const TeamsPage = () => {
     const { socket } = useSocket();
     const { user } = useAuth();
@@ -26,7 +29,7 @@ const TeamsPage = () => {
                 const firebaseToken = sessionStorage.getItem('firebase_token');
 
                 if (tournamentId && firebaseToken) {
-                    const res = await fetch(`http://localhost:5000/api/v2/auth/tournaments/${tournamentId}/teams`, {
+                    const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${tournamentId}/teams`, {
                         headers: { 'Authorization': `Bearer ${firebaseToken}` }
                     });
                     const resData = await res.json();

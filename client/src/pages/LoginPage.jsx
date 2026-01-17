@@ -4,6 +4,9 @@ import { Trophy, ArrowRight, Lock, Shield } from 'lucide-react';
 import TeamSelector from '../components/TeamSelector';
 import { useAuth } from '../context/AuthContext';
 
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+
 const LoginPage = () => {
     const [teams, setTeams] = useState([]);
     const [selectedTeam, setSelectedTeam] = useState(null);
@@ -16,7 +19,7 @@ const LoginPage = () => {
 
     useEffect(() => {
         // Teams list can be public
-        fetch('http://localhost:5000/api/teams')
+        fetch(`${API_URL}/api/teams`)
             .then(res => res.json())
             .then(data => setTeams(data))
             .catch(err => console.error('Failed to load teams', err));
