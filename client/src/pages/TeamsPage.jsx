@@ -8,7 +8,7 @@ import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 import { PLAYER_SETS } from '../constants/playerSets'; // Optional if needed for categories
 
-const API_URL = import.meta.env.VITE_API_BASE_URL || 'https://auction-arena-server.onrender.com';
+import { API_BASE_URL as API_URL } from '../config';
 
 
 const TeamsPage = () => {

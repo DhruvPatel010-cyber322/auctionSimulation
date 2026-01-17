@@ -6,7 +6,7 @@ import { controlTimer, endTurn, nextPlayer, getPlayers, requeuePlayer } from '..
 import { toCr } from '../utils/formatCurrency';
 import TeamSelector from '../components/TeamSelector';
 
-const API_URL = import.meta.env.VITE_API_BASE_URL || 'https://auction-arena-server.onrender.com';
+import { API_BASE_URL as API_URL } from '../config';
 
 
 const AdminPage = () => {

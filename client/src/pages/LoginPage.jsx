@@ -4,7 +4,7 @@ import { Trophy, ArrowRight, Lock, Shield } from 'lucide-react';
 import TeamSelector from '../components/TeamSelector';
 import { useAuth } from '../context/AuthContext';
 
-const API_URL = import.meta.env.VITE_API_BASE_URL || 'https://auction-arena-server.onrender.com';
+import { API_BASE_URL as API_URL } from '../config';
 
 
 const LoginPage = () => {

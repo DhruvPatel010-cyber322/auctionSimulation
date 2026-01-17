@@ -2,6 +2,8 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import io from 'socket.io-client';
 import { useAuth } from './AuthContext';
 
+import { API_BASE_URL } from '../config';
+
 const SocketContext = createContext({ socket: null });
 
 export const useSocket = () => {
@@ -19,7 +21,7 @@ export const SocketProvider = ({ children }) => {
     useEffect(() => {
         // Phase 4: Re-enable Socket connection
         if (token) {
-            const newSocket = io(import.meta.env.VITE_API_BASE_URL || 'https://auction-arena-server.onrender.com', {
+            const newSocket = io(API_BASE_URL, {
                 auth: { token },
                 transports: ['websocket']
             });

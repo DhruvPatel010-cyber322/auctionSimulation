@@ -1,7 +1,8 @@
 
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://auction-arena-server.onrender.com';
+import { API_BASE_URL } from '../config';
+
 console.log('[API] Connecting to:', API_BASE_URL);
 
 const api = axios.create({
