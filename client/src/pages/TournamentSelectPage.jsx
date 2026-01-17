@@ -267,7 +267,7 @@ const TournamentSelectPage = () => {
                                 type="text"
                                 value={newUsername}
                                 onChange={(e) => setNewUsername(e.target.value)}
-                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl mb-4 focus:ring-2 focus:ring-blue-500 outline-none font-bold"
+                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl mb-4 focus:ring-2 focus:ring-blue-500 outline-none font-bold text-black"
                                 placeholder="e.g. MasterStrategist"
                                 autoFocus
                             />
