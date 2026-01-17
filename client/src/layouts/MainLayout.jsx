@@ -121,11 +121,15 @@ const MainLayout = () => {
                                     <p className="text-sm font-bold text-gray-900 leading-none">{team.name}</p>
                                     <p className="text-[10px] uppercase font-bold text-gray-400 mt-1 tracking-wider">{team.username || team.code || 'Team Account'}</p>
                                 </div>
-                                <div className="w-10 h-10 rounded-full bg-white shadow-md border border-gray-200 flex items-center justify-center overflow-hidden p-1">
+                                <div className="w-10 h-10 rounded-full bg-auction-primary/10 border border-auction-primary/20 flex items-center justify-center overflow-hidden p-0.5">
                                     {team.logo ? (
-                                        <img src={team.logo} alt={team.name} className="w-full h-full object-cover" />
+                                        <img src={team.logo} alt={team.name} className="w-full h-full object-cover rounded-full" />
                                     ) : (
-                                        <span className="text-white font-bold text-lg">{team.code?.[0]}</span>
+                                        <div className="w-full h-full bg-auction-primary flex items-center justify-center rounded-full">
+                                            <span className="text-white font-bold text-lg leading-none">
+                                                {team.code?.[0] || team.name?.[0] || 'U'}
+                                            </span>
+                                        </div>
                                     )}
                                 </div>
                             </div>
