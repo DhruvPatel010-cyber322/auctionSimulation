@@ -49,9 +49,11 @@ const TournamentSelectPage = () => {
 
                 if (userRes.ok) {
                     const userData = await userRes.json();
-                    if (userData.user && userData.user.username) {
-                        setUsername(userData.user.username);
-                        setUserRole(userData.user.role || 'USER'); // Store role
+                    if (userData.user) {
+                        setUserRole(userData.user.role || 'USER'); // Set role regardless of username
+                        if (userData.user.username) {
+                            setUsername(userData.user.username);
+                        }
                     }
                 }
 
