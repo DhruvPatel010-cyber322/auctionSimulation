@@ -32,3 +32,6 @@ Thumbs.db
 # IDEs
 .vscode/
 .idea/
+
+# Excluded
+_deployment_excluded/
