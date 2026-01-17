@@ -208,7 +208,15 @@ const TournamentTeamSelector = () => {
             <div className="z-10 w-full max-w-7xl px-4 flex flex-col items-center pt-10">
 
                 {/* Header */}
-                <div className="text-center mb-8">
+                <div className="text-center mb-8 relative">
+                    {myAssignedTeam && (
+                        <Link
+                            to="/dashboard"
+                            className="absolute top-0 right-0 hidden md:flex items-center gap-2 px-6 py-2 bg-green-600 hover:bg-green-500 text-white font-bold rounded-full shadow-lg shadow-green-600/20 transition-all animate-in fade-in"
+                        >
+                            Go to Dashboard <ArrowRight size={18} />
+                        </Link>
+                    )}
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 mb-6 shadow-2xl shadow-blue-500/30">
                         <Trophy className="text-white" size={32} />
                     </div>
@@ -220,6 +228,18 @@ const TournamentTeamSelector = () => {
                             ? "Select a team below to assign to user."
                             : "Choose the team you will lead in this tournament."}
                     </p>
+
+                    {/* Mobile Dashboard Button */}
+                    {myAssignedTeam && (
+                        <div className="md:hidden mt-4">
+                            <Link
+                                to="/dashboard"
+                                className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-full shadow-lg shadow-green-600/20 transition-all"
+                            >
+                                Go to Dashboard <ArrowRight size={18} />
+                            </Link>
+                        </div>
+                    )}
                 </div>
 
                 {/* Global Error Display */}
