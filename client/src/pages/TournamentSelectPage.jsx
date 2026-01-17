@@ -329,7 +329,7 @@ const TournamentSelectPage = () => {
                                         type="text"
                                         value={createName}
                                         onChange={(e) => setCreateName(e.target.value)}
-                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-900"
+                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-black"
                                         placeholder="e.g. IPL 2024"
                                         required
                                     />
@@ -340,7 +340,7 @@ const TournamentSelectPage = () => {
                                         type="text"
                                         value={createCode}
                                         onChange={(e) => setCreateCode(e.target.value)}
-                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-900"
+                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-black"
                                         placeholder="e.g. PLAY123"
                                         required
                                     />
@@ -350,7 +350,7 @@ const TournamentSelectPage = () => {
                                     <select
                                         value={createMode}
                                         onChange={(e) => setCreateMode(e.target.value)}
-                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-900"
+                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-black"
                                     >
                                         <option value="USER_CHOICE">User Choice (Classic)</option>
                                         <option value="ADMIN_ASSIGN">Admin Assignment (Locked)</option>
