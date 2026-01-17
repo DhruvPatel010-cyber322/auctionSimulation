@@ -6,6 +6,9 @@ import { fileURLToPath } from 'url';
 import { TEAMS } from '../data/teams.js';
 import Player from '../models/Player.js';
 import Team from '../models/Team.js';
+import Tournament from '../models/Tournament.js';
+import User from '../models/User.js';
+import TournamentUser from '../models/TournamentUser.js';
 
 // Setup paths
 const __filename = fileURLToPath(import.meta.url);
@@ -31,6 +34,10 @@ async function seed() {
         // CLEAR DATA
         await Player.deleteMany({});
         await Team.deleteMany({});
+        await Tournament.deleteMany({});
+        await User.deleteMany({});
+        await TournamentUser.deleteMany({});
+
         // Clear checkpoints to avoid stale state
         try {
             await mongoose.connection.collection('checkpoints').deleteMany({});
