@@ -225,7 +225,10 @@ const TournamentSelectPage = () => {
                                     </div>
                                     <div>
                                         <h3 className="font-bold text-gray-900">{t.name}</h3>
-                                        <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">{t.status}</span>
+                                        <div className="flex gap-2 mt-1">
+                                            <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">{t.status}</span>
+                                            <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">{t.selectionMode === 'ADMIN_ASSIGN' ? 'Admin Assign' : 'User Choice'}</span>
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">

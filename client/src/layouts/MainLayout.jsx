@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
-import { LayoutDashboard, Gavel, Users, UserCircle, Menu, X, BookOpen, LogOut, Wallet, Shield } from 'lucide-react';
+import { LayoutDashboard, Gavel, Users, UserCircle, Menu, X, BookOpen, LogOut, Wallet, Shield, Trophy } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
@@ -62,6 +62,9 @@ const MainLayout = () => {
     if (team?.role === 'admin') {
         navItems.push({ name: 'Admin', path: '/admin', icon: Shield });
     }
+
+    // Add Switch Tournament as a utility item
+    navItems.push({ name: 'Switch Tournament', path: '/tournaments', icon: Trophy });
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row font-sans text-gray-900">
