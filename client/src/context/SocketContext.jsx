@@ -19,7 +19,7 @@ export const SocketProvider = ({ children }) => {
     useEffect(() => {
         // Phase 4: Re-enable Socket connection
         if (token) {
-            const newSocket = io(import.meta.env.VITE_API_BASE_URL, {
+            const newSocket = io(import.meta.env.VITE_API_BASE_URL || 'https://auction-arena-server.onrender.com', {
                 auth: { token },
                 transports: ['websocket']
             });

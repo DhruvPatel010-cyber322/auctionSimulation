@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { Shield, ArrowRight, Trophy, User, Check, X as XIcon, Edit2 } from 'lucide-react';
 import TeamSelector from '../components/TeamSelector';
 
-const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'https://auction-arena-server.onrender.com';
 
 
 const TournamentTeamSelector = () => {
