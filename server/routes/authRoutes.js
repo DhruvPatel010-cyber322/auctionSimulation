@@ -536,4 +536,27 @@ router.get('/tournaments/:id/my-squad', firebaseAuth, async (req, res) => {
     }
 });
 
+// 9. Public Squad View (For "View Other Team")
+router.get('/tournaments/:id/teams/:teamCode/squad', firebaseAuth, async (req, res) => {
+    const { teamCode } = req.params;
+
+    try {
+        const team = await Team.findOne({ code: teamCode.toUpperCase() })
+            .populate('playersBought')
+            .populate('playing11');
+
+        if (!team) return res.status(404).json({ message: 'Team not found.' });
+
+        res.json({
+            success: true,
+            players: team.playersBought,
+            playing11: team.playing11,
+            teamCode: team.code
+        });
+    } catch (err) {
+        console.error("Get Team Squad Error:", err);
+        res.status(500).json({ message: 'Failed to fetch team squad' });
+    }
+});
+
 export default router;
