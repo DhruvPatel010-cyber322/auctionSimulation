@@ -95,6 +95,24 @@ const RulesPage = () => {
                             <p className="text-xs text-gray-400 mt-2">Must be Group 4</p>
                         </div>
                     </div>
+
+                    <div className="mt-8 pt-8 border-t border-gray-100">
+                        <h3 className="text-lg font-bold text-gray-800 mb-4">Composition Requirements</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="flex flex-col gap-1 text-gray-700 bg-red-50 p-4 rounded-xl border border-red-100">
+                                <span className="font-bold text-red-700 text-xl">Max 4</span>
+                                <span className="text-sm font-bold text-gray-600 uppercase tracking-wider">Overseas Players</span>
+                            </div>
+                            <div className="flex flex-col gap-1 text-gray-700 bg-blue-50 p-4 rounded-xl border border-blue-100">
+                                <span className="font-bold text-blue-700 text-xl">Min 1</span>
+                                <span className="text-sm font-bold text-gray-600 uppercase tracking-wider">Wicket Keeper</span>
+                            </div>
+                            <div className="flex flex-col gap-1 text-gray-700 bg-green-50 p-4 rounded-xl border border-green-100">
+                                <span className="font-bold text-green-700 text-xl">Min 5</span>
+                                <span className="text-sm font-bold text-gray-600 uppercase tracking-wider">Bowling Options</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
