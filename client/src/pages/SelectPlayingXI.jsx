@@ -220,7 +220,16 @@ const SelectPlayingXI = () => {
 
     // Edit Mode Data
     const assignedIds = Object.values(slots).filter(p => p).map(p => p._id);
-    const availableForEdit = squad.filter(p => !assignedIds.includes(p._id));
+    const availableForEdit = squad
+        .filter(p => !assignedIds.includes(p._id))
+        .sort((a, b) => {
+            // Sort by Batting Group (1 -> 4)
+            const groupA = a.battingPositionGroup || 99; // 99 for undefined (put at end)
+            const groupB = b.battingPositionGroup || 99;
+            if (groupA !== groupB) return groupA - groupB;
+            // Then by Name
+            return a.name.localeCompare(b.name);
+        });
 
     return (
         <div className="max-w-7xl mx-auto p-4 md:p-8">
