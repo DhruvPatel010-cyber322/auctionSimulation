@@ -8,6 +8,7 @@ import Player from '../models/Player.js';
 import Team from '../models/Team.js'; // Singleton Team Model
 import { TEAMS } from '../data/teams.js'; // Static configs
 import { firebaseAuth } from '../middleware/firebaseAuth.js';
+import * as teamController from '../controllers/teamController.js';
 
 const router = express.Router();
 
@@ -558,5 +559,8 @@ router.get('/tournaments/:id/teams/:teamCode/squad', firebaseAuth, async (req, r
         res.status(500).json({ message: 'Failed to fetch team squad' });
     }
 });
+
+// 10. Points Table
+router.get('/tournaments/:id/points-table', firebaseAuth, teamController.getPointsTable);
 
 export default router;

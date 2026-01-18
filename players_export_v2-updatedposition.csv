@@ -1,0 +1,251 @@
+SrNo,Name,Country,Role,BasePrice,IsOverseas,Status,SoldPrice,SoldToTeam,BattingPositionGroup,Set,Position
+1,MS Dhoni,India,Wicket Keeper,2,No,AVAILABLE,,,,0,5
+2,Sanju Samson,India,Wicket Keeper,2,No,AVAILABLE,,,,4,1
+3,Ruturaj Gaikwad,India,Batsman,1,No,AVAILABLE,,,,1,3
+4,Dewald Brevis,Overseas,Batsman,0.75,Yes,AVAILABLE,,,,1,4
+5,Ayush Mhatre,India,Batsman,0.3,No,AVAILABLE,,,,1,1
+6,Kartik Sharma,India,Wicket Keeper,0.3,No,AVAILABLE,,,,9,6
+7,Sarfaraz Khan,India,Batsman,0.75,No,AVAILABLE,,,,1,3
+8,Urvil Patel,India,Wicket Keeper,0.3,No,AVAILABLE,,,,9,4
+9,Anshul Kamboj,India,Bowler,0.3,No,AVAILABLE,,,,7,8
+10,Jamie Overton,Overseas,All-Rounder,1,Yes,AVAILABLE,,,,4,7
+11,Ramakrishna Ghosh,India,All-Rounder,0.3,No,AVAILABLE,,,,10,8
+12,Prashant Veer,India,All-Rounder,0.3,No,AVAILABLE,,,,10,7
+13,Matthew William Short,Overseas,All-Rounder,0.3,Yes,AVAILABLE,,,,5,6
+14,Aman Khan,India,All-Rounder,0.3,No,AVAILABLE,,,,10,7
+15,Zak Foulkes,New Zealand,All-Rounder,0.3,Yes,AVAILABLE,,,,5,8
+16,Shivam Dube,India,All-Rounder,2,No,AVAILABLE,,,,5,5
+17,Khaleel Ahmed,India,Bowler,1,No,AVAILABLE,,,,2,9
+18,Noor Ahmad,Overseas,Bowler,2,Yes,AVAILABLE,,,,3,10
+19,Mukesh Choudhary,India,Bowler,0.3,No,AVAILABLE,,,,7,11
+20,Nathan Ellis,Overseas,Bowler,1.25,Yes,AVAILABLE,,,,2,9
+21,Shreyas Gopal,India,Bowler,0.3,No,AVAILABLE,,,,3,8
+22,Gurjapneet Singh,India,Bowler,0.3,No,AVAILABLE,,,,7,11
+23,Akeal Hosein,West Indies,Bowler,2,Yes,AVAILABLE,,,,3,8
+24,Matt Henry,New Zealand,Bowler,2,Yes,AVAILABLE,,,,2,10
+25,Rahul Chahar,India,Bowler,1,No,AVAILABLE,,,,3,10
+26,KL Rahul,India,Wicket Keeper,2,No,AVAILABLE,,,,4,1
+27,Karun Nair,India,Batsman,0.75,No,AVAILABLE,,,,1,3
+28,David Miller,South Africa,Batsman,2,Yes,AVAILABLE,,,,1,5
+29,Ben Duckett,England,Wicket Keeper,2,Yes,AVAILABLE,,,,4,2
+30,Pathum Nissanka,Sri Lanka,Batsman,0.75,Yes,AVAILABLE,,,,1,2
+31,Sahil Parakh,India,Batsman,0.3,No,AVAILABLE,,,,6,4
+32,Prithvi Shaw,India,Batsman,0.75,No,AVAILABLE,,,,1,2
+33,Abishek Porel,India,Wicket Keeper,0.75,No,AVAILABLE,,,,9,4
+34,Tristan Stubbs,Overseas,Wicket Keeper,1.5,Yes,AVAILABLE,,,,4,4
+35,Axar Patel,India,All-Rounder,2,No,AVAILABLE,,,,5,5
+36,Sameer Rizvi,India,All-Rounder,0.75,No,AVAILABLE,,,,10,5
+37,Ashutosh Sharma,India,All-Rounder,1,No,AVAILABLE,,,,10,6
+38,Vipraj Nigam,India,All-Rounder,0.75,No,AVAILABLE,,,,10,7
+39,Ajay Mandal,India,All-Rounder,0.3,No,AVAILABLE,,,,10,8
+40,Tripurana Vijay,India,All-Rounder,0.3,No,AVAILABLE,,,,10,7
+41,Madhav Tiwari,India,All-Rounder,0.3,No,AVAILABLE,,,,10,7
+42,Auqib Dar,India,All-Rounder,0.3,No,AVAILABLE,,,,10,9
+43,Nitish Rana,India,All-Rounder,1.5,No,AVAILABLE,,,,5,3
+44,Mitchell Starc,Overseas,Bowler,2,Yes,AVAILABLE,,,,0,8
+45,T. Natarajan,India,Bowler,1,No,AVAILABLE,,,,2,10
+46,Mukesh Kumar,India,Bowler,1,No,AVAILABLE,,,,2,11
+47,Dushmantha Chameera,Overseas,Bowler,0.75,Yes,AVAILABLE,,,,2,11
+48,Lungisani Ngidi,South Africa,Bowler,2,Yes,AVAILABLE,,,,2,10
+49,Kyle Jamieson,New Zealand,Bowler,1,Yes,AVAILABLE,,,,2,10
+50,Kuldeep Yadav,India,Bowler,2,No,AVAILABLE,,,,3,10
+51,Shubman Gill,India,Batsman,2,No,AVAILABLE,,,,1,1
+52,Jos Buttler,Overseas,Wicket Keeper,2,Yes,AVAILABLE,,,,0,3
+53,Kumar Kushagra,India,Wicket Keeper,0.3,No,AVAILABLE,,,,9,4
+54,Anuj Rawat,India,Wicket Keeper,0.3,No,AVAILABLE,,,,9,4
+55,Tom Banton,England,Wicket Keeper,1,Yes,AVAILABLE,,,,4,3
+56,Glenn Phillips,Overseas,All-Rounder,1.5,Yes,AVAILABLE,,,,5,5
+57,Nishant Sindhu,India,All-Rounder,0.3,No,AVAILABLE,,,,10,7
+58,Washington Sundar,India,All-Rounder,2,No,AVAILABLE,,,,5,4
+59,Mohd. Arshad Khan,India,All-Rounder,0.3,No,AVAILABLE,,,,10,8
+60,Sai Kishore,India,All-Rounder,0.75,No,AVAILABLE,,,,10,9
+61,Jayant Yadav,India,All-Rounder,0.3,No,AVAILABLE,,,,10,9
+62,Jason Holder,West Indies,All-Rounder,1.25,Yes,AVAILABLE,,,,5,8
+63,Sai Sudharsan,India,Batsman,1.5,No,AVAILABLE,,,,1,2
+64,Shahrukh Khan,India,All-Rounder,0.75,No,AVAILABLE,,,,10,6
+65,Kagiso Rabada,Overseas,Bowler,2,Yes,AVAILABLE,,,,2,10
+66,Mohammed Siraj,India,Bowler,2,No,AVAILABLE,,,,2,11
+67,Prasidh Krishna,India,Bowler,1.25,No,AVAILABLE,,,,2,10
+68,Manav Suthar,India,Bowler,0.3,No,AVAILABLE,,,,8,9
+69,Gurnoor Singh Brar,India,Bowler,0.3,No,AVAILABLE,,,,7,11
+70,Ishant Sharma,India,Bowler,0.75,No,AVAILABLE,,,,2,10
+71,Ashok Sharma,India,Bowler,0.3,No,AVAILABLE,,,,7,11
+72,Prithvi Raj Yarra,India,Bowler,0.3,No,AVAILABLE,,,,7,10
+73,Luke Wood,England,Bowler,0.3,Yes,AVAILABLE,,,,2,10
+74,Rahul Tewatia,India,All-Rounder,0.75,No,AVAILABLE,,,,10,7
+75,Rashid Khan,Overseas,Bowler,2,Yes,AVAILABLE,,,,3,8
+76,Ajinkya Rahane,India,Batsman,1.5,No,AVAILABLE,,,,1,2
+77,Rinku Singh,India,Batsman,1.25,No,AVAILABLE,,,,1,6
+78,Angkrish Raghuvanshi,India,Batsman,0.75,No,AVAILABLE,,,,6,3
+79,Manish Pandey,India,Batsman,0.75,No,AVAILABLE,,,,0,4
+80,Cameron Green,Australia,All-Rounder,2,Yes,AVAILABLE,,,,5,3
+81,Finn Allen,New Zealand,Wicket Keeper,1.5,Yes,AVAILABLE,,,,4,1
+82,Tejasvi Singh,India,Wicket Keeper,0.3,No,AVAILABLE,,,,9,5
+83,Rahul Tripathi,India,Batsman,0.75,No,AVAILABLE,,,,1,2
+84,Tim Seifert,New Zealand,Wicket Keeper,1.5,Yes,AVAILABLE,,,,5,1
+85,Rovman Powell,Overseas,Batsman,1.5,Yes,AVAILABLE,,,,1,6
+86,Anukul Roy,India,All-Rounder,0.3,No,AVAILABLE,,,,10,7
+87,Sarthak Ranjan,India,All-Rounder,0.3,No,AVAILABLE,,,,10,8
+88,Daksh Kamra,India,All-Rounder,0.3,No,AVAILABLE,,,,10,8
+89,Rachin Ravindra,New Zealand,All-Rounder,2,Yes,AVAILABLE,,,,5,2
+90,Ramandeep Singh,India,All-Rounder,0.75,No,AVAILABLE,,,,5,6
+91,Vaibhav Arora,India,Bowler,0.3,No,AVAILABLE,,,,2,10
+92,Matheesha Pathirana,Sri Lanka,Bowler,2,Yes,AVAILABLE,,,,2,11
+93,Kartik Tyagi,India,Bowler,0.75,No,AVAILABLE,,,,7,10
+94,Prashant Solanki,India,Bowler,0.3,No,AVAILABLE,,,,8,11
+95,Mustafizur Rahman,Bangladesh,Bowler,1,Yes,AVAILABLE,,,,2,11
+96,Akash Deep,India,Bowler,1,No,AVAILABLE,,,,2,9
+97,Harshit Rana,India,Bowler,0.75,No,AVAILABLE,,,,2,8
+98,Umran Malik,India,Bowler,0.75,No,AVAILABLE,,,,2,11
+99,Sunil Narine,Overseas,Bowler,2,Yes,AVAILABLE,,,,3,10
+100,Varun Chakaravarthy,India,Bowler,2,No,AVAILABLE,,,,3,10
+101,Rishabh Pant,India,Wicket Keeper,2,No,AVAILABLE,,,,4,4
+102,Aiden Markram,Overseas,Batsman,2,Yes,AVAILABLE,,,,1,1
+103,Himmat Singh,India,Batsman,0.3,No,AVAILABLE,,,,6,5
+104,Matthew Breetzke,Overseas,Batsman,0.75,Yes,AVAILABLE,,,,1,4
+105,Mukul Choudhary,India,Wicket Keeper,0.3,No,AVAILABLE,,,,9,5
+106,Akshat Raghuwanshi,India,Batsman,0.3,No,AVAILABLE,,,,6,4
+107,Josh Inglis,Australia,Wicket Keeper,2,Yes,AVAILABLE,,,,4,5
+108,Nicholas Pooran,Overseas,Wicket Keeper,2,Yes,AVAILABLE,,,,4,3
+109,Mitchell Marsh,Overseas,All-Rounder,2,Yes,AVAILABLE,,,,5,2
+110,Abdul Samad,India,All-Rounder,0.3,No,AVAILABLE,,,,10,6
+111,Shahbaz Ahamad,India,All-Rounder,0.75,No,AVAILABLE,,,,5,7
+112,Arshin Kulkarni,India,All-Rounder,0.3,No,AVAILABLE,,,,10,3
+113,Wanindu Hasaranga,Sri Lanka,All-Rounder,2,Yes,AVAILABLE,,,,5,8
+114,Ayush Badoni,India,All-Rounder,0.75,No,AVAILABLE,,,,10,5
+115,Mohammad Shami,India,Bowler,2,No,AVAILABLE,,,,2,10
+116,Avesh Khan,India,Bowler,1,No,AVAILABLE,,,,2,9
+117,M. Siddharth,India,Bowler,0.3,No,AVAILABLE,,,,8,11
+118,Digvesh Singh,India,Bowler,0.75,No,AVAILABLE,,,,8,11
+119,Akash Singh,India,Bowler,0.3,No,AVAILABLE,,,,7,10
+120,Prince Yadav,India,Bowler,0.3,No,AVAILABLE,,,,7,10
+121,Arjun Tendulkar,India,Bowler,0.3,No,AVAILABLE,,,,7,9
+122,Anrich Nortje,South Africa,Bowler,2,Yes,AVAILABLE,,,,2,11
+123,Naman Tiwari,India,Bowler,0.3,No,AVAILABLE,,,,7,10
+124,Mayank Yadav,India,Bowler,0.75,No,AVAILABLE,,,,7,11
+125,Mohsin Khan,India,Bowler,0.3,No,AVAILABLE,,,,7,9
+126,Rohit Sharma,India,Batsman,2,No,AVAILABLE,,,,0,1
+127,Surya Kumar Yadav,India,Batsman,2,No,AVAILABLE,,,,1,4
+128,Robin Minz,India,Wicket Keeper,0.3,No,AVAILABLE,,,,9,5
+129,Sherfane Rutherford,Overseas,Batsman,1.5,Yes,AVAILABLE,,,,1,6
+130,Ryan Rickelton,Overseas,Wicket Keeper,1,Yes,AVAILABLE,,,,4,2
+131,Quinton de Kock,Overseas,Wicket Keeper,1,Yes,AVAILABLE,,,,0,2
+132,Danish Malewar,India,Batsman,0.3,No,AVAILABLE,,,,6,5
+133,N. Tilak Varma,India,Batsman,1,No,AVAILABLE,,,,1,3
+134,Hardik Pandya,India,All-Rounder,2,No,AVAILABLE,,,,0,5
+135,Naman Dhir,India,All-Rounder,0.75,No,AVAILABLE,,,,5,6
+136,Mitchell Santner,Overseas,All-Rounder,2,Yes,AVAILABLE,,,,5,8
+137,Raj Angad Bawa,India,All-Rounder,0.3,No,AVAILABLE,,,,10,6
+138,Atharva Ankolekar,India,All-Rounder,0.3,No,AVAILABLE,,,,10,7
+139,Mayank Rawat,India,All-Rounder,0.3,No,AVAILABLE,,,,10,7
+140,Corbin Bosch,Overseas,All-Rounder,0.75,Yes,AVAILABLE,,,,5,7
+141,Will Jacks,Overseas,All-Rounder,2,Yes,AVAILABLE,,,,5,5
+142,Shardul Thakur,India,All-Rounder,1,No,AVAILABLE,,,,5,7
+143,Trent Boult,Overseas,Bowler,2,Yes,AVAILABLE,,,,2,10
+144,Mayank Markande,India,Bowler,0.3,No,AVAILABLE,,,,8,11
+145,Deepak Chahar,India,Bowler,2,No,AVAILABLE,,,,2,9
+146,Ashwani Kumar,India,Bowler,0.75,No,AVAILABLE,,,,7,11
+147,Raghu Sharma,India,Bowler,0.3,No,AVAILABLE,,,,8,10
+148,Mohammad Izhar,India,Bowler,0.3,No,AVAILABLE,,,,7,10
+149,Allah Ghazanfar,Overseas,Bowler,0.75,Yes,AVAILABLE,,,,3,11
+150,Jasprit Bumrah,India,Bowler,2,No,AVAILABLE,,,,0,10
+151,Shreyas Iyer,India,Batsman,2,No,AVAILABLE,,,,1,3
+152,Nehal Wadhera,India,Batsman,0.75,No,AVAILABLE,,,,6,4
+153,Vishnu Vinod,India,Wicket Keeper,0.3,No,AVAILABLE,,,,9,5
+154,Harnoor Pannu,India,Batsman,0.3,No,AVAILABLE,,,,6,4
+155,Pyla Avinash,India,Batsman,0.3,No,AVAILABLE,,,,6,2
+156,Prabhsimran Singh,India,Wicket Keeper,1,No,AVAILABLE,,,,9,1
+157,Shashank Singh,India,Batsman,1,No,AVAILABLE,,,,6,6
+158,Marcus Stoinis,Overseas,All-Rounder,2,Yes,AVAILABLE,,,,5,5
+159,Harpreet Brar,India,All-Rounder,0.3,No,AVAILABLE,,,,10,7
+160,Marco Jansen,Overseas,All-Rounder,1.25,Yes,AVAILABLE,,,,5,7
+161,Azmatullah Omarzai,Overseas,All-Rounder,1,Yes,AVAILABLE,,,,5,5
+162,Priyansh Arya,India,All-Rounder,0.75,No,AVAILABLE,,,,10,2
+163,Musheer Khan,India,All-Rounder,0.3,No,AVAILABLE,,,,10,4
+164,Suryansh Shedge,India,All-Rounder,0.3,No,AVAILABLE,,,,10,8
+165,Mitch Owen,Overseas,Batsman,1,Yes,AVAILABLE,,,,1,6
+166,Cooper Connolly,Australia,All-Rounder,1,Yes,AVAILABLE,,,,5,5
+167,Ben Dwarshuis,Australia,All-Rounder,0.75,Yes,AVAILABLE,,,,5,9
+168,Arshdeep Singh,India,Bowler,2,No,AVAILABLE,,,,2,10
+169,Yuzvendra Chahal,India,Bowler,2,No,AVAILABLE,,,,0,11
+170,Vyshak Vijaykumar,India,Bowler,0.3,No,AVAILABLE,,,,7,11
+171,Yash Thakur,India,Bowler,0.3,No,AVAILABLE,,,,7,10
+172,Xavier Bartlett,Overseas,Bowler,0.75,Yes,AVAILABLE,,,,2,9
+173,Pravin Dubey,India,Bowler,0.3,No,AVAILABLE,,,,8,8
+174,Vishal Nishad,India,Bowler,0.3,No,AVAILABLE,,,,8,10
+175,Lockie Ferguson,Overseas,Bowler,2,Yes,AVAILABLE,,,,2,10
+176,Shubham Dubey,India,Batsman,0.3,No,AVAILABLE,,,,6,5
+177,Vaibhav Suryavanshi,India,Batsman,0.75,No,AVAILABLE,,,,6,2
+178,Donovan Ferreira,Overseas,Wicket Keeper,0.75,Yes,AVAILABLE,,,,4,4
+179,Lhuan-dre Pretorius,Overseas,Batsman,0.3,Yes,AVAILABLE,,,,6,3
+180,Ravi Singh,India,Wicket Keeper,0.3,No,AVAILABLE,,,,9,5
+181,Aman Rao Perala,India,Batsman,0.3,No,AVAILABLE,,,,6,5
+182,Shimron Hetmyer,Overseas,Batsman,2,Yes,AVAILABLE,,,,1,5
+183,Yashasvi Jaiswal,India,Batsman,2,No,AVAILABLE,,,,1,1
+184,Dhruv Jurel,India,Wicket Keeper,1,No,AVAILABLE,,,,4,4
+185,Riyan Parag,India,Batsman,1.25,No,AVAILABLE,,,,1,3
+186,Yudhvir Singh Charak,India,All-Rounder,0.3,No,AVAILABLE,,,,10,8
+187,Ravindra Jadeja,India,All-Rounder,0.2,No,AVAILABLE,,,,0,7
+188,Sam Curran,Overseas,All-Rounder,2,Yes,AVAILABLE,,,,5,6
+189,Jofra Archer,Overseas,Bowler,2,Yes,AVAILABLE,,,,2,8
+190,Tushar Deshpande,India,Bowler,0.75,No,AVAILABLE,,,,7,8
+191,Kwena Maphaka,Overseas,Bowler,0.75,Yes,AVAILABLE,,,,2,10
+192,Ravi Bishnoi,India,Bowler,2,No,AVAILABLE,,,,3,11
+193,Sushant Mishra,India,Bowler,0.3,No,AVAILABLE,,,,7,10
+194,Yash Raj Punja,India,Bowler,0.3,No,AVAILABLE,,,,8,9
+195,Vignesh Puthur,India,Bowler,0.3,No,AVAILABLE,,,,8,11
+196,Brijesh Sharma,India,Bowler,0.3,No,AVAILABLE,,,,7,10
+197,Adam Milne,New Zealand,Bowler,2,Yes,AVAILABLE,,,,2,10
+198,Kuldeep Sen,India,Bowler,0.75,No,AVAILABLE,,,,7,11
+199,Sandeep Sharma,India,Bowler,0.75,No,AVAILABLE,,,,7,9
+200,Nandre Burger,Overseas,Bowler,1,Yes,AVAILABLE,,,,2,9
+201,Rajat Patidar,India,Batsman,2,No,AVAILABLE,,,,1,4
+202,Devdutt Padikkal,India,Batsman,1.25,No,AVAILABLE,,,,1,3
+203,Virat Kohli,India,Batsman,2,No,AVAILABLE,,,,0,1
+204,Phil Salt,Overseas,Wicket Keeper,2,Yes,AVAILABLE,,,,4,2
+205,Jitesh Sharma,India,Wicket Keeper,1,No,AVAILABLE,,,,4,5
+206,Jordan Cox,England,Wicket Keeper,0.75,Yes,AVAILABLE,,,,4,5
+207,Krunal Pandya,India,All-Rounder,2,No,AVAILABLE,,,,5,5
+208,Swapnil Singh,India,All-Rounder,0.3,No,AVAILABLE,,,,10,7
+209,Tim David,Overseas,All-Rounder,2,Yes,AVAILABLE,,,,5,6
+210,Romario Shepherd,Overseas,All-Rounder,1.5,Yes,AVAILABLE,,,,5,7
+211,Jacob Bethell,Overseas,All-Rounder,0.75,Yes,AVAILABLE,,,,5,7
+212,Venkatesh Iyer,India,All-Rounder,1.5,No,AVAILABLE,,,,5,5
+213,Satvik Deswal,India,All-Rounder,0.3,No,AVAILABLE,,,,10,8
+214,Mangesh Yadav,India,All-Rounder,0.3,No,AVAILABLE,,,,10,8
+215,Vicky Ostwal,India,All-Rounder,0.3,No,AVAILABLE,,,,10,8
+216,Vihaan Malhotra,India,All-Rounder,0.3,No,AVAILABLE,,,,10,4
+217,Kanishk Chouhan,India,All-Rounder,0.3,No,AVAILABLE,,,,10,7
+218,Josh Hazlewood,Overseas,Bowler,2,Yes,AVAILABLE,,,,2,9
+219,Rasikh Dar,India,Bowler,0.3,No,AVAILABLE,,,,7,10
+220,Suyash Sharma,India,Bowler,0.3,No,AVAILABLE,,,,8,11
+221,Bhuvneshwar Kumar,India,Bowler,2,No,AVAILABLE,,,,0,9
+222,Nuwan Thushara,Overseas,Bowler,0.75,Yes,AVAILABLE,,,,7,11
+223,Abhinandan Singh,India,Bowler,0.3,No,AVAILABLE,,,,7,10
+224,Jacob Duffy,New Zealand,Bowler,1,Yes,AVAILABLE,,,,2,10
+225,Yash Dayal,India,Bowler,0.75,No,AVAILABLE,,,,2,11
+226,Ishan Kishan,India,Wicket Keeper,2,No,AVAILABLE,,,,4,3
+227,Aniket Verma,India,Batsman,0.3,No,AVAILABLE,,,,6,5
+228,Smaran Ravichandran,India,Batsman,0.3,No,AVAILABLE,,,,6,5
+229,Salil Arora,India,Wicket Keeper,0.3,No,AVAILABLE,,,,9,2
+230,Heinrich Klaasen,Overseas,Wicket Keeper,2,Yes,AVAILABLE,,,,4,4
+231,Travis Head,Overseas,Batsman,2,Yes,AVAILABLE,,,,1,1
+232,Harshal Patel,India,All-Rounder,1,No,AVAILABLE,,,,5,8
+233,Kamindu Mendis,Overseas,All-Rounder,0.75,Yes,AVAILABLE,,,,5,7
+234,Harsh Dubey,India,All-Rounder,0.3,No,AVAILABLE,,,,10,6
+235,Brydon Carse,Overseas,All-Rounder,0.75,Yes,AVAILABLE,,,,5,8
+236,Shivang Kumar,India,All-Rounder,0.3,No,AVAILABLE,,,,10,8
+237,Krains Fuletra,India,All-Rounder,0.3,No,AVAILABLE,,,,10,8
+238,Liam Livingstone,England,All-Rounder,1,Yes,AVAILABLE,,,,5,5
+239,Jack Edwards,Australia,All-Rounder,0.3,Yes,AVAILABLE,,,,10,5
+240,Abhishek Sharma,India,All-Rounder,2,No,AVAILABLE,,,,5,1
+241,Nitish Kumar Reddy,India,All-Rounder,1.5,No,AVAILABLE,,,,5,6
+242,Pat Cummins,Overseas,Bowler,2,Yes,AVAILABLE,,,,0,8
+243,Zeeshan Ansari,India,Bowler,0.3,No,AVAILABLE,,,,8,9
+244,Jaydev Unadkat,India,Bowler,0.75,No,AVAILABLE,,,,2,9
+245,Eshan Malinga,Overseas,Bowler,0.3,Yes,AVAILABLE,,,,2,11
+246,Sakib Hussain,India,Bowler,0.3,No,AVAILABLE,,,,7,10
+247,Onkar Tarmale,India,Bowler,0.3,No,AVAILABLE,,,,7,10
+248,Amit Kumar,India,Bowler,0.3,No,AVAILABLE,,,,8,11
+249,Praful Hinge,India,Bowler,0.3,No,AVAILABLE,,,,7,10
+250,Shivam Mavi,India,Bowler,0.75,No,AVAILABLE,,,,2,9

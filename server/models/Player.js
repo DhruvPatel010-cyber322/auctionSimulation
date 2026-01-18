@@ -59,6 +59,10 @@ const playerSchema = new mongoose.Schema({
     battingPositionGroup: {
         type: Number,
         default: null
+    },
+    points: {
+        type: Number,
+        default: 0
     }
 }, {
     timestamps: true

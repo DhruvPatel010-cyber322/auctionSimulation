@@ -57,6 +57,7 @@ const MainLayout = () => {
         { name: 'Teams', path: '/teams', icon: Users },
         { name: 'Rules', path: '/rules', icon: BookOpen },
         { name: 'Playing XI', path: '/select-playing-xi', icon: Check },
+        { name: 'Points Table', path: '/points-table', icon: Trophy },
     ];
 
     // Conditionally add Admin Link
