@@ -12,6 +12,28 @@ import Player from './models/Player.js';
 import { TEAMS } from './data/teams.js';
 import { setupSocket, startAuctionCheckLoop } from './socketHandler.js';
 import * as auctionController from './controllers/auctionController.js';
+import AuctionState from './models/AuctionState.js';
+import { updateAuctionTimer, setupSocket, startAuctionCheckLoop } from './socketHandler.js';
+
+// --- FIX: Restore Timer on Startup ---
+const restoreAuctionTimer = async () => {
+  try {
+    const state = await AuctionState.findOne({ status: 'ACTIVE' });
+    if (state && state.timerEndsAt) {
+      const now = new Date();
+      if (state.timerEndsAt > now) {
+        console.log(`[Startup] Restoring Auction Timer. Ends at: ${state.timerEndsAt}`);
+        updateAuctionTimer(state.timerEndsAt);
+      } else {
+        console.log('[Startup] Found ACTIVE auction with expired timer. Triggering immediate resolution check.');
+        updateAuctionTimer(state.timerEndsAt);
+      }
+    }
+  } catch (e) {
+    console.error("Failed to restore auction timer:", e);
+  }
+};
+// -------------------------------------
 import firebaseAdmin from './config/firebaseAdmin.js';
 import authRoutes from './routes/authRoutes.js';
 import Tournament from './models/Tournament.js';
@@ -323,6 +345,11 @@ app.get('/', (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-httpServer.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+
+
+// Run Timer Restoration
+restoreAuctionTimer().then(() => {
+  httpServer.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
 });

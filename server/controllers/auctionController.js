@@ -1,6 +1,7 @@
 import AuctionState from '../models/AuctionState.js';
 import Player from '../models/Player.js';
 import Team from '../models/Team.js';
+import mongoose from 'mongoose';
 import { getIO, updateAuctionTimer } from '../socketHandler.js';
 
 // Helper to get or create the singleton state
@@ -352,25 +353,28 @@ export const placeBid = async (req, res) => {
 };
 
 // Called by Timer Expiry or Admin Force Sell
+// Called by Timer Expiry or Admin Force Sell
 export const resolveAuctionTurn = async (triggeredByTimer = false) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
         let state = await getAuctionState();
 
         // 1. Idempotency Check
-        // If triggered by timer, ensure timer has actually expired in DB
         if (triggeredByTimer) {
             const now = new Date();
             // 500ms grace period for slight clock skews
             if (!state.timerEndsAt || new Date(state.timerEndsAt) > now) {
                 console.log(`[resolveAuctionTurn] Ignored premature timer. Ends at: ${state.timerEndsAt}, Now: ${now}`);
+                await session.abortTransaction();
                 return;
             }
         }
 
         // 2. Active Check
-        // Only process if status is ACTIVE (or waiting for resolution) and has a player
         if (state.status !== 'ACTIVE' || !state.currentPlayer) {
             console.log(`[resolveAuctionTurn] Ignored. Status: ${state.status}`);
+            await session.abortTransaction();
             return;
         }
 
@@ -384,38 +388,38 @@ export const resolveAuctionTurn = async (triggeredByTimer = false) => {
             const amount = state.currentBid;
 
             // ATOMIC UPDATE to prevent double-spend or double-sell
-            // Check condition: State is still ACTIVE and Current Player matches
             const success = await AuctionState.findOneAndUpdate(
                 { _id: state._id, status: 'ACTIVE', currentPlayer: player._id },
                 { status: 'SOLD', timerEndsAt: null },
-                { new: true }
+                { new: true, session }
             );
 
             if (!success) {
                 console.log('[resolveAuctionTurn] Race condition detected. Turn already resolved.');
+                await session.abortTransaction();
                 return;
             }
             state = success; // Update local ref
             updateAuctionTimer(null);
 
-            // Update Team
-            const teamDoc = await Team.findOne({ code: teamCode });
+            // Update Team (WITH SESSION)
+            const teamDoc = await Team.findOne({ code: teamCode }).session(session);
             teamDoc.remainingPurse -= amount;
             teamDoc.squadSize += 1;
             if (player.country !== 'India') teamDoc.overseasCount += 1;
             teamDoc.totalSpent += amount;
 
-            // Update Player
-            const playerDoc = await Player.findById(player._id);
+            // Update Player (WITH SESSION)
+            const playerDoc = await Player.findById(player._id).session(session);
             playerDoc.status = 'SOLD';
             playerDoc.soldPrice = amount;
             playerDoc.soldToTeam = teamCode;
-            await playerDoc.save();
+            await playerDoc.save({ session });
 
             teamDoc.playersBought.push(playerDoc._id);
-            await teamDoc.save();
-            // (Assumes team updates don't need transactional strictness for this exercise, main issue is double-selling player)
+            await teamDoc.save({ session });
 
+            await session.commitTransaction();
 
             if (io) {
                 // Legacy event for toasts
@@ -427,7 +431,7 @@ export const resolveAuctionTurn = async (triggeredByTimer = false) => {
                 });
 
                 // Full Sync
-                const teams = await Team.find({});
+                const teams = await Team.find({}); // Read-only, eventual consistency ok
                 const standardizedState = getStandardizedState(state, teams);
 
                 io.emit('auction:state', {
@@ -442,19 +446,22 @@ export const resolveAuctionTurn = async (triggeredByTimer = false) => {
             const success = await AuctionState.findOneAndUpdate(
                 { _id: state._id, status: 'ACTIVE', currentPlayer: player._id },
                 { status: 'UNSOLD', timerEndsAt: null },
-                { new: true }
+                { new: true, session }
             );
 
             if (!success) {
                 console.log('[resolveAuctionTurn] Race condition detected (Unsold). Turn already resolved.');
+                await session.abortTransaction();
                 return;
             }
             state = success;
             updateAuctionTimer(null);
 
-            const playerDoc = await Player.findById(player._id);
+            const playerDoc = await Player.findById(player._id).session(session);
             playerDoc.status = 'UNSOLD';
-            await playerDoc.save();
+            await playerDoc.save({ session });
+
+            await session.commitTransaction();
 
             if (io) {
                 io.emit('playerSold', {
@@ -475,6 +482,9 @@ export const resolveAuctionTurn = async (triggeredByTimer = false) => {
 
     } catch (error) {
         console.error("Error resolving turn:", error);
+        await session.abortTransaction();
+    } finally {
+        session.endSession();
     }
 };
 

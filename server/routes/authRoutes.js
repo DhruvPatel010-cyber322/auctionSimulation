@@ -341,6 +341,12 @@ router.post('/tournaments/:id/select-team', firebaseAuth, async (req, res) => {
         const dbTeam = await Team.findOne({ code: teamCode.toUpperCase() });
         if (!dbTeam) return res.status(500).json({ message: 'System Error: Team config missing.' });
 
+        // --- NEW SESSION LOGIC ---
+        const sessionId = crypto.randomUUID();
+        dbTeam.activeSessionId = sessionId;
+        await dbTeam.save();
+        // -------------------------
+
         // 2. Issue Token with Tournament Scope
         // If the user has 'admin' role in DB, preserve it in the JWT
         const userRole = req.user.role === 'admin' ? 'admin' : 'team';
@@ -349,7 +355,8 @@ router.post('/tournaments/:id/select-team', firebaseAuth, async (req, res) => {
             teamCode: dbTeam.code,
             role: userRole,
             tournamentId: tournament._id, // Scope token to tournament
-            userId: userId
+            userId: userId,
+            sessionId: sessionId // EMBED SESSION ID
         }, process.env.JWT_SECRET, { expiresIn: '12h' });
 
         // 4. Return Data expected by Frontend
@@ -443,9 +450,10 @@ const validateBattingPositionRules = (player, position) => {
 };
 
 // 7. Save Playing XI
+// 7. Save Playing XI
 router.post('/tournaments/:id/playing11', firebaseAuth, async (req, res) => {
     const { playerIds } = req.body; // Legacy payload
-    const newPayload = Array.isArray(req.body) ? req.body : null; // New payload [ { playerId, battingPosition } ]
+    let itemsToProcess = [];
 
     const tournamentId = req.params.id;
     const userId = req.user._id;
@@ -457,49 +465,62 @@ router.post('/tournaments/:id/playing11', firebaseAuth, async (req, res) => {
             return res.status(403).json({ message: 'You do not have a team in this tournament.' });
         }
 
-        // 2. Resolve Player IDs to Save
-        let finalPlayerIds = [];
+        // 2. Fetch Team PRIOR to validation (Needed for Ownership Check)
+        const team = await Team.findOne({ code: userAssignment.teamCode });
+        if (!team) return res.status(404).json({ message: 'Team not found.' });
 
-        if (newPayload) {
-            // --- NEW VALIDATION FLOW ---
-            if (newPayload.length !== 11) {
-                return res.status(400).json({ message: 'You must select exactly 11 players.' });
-            }
-
-            const inputIds = newPayload.map(p => p.playerId);
-            const players = await Player.find({ _id: { $in: inputIds } });
-
-            // Create map for easy lookup
-            const playerMap = new Map(players.map(p => [p._id.toString(), p]));
-
-            for (const item of newPayload) {
-                const player = playerMap.get(item.playerId);
-                if (!player) return res.status(400).json({ message: `Player not found: ${item.playerId}` });
-
-                // Run Validation
-                const result = validateBattingPositionRules(player, item.battingPosition);
-                if (!result.valid) {
-                    return res.status(400).json({ message: result.message });
-                }
-            }
-            finalPlayerIds = inputIds; // If all valid, use these IDs
-
-        } else if (playerIds) {
-            // --- LEGACY FLOW (No Rule Validation) ---
-            if (!Array.isArray(playerIds) || playerIds.length !== 11) {
-                return res.status(400).json({ message: 'You must select exactly 11 players.' });
-            }
-            finalPlayerIds = playerIds;
+        // 3. Normalize Input
+        if (Array.isArray(req.body)) {
+            // NEW Payload: [ { playerId, battingPosition } ]
+            itemsToProcess = req.body;
+        } else if (Array.isArray(playerIds)) {
+            // LEGACY Payload: [ id1, id2... ] - Infer Position from Index (1-based)
+            itemsToProcess = playerIds.map((pid, index) => ({
+                playerId: pid,
+                battingPosition: index + 1
+            }));
         } else {
             return res.status(400).json({ message: 'Invalid payload format.' });
         }
 
-        // 3. Find Team and Save
-        const team = await Team.findOne({ code: userAssignment.teamCode });
-        if (!team) return res.status(404).json({ message: 'Team not found.' });
+        if (itemsToProcess.length !== 11) {
+            return res.status(400).json({ message: 'You must select exactly 11 players.' });
+        }
 
-        // (Optional: Verify these players assume to 'playersBought' check omitted per prev instructions, simple save)
-        team.playing11 = finalPlayerIds;
+        // 4. Resolve Players and Validate
+        const inputIds = itemsToProcess.map(p => p.playerId);
+
+        // Strict Integrity Check: All players must be UNIQUE in the request
+        const uniqueParams = new Set(inputIds);
+        if (uniqueParams.size !== 11) {
+            return res.status(400).json({ message: 'Duplicate players in selection.' });
+        }
+
+        const players = await Player.find({ _id: { $in: inputIds } });
+        if (players.length !== 11) {
+            return res.status(400).json({ message: 'One or more invalid player IDs.' });
+        }
+
+        const playerMap = new Map(players.map(p => [p._id.toString(), p]));
+        const ownedPlayerIds = new Set(team.playersBought.map(id => id.toString()));
+
+        for (const item of itemsToProcess) {
+            const player = playerMap.get(item.playerId);
+
+            // A. OWNERSHIP CHECK (CRITICAL FIX)
+            if (!ownedPlayerIds.has(item.playerId)) {
+                return res.status(403).json({ message: `Security violation: You do not own player ${player.name}` });
+            }
+
+            // B. Batting Position Rule Validation
+            const result = validateBattingPositionRules(player, item.battingPosition);
+            if (!result.valid) {
+                return res.status(400).json({ message: result.message });
+            }
+        }
+
+        // 5. Save if all valid
+        team.playing11 = inputIds;
         await team.save();
 
         res.json({ success: true, message: 'Playing XI saved successfully', playing11: team.playing11 });
