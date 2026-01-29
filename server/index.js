@@ -243,13 +243,27 @@ app.post('/api/login', (req, res) => {
   res.redirect(307, '/api/auth/login');
 });
 
-app.post('/api/logout', async (req, res) => {
+app.post('/api/logout', protect, async (req, res) => {
   try {
-    const teamCode = req.body.teamId || (req.user && req.user.teamCode);
-    if (teamCode) {
+    const requestedTeamId = req.body.teamId;
+    const authTeamCode = req.user.teamCode;
+    const authRole = req.user.role;
+
+    // Determine target team to logout
+    let targetTeamCode = authTeamCode;
+
+    // If admin is requesting logout of a specific team
+    if (authRole === 'admin' && requestedTeamId) {
+      targetTeamCode = requestedTeamId;
+    } else if (requestedTeamId && requestedTeamId.toUpperCase() !== authTeamCode.toUpperCase()) {
+      // If regular user tries to logout someone else
+      return res.status(403).json({ message: 'Unauthorized to logout this team' });
+    }
+
+    if (targetTeamCode) {
       // Clear DB session
       await Team.findOneAndUpdate(
-        { code: teamCode.toUpperCase() },
+        { code: targetTeamCode.toUpperCase() },
         {
           isLoggedIn: false,
           activeSessionId: null
@@ -269,7 +283,7 @@ app.post('/api/logout', async (req, res) => {
 
 // --- TEAMS API ---
 // --- TEAMS API (Smart V2 Compatible) ---
-app.get('/api/teams', async (req, res) => {
+app.get('/api/teams', protect, async (req, res) => {
   try {
     const teams = await Team.find({}).select('code name remainingPurse squadSize overseasCount totalSpent isActive playersBought logo').populate('playersBought');
 

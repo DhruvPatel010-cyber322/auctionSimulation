@@ -264,9 +264,32 @@ const DashboardPage = () => {
                 </div>
             </div>
 
+            {/* Quick Actions / Tips */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-6 rounded-3xl border border-indigo-100/50">
+                    <h3 className="font-bold text-indigo-900 mb-2">Auction Strategy</h3>
+                    <p className="text-sm text-indigo-700/80 mb-4">Keep at least ₹20 Cr for the final round of accelerated bidding.</p>
+                </div>
+                <div className="bg-gradient-to-br from-orange-50 to-amber-50 p-6 rounded-3xl border border-orange-100/50">
+                    <h3 className="font-bold text-orange-900 mb-2">Squad Balance</h3>
+                    <p className="text-sm text-orange-700/80 mb-4">Don't forget to fill your minimum 18 player quota early.</p>
+                </div>
+                <div className="bg-gradient-to-br from-cyan-50 to-blue-50 p-6 rounded-3xl border border-cyan-100/50">
+                    <h3 className="font-bold text-cyan-900 mb-2">Upcoming</h3>
+                    <p className="text-sm text-cyan-700/80 mb-4">Next set: Marquee All-Rounders. Be prepared.</p>
+                </div>
+            </div>
 
-
-
+            {/* Rules / Extra Section */}
+            <div className="bg-orange-50 border border-orange-100 rounded-2xl p-6 flex items-start gap-4">
+                <AlertCircle className="text-orange-500 shrink-0" size={24} />
+                <div>
+                    <h3 className="font-bold text-orange-900 mb-1">Remember the Rules</h3>
+                    <p className="text-orange-700 text-sm leading-relaxed">
+                        Minimum scheduled squad size is 18. Maximum overseas players allowed is 8. Ensure you maintain the minimum purse spend.
+                    </p>
+                </div>
+            </div>
         </div>
     );
 };

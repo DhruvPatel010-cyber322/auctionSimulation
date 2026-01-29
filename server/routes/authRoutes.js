@@ -9,6 +9,7 @@ import Team from '../models/Team.js'; // Singleton Team Model
 import { TEAMS } from '../data/teams.js'; // Static configs
 import { firebaseAuth } from '../middleware/firebaseAuth.js';
 import * as teamController from '../controllers/teamController.js';
+import AuctionState from '../models/AuctionState.js';
 
 const router = express.Router();
 
@@ -59,6 +60,7 @@ router.get('/tournaments', firebaseAuth, async (req, res) => {
 });
 
 // 2.2 Delete Tournament
+// 2.2 Delete Tournament (AND RESET GAME DATA)
 router.delete('/tournaments/:id', firebaseAuth, async (req, res) => {
     if (req.user.role !== 'admin') {
         return res.status(403).json({ message: 'Access Denied: Only admins can delete tournaments.' });
@@ -78,7 +80,38 @@ router.delete('/tournaments/:id', firebaseAuth, async (req, res) => {
         // 2. Delete associated user assignments (Cascade)
         await TournamentUser.deleteMany({ tournament: tournamentId });
 
-        res.json({ success: true, message: 'Tournament deleted successfully' });
+        // 3. HARD RESET: INIT DATABASE AGAIN
+        // Reset Players
+        await Player.updateMany({}, {
+            $set: {
+                status: 'AVAILABLE',
+                soldPrice: null,
+                soldToTeam: null,
+                points: 0 // Optional: Reset points too if part of new tournament
+            }
+        });
+
+        // Reset Teams
+        await Team.updateMany({}, {
+            $set: {
+                remainingPurse: 120, // Default 120 Cr
+                totalSpent: 0,
+                squadSize: 0,
+                overseasCount: 0,
+                playersBought: [],
+                playing11: [],
+                isActive: false, // Reset active status
+                isLoggedIn: false,
+                activeSessionId: null
+            }
+        });
+
+        // Reset Global Auction State
+        await AuctionState.deleteMany({}); // Clear active auction state
+
+        console.log(`[System] Tournament ${tournamentId} deleted. GLOBAL RESET performed.`);
+
+        res.json({ success: true, message: 'Tournament deleted and System Reset successfully' });
     } catch (err) {
         console.error('Delete Tournament Error:', err);
         res.status(500).json({ message: 'Failed to delete tournament' });
