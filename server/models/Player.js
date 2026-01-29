@@ -60,6 +60,10 @@ const playerSchema = new mongoose.Schema({
         type: Number,
         default: null
     },
+    position: {
+        type: Number,
+        default: null
+    },
     points: {
         type: Number,
         default: 0
