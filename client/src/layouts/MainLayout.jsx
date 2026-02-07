@@ -4,17 +4,34 @@ import { LayoutDashboard, Gavel, Users, UserCircle, Menu, X, BookOpen, LogOut, W
 import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
+import { getTeams } from '../services/api';
 
 const MainLayout = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const { user: team, logout } = useAuth(); // Map user to team for compatibility
     const { socket } = useSocket();
+    const [teamDetails, setTeamDetails] = useState(team);
     const [budget, setBudget] = useState(team?.remainingPurse || team?.budget || 0);
 
-    // Sync Budget
+    // Sync Budget & Fetch Team Details
     useEffect(() => {
         if (team) {
             setBudget(team.remainingPurse || team.budget || 0);
+
+            // Fetch fresh team details (including logo)
+            const fetchTeamDetails = async () => {
+                try {
+                    const teams = await getTeams();
+                    const myData = teams.find(t => t.id === team.id || t.code === team.code);
+                    if (myData) {
+                        setTeamDetails(prev => ({ ...prev, ...myData }));
+                        setBudget(myData.remainingPurse || myData.budget || 0);
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch fresh team details:", error);
+                }
+            };
+            fetchTeamDetails();
         }
     }, [team]);
 
@@ -123,12 +140,12 @@ const MainLayout = () => {
 
                             <div className="flex items-center gap-3 pl-6 border-l border-gray-200">
                                 <div className="text-right hidden sm:block">
-                                    <p className="text-sm font-bold text-gray-900 leading-none">{team.name}</p>
-                                    <p className="text-[10px] uppercase font-bold text-gray-400 mt-1 tracking-wider">{team.username || team.code || 'Team Account'}</p>
+                                    <p className="text-sm font-bold text-gray-900 leading-none">{teamDetails?.name || team.name}</p>
+                                    <p className="text-[10px] uppercase font-bold text-gray-400 mt-1 tracking-wider">{teamDetails?.username || team.username || team.code || 'Team Account'}</p>
                                 </div>
                                 <div className="w-10 h-10 rounded-full bg-auction-primary/10 border border-auction-primary/20 flex items-center justify-center overflow-hidden p-0.5">
-                                    {team.logo ? (
-                                        <img src={team.logo} alt={team.name} className="w-full h-full object-cover rounded-full" />
+                                    {(teamDetails?.logo || team.logo) ? (
+                                        <img src={teamDetails?.logo || team.logo} alt={teamDetails?.name || team.name} className="w-full h-full object-cover rounded-full" />
                                     ) : (
                                         <div className="w-full h-full bg-auction-primary flex items-center justify-center rounded-full">
                                             <span className="text-white font-bold text-lg leading-none">
