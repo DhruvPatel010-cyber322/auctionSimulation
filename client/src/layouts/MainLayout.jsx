@@ -22,10 +22,18 @@ const MainLayout = () => {
             const fetchTeamDetails = async () => {
                 try {
                     const teams = await getTeams();
-                    const myData = teams.find(t => t.id === team.id || t.code === team.code);
+                    const myData = teams.find(t =>
+                        (t.id && team.id && t.id.toLowerCase() === team.id.toLowerCase()) ||
+                        (t.code && team.code && t.code.toLowerCase() === team.code.toLowerCase()) ||
+                        (t.name && team.name && t.name.toLowerCase() === team.name.toLowerCase())
+                    );
+
                     if (myData) {
+                        console.log("Found Team Data:", myData);
                         setTeamDetails(prev => ({ ...prev, ...myData }));
                         setBudget(myData.remainingPurse || myData.budget || 0);
+                    } else {
+                        console.warn("Could not find matching team in API response", { team, teamsMatch: teams.map(t => t.id) });
                     }
                 } catch (error) {
                     console.error("Failed to fetch fresh team details:", error);
