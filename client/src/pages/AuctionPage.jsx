@@ -521,12 +521,19 @@ const AuctionPage = () => {
                                         </div>
                                         <div className="flex-1">
                                             <div className="flex items-center justify-between mb-0.5">
-                                                <span
-                                                    className="font-bold text-xs"
-                                                    style={{ color: tColor }}
-                                                >
-                                                    {bid.teamName || bid.team}
-                                                </span>
+                                                <div className="flex items-center gap-1">
+                                                    <span
+                                                        className="font-bold text-xs"
+                                                        style={{ color: tColor }}
+                                                    >
+                                                        {bid.teamName || bid.team}
+                                                    </span>
+                                                    {auctionState.teams.find(t => t.id === bid.team)?.ownerUsername && (
+                                                        <span className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
+                                                            @{auctionState.teams.find(t => t.id === bid.team)?.ownerUsername}
+                                                        </span>
+                                                    )}
+                                                </div>
                                                 <span className="text-[10px] font-medium text-gray-400">{bid.time}</span>
                                             </div>
                                             <p className="text-lg font-black text-gray-900 tabular-nums">{formatPrice(bid.amount)}</p>
