@@ -331,12 +331,17 @@ export const placeBid = async (req, res) => {
         }
 
         const currentBid = state.currentBid || 0;
-        const MIN_INCREMENT = 0.5;
+
+        let minIncrement = 0.05;
+        if (currentBid >= 1 && currentBid < 2) minIncrement = 0.10;
+        else if (currentBid >= 2 && currentBid < 5) minIncrement = 0.20;
+        else if (currentBid >= 5) minIncrement = 0.25;
 
         // Validation 1: Bid must be higher than current OR equal if it's the opening bid
         if (state.highestBidder) {
-            if (newBidAmount < currentBid + MIN_INCREMENT) {
-                return res.status(400).json({ message: `Bid must be at least ₹${currentBid + MIN_INCREMENT}` });
+            const requiredBid = Math.round((currentBid + minIncrement) * 100) / 100;
+            if (newBidAmount < requiredBid) {
+                return res.status(400).json({ message: `Bid must be at least ₹${requiredBid} Cr` });
             }
         } else {
             // Opening Bid Logic: Must be at least Base Price (which is currentBid initially)
