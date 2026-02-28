@@ -85,7 +85,7 @@ const DashboardPage = () => {
         socket.on('auction:state', handleUpdate);
 
         // Listen for team-specific updates (e.g., after player sold)
-        socket.on('team:update', (update) => {
+        const handleTeamUpdate = (update) => {
             if (update.teamCode?.toLowerCase() === teamId?.toLowerCase()) {
                 setStats(prev => ({
                     ...prev,
@@ -94,22 +94,26 @@ const DashboardPage = () => {
                     overseasCount: update.overseasCount
                 }));
             }
-        });
+        };
+        socket.on('team:update', handleTeamUpdate);
 
         // Also listen for detailed events for immediate feedback
-        socket.on('auctionStart', (data) => {
+        const handleAuctionStart = (data) => {
             setAuctionStatus(prev => ({ ...prev, currentPlayer: data.currentPlayer, currentBid: data.currentBid, isSold: false }));
-        });
-        socket.on('bidPlaced', ({ amount, team }) => {
+        };
+        socket.on('auctionStart', handleAuctionStart);
+
+        const handleBidPlaced = ({ amount, team }) => {
             // Optional: visual flair
-        });
+        };
+        socket.on('bidPlaced', handleBidPlaced);
 
         return () => {
-            socket.off('auction:sync');
-            socket.off('auction:state');
-            socket.off('team:update');
-            socket.off('auctionStart');
-            socket.off('bidPlaced');
+            socket.off('auction:sync', handleUpdate);
+            socket.off('auction:state', handleUpdate);
+            socket.off('team:update', handleTeamUpdate);
+            socket.off('auctionStart', handleAuctionStart);
+            socket.off('bidPlaced', handleBidPlaced);
         };
     }, [socket, teamId]);
 

@@ -114,7 +114,7 @@ const TeamsPage = () => {
             socket.on('auction:sync', handleUpdate);
 
             // New Listener for Real-time Ownership
-            socket.on('tournament:team_taken', (data) => {
+            const handleTeamTaken = (data) => {
                 setTeams(prev => prev.map(t => {
                     if (t.id === data.teamCode.toLowerCase() || t.code === data.teamCode.toUpperCase()) {
                         return { ...t, isTaken: true, ownerUsername: data.ownerUsername };
@@ -128,7 +128,8 @@ const TeamsPage = () => {
                     }
                     return prev;
                 });
-            });
+            };
+            socket.on('tournament:team_taken', handleTeamTaken);
 
             // socket.on('team:update', handleTeamUpdate); // 'auction:state' is often more complete for players
 
@@ -137,7 +138,7 @@ const TeamsPage = () => {
             return () => {
                 socket.off('auction:state', handleUpdate);
                 socket.off('auction:sync', handleUpdate);
-                socket.off('tournament:team_taken');
+                socket.off('tournament:team_taken', handleTeamTaken);
                 // socket.off('team:update', handleTeamUpdate);
             };
         }

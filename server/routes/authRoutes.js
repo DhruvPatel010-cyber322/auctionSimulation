@@ -355,17 +355,17 @@ router.post('/tournaments/:id/select-team', firebaseAuth, async (req, res) => {
                 user: userId
             });
 
-            if (userAssignment) {
+            if (userAssignment && userAssignment.teamCode !== null) {
                 // If user tries to pick a differnt team
                 return res.status(400).json({ message: 'You have already selected a team in this tournament.' });
             }
 
             // C. Create Assignment
-            await TournamentUser.create({
-                tournament: tournamentId,
-                user: userId,
-                teamCode: teamCode.toUpperCase()
-            });
+            await TournamentUser.findOneAndUpdate(
+                { tournament: tournamentId, user: userId },
+                { teamCode: teamCode.toUpperCase() },
+                { upsert: true, new: true, setDefaultsOnInsert: true }
+            );
         }
 
         // --- STATELESS LOGIN (Multi-Tournament) ---
@@ -532,6 +532,20 @@ router.post('/tournaments/:id/playing11', firebaseAuth, async (req, res) => {
         const players = await Player.find({ _id: { $in: inputIds } });
         if (players.length !== 11) {
             return res.status(400).json({ message: 'One or more invalid player IDs.' });
+        }
+
+        let overseasCount = 0;
+        let wkCount = 0;
+        let bowlerCount = 0;
+
+        for (const player of players) {
+            if (player.country !== 'India' && player.country !== 'IND') overseasCount++;
+            if (player.role === 'Wicket Keeper') wkCount++;
+            if (player.role === 'Bowler' || player.role === 'All-Rounder') bowlerCount++;
+        }
+
+        if (overseasCount > 4 || wkCount < 1 || bowlerCount < 5) {
+            return res.status(400).json({ message: 'Playing XI does not meet squad formation rules' });
         }
 
         const playerMap = new Map(players.map(p => [p._id.toString(), p]));

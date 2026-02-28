@@ -34,8 +34,7 @@ api.interceptors.response.use(
         if (error.response?.data?.forceLogout) {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            alert('Your session has been invalidated. You have been logged out from another location.');
-            window.location.href = '/email-login';
+            window.location.href = '/email-login?reason=session_expired';
         }
         return Promise.reject(error);
     }

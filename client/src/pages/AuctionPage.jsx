@@ -100,6 +100,11 @@ const AuctionPage = () => {
             console.log("Requesting Auction Sync...");
             socket.emit('auction:request_sync');
 
+            const handleConnect = () => {
+                socket.emit('auction:request_sync');
+            };
+            socket.on('connect', handleConnect);
+
             const handleStateUpdate = (newState) => {
                 setAuctionState(prev => ({
                     ...prev,
@@ -122,18 +127,20 @@ const AuctionPage = () => {
             socket.on('auction:state', handleStateUpdate);
 
             // 2. New Player (Animation Trigger but use State for Data)
-            socket.on('auctionStart', (data) => {
+            const handleAuctionStart = (data) => {
                 addToast(`New Player on Block: ${data.currentPlayer.name}`, 'info');
                 // State update handled by auction:state
-            });
+            };
+            socket.on('auctionStart', handleAuctionStart);
 
             // 3. Bid Placed (Sound Only)
-            socket.on('bidPlaced', () => {
+            const handleBidPlaced = () => {
                 playBeep();
-            });
+            };
+            socket.on('bidPlaced', handleBidPlaced);
 
             // 4. Sold (Toast & Update Feed)
-            socket.on('playerSold', ({ player, soldTo, price }) => {
+            const handlePlayerSold = ({ player, soldTo, price }) => {
                 if (soldTo) {
                     addToast(`SOLD! ${player.name} to ${soldTo.name} for ₹${price} Cr`, 'success');
                     // Add to recent sales feed
@@ -146,17 +153,20 @@ const AuctionPage = () => {
                     addToast(`${player.name} remains UNSOLD`, 'error');
                 }
                 // State update handled by auction:state
-            });
+            };
+            socket.on('playerSold', handlePlayerSold);
 
-            socket.on('error', (msg) => addToast(msg, 'error'));
+            const handleError = (msg) => addToast(msg, 'error');
+            socket.on('error', handleError);
 
             return () => {
-                socket.off('auction:sync');
-                socket.off('auction:state');
-                socket.off('auctionStart');
-                socket.off('bidPlaced');
-                socket.off('playerSold');
-                socket.off('error');
+                socket.off('connect', handleConnect);
+                socket.off('auction:sync', handleStateUpdate);
+                socket.off('auction:state', handleStateUpdate);
+                socket.off('auctionStart', handleAuctionStart);
+                socket.off('bidPlaced', handleBidPlaced);
+                socket.off('playerSold', handlePlayerSold);
+                socket.off('error', handleError);
             };
         }
     }, [socket, user]);

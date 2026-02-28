@@ -53,6 +53,9 @@ const getStandardizedState = (state, teams) => {
 export const endTurn = async (req, res) => {
     try {
         const { winner, amount } = req.body;
+        const state = await getAuctionState();
+        if (!state) return res.status(404).json({ message: 'Auction state not found' });
+
         // If winner is provided, mark as SOLD to that team
         // If not, mark UNSOLD
 
@@ -60,6 +63,7 @@ export const endTurn = async (req, res) => {
             state.highestBidder = winner;
             state.currentBid = amount;
             state.timerEndsAt = null; // Stop timer
+            state.status = 'RESOLVING';
             await state.save();
             updateAuctionTimer(null); // Clear in-memory timer
 
@@ -69,6 +73,7 @@ export const endTurn = async (req, res) => {
             // Mark UNSOLD (Manual)
             state.highestBidder = null;
             state.timerEndsAt = null;
+            state.status = 'RESOLVING';
             await state.save();
             updateAuctionTimer(null);
 
@@ -103,6 +108,8 @@ export const resetTimer = async (req, res) => {
             state.timerEndsAt = new Date(Date.now() + 30000);
             state.status = 'ACTIVE';
             state.remainingTime = null;
+            state.highestBidder = null;
+            state.bidHistory = [];
             // Ensure populate before accessing basePrice
             await state.populate('currentPlayer');
             if (state.currentPlayer) {
@@ -154,13 +161,18 @@ export const startAuction = async (req, res) => {
             return res.status(400).json({ message: 'Auction is already active' });
         }
 
-        // Find next available player based on Serial Number
+        // 0. Hard Reset any stranded LIVE players to prevent ghost states
+        await Player.updateMany({ status: 'LIVE' }, { $set: { status: 'AVAILABLE' } });
+
         // Find next available player based on Set then Serial Number
         const nextPlayer = await Player.findOne({ status: 'AVAILABLE' }).sort({ set: 1, srNo: 1 });
 
         if (!nextPlayer) {
             return res.status(404).json({ message: 'No available players left' });
         }
+
+        nextPlayer.status = 'LIVE';
+        await nextPlayer.save();
 
         state.status = 'ACTIVE';
         state.currentPlayer = nextPlayer._id;
@@ -198,6 +210,11 @@ export const startAuction = async (req, res) => {
 
 export const nextPlayer = async (req, res) => {
     try {
+        await Player.updateMany(
+            { status: 'LIVE' },
+            { $set: { status: 'AVAILABLE' } }
+        );
+
         // 1. Resolve current turn if active (Force End)
         await resolveAuctionTurn();
 
@@ -290,23 +307,36 @@ export const placeBid = async (req, res) => {
         if (state.status !== 'ACTIVE' || !state.currentPlayer) {
             return res.status(400).json({ message: 'No active auction' });
         }
+
+        await state.populate('currentPlayer');
+        const player = state.currentPlayer;
+
+        if (team.squadSize >= 25) {
+            return res.status(400).json({ message: 'Maximum squad size of 25 reached' });
+        }
+
+        if (team.overseasCount >= 8 && player.country !== 'India') {
+            return res.status(400).json({ message: 'Maximum overseas limit of 8 reached' });
+        }
+
         if (state.highestBidder === team.code) { // Compare with Normalized DB Code
             return res.status(400).json({ message: 'You already hold the highest bid' });
         }
 
         // Logic Change: Treat `amount` as TOTAL BID VALUE (Cleaner control from frontend)
-        const newBidAmount = parseFloat(amount);
+        const newBidAmount = Math.round(parseFloat(amount) * 100) / 100;
 
         if (isNaN(newBidAmount) || newBidAmount <= 0) {
             return res.status(400).json({ message: 'Invalid bid amount' });
         }
 
         const currentBid = state.currentBid || 0;
+        const MIN_INCREMENT = 0.5;
 
         // Validation 1: Bid must be higher than current OR equal if it's the opening bid
         if (state.highestBidder) {
-            if (newBidAmount <= currentBid) {
-                return res.status(400).json({ message: `Bid must be higher than ₹${currentBid}` });
+            if (newBidAmount < currentBid + MIN_INCREMENT) {
+                return res.status(400).json({ message: `Bid must be at least ₹${currentBid + MIN_INCREMENT}` });
             }
         } else {
             // Opening Bid Logic: Must be at least Base Price (which is currentBid initially)
@@ -321,16 +351,37 @@ export const placeBid = async (req, res) => {
             return res.status(400).json({ message: `Insufficient purse. You need ₹${newBidAmount} but have ₹${team.remainingPurse}` });
         }
 
-        // Update State
-        state.currentBid = newBidAmount;
-        state.highestBidder = team.code;
-        state.bidHistory.unshift({
-            team: team.code,
-            amount: newBidAmount,
-            timestamp: new Date()
-        });
-        state.timerEndsAt = new Date(Date.now() + 30000); // Reset timer to 30s
-        await state.save();
+        // Update State Atomically
+        const atomicUpdate = await AuctionState.findOneAndUpdate(
+            {
+                _id: state._id,
+                status: 'ACTIVE',
+                $or: [
+                    { highestBidder: { $ne: null }, currentBid: { $lt: newBidAmount } },
+                    { highestBidder: null, currentBid: { $lte: newBidAmount } }
+                ]
+            },
+            {
+                $set: {
+                    currentBid: newBidAmount,
+                    highestBidder: team.code,
+                    timerEndsAt: new Date(Date.now() + 30000)
+                },
+                $push: {
+                    bidHistory: {
+                        $each: [{ team: team.code, amount: newBidAmount, timestamp: new Date() }],
+                        $position: 0
+                    }
+                }
+            },
+            { new: true }
+        );
+
+        if (!atomicUpdate) {
+            return res.status(400).json({ message: 'Bid rejected: Race condition or invalid amount' });
+        }
+
+        state = atomicUpdate;
         updateAuctionTimer(state.timerEndsAt); // Update in-memory timer
 
         const io = getIO();
@@ -372,7 +423,7 @@ export const resolveAuctionTurn = async (triggeredByTimer = false) => {
         }
 
         // 2. Active Check
-        if (state.status !== 'ACTIVE' || !state.currentPlayer) {
+        if ((state.status !== 'ACTIVE' && state.status !== 'RESOLVING') || !state.currentPlayer) {
             console.log(`[resolveAuctionTurn] Ignored. Status: ${state.status}`);
             await session.abortTransaction();
             return;
@@ -389,7 +440,7 @@ export const resolveAuctionTurn = async (triggeredByTimer = false) => {
 
             // ATOMIC UPDATE to prevent double-spend or double-sell
             const success = await AuctionState.findOneAndUpdate(
-                { _id: state._id, status: 'ACTIVE', currentPlayer: player._id },
+                { _id: state._id, status: { $in: ['ACTIVE', 'RESOLVING'] }, currentPlayer: player._id },
                 { status: 'SOLD', timerEndsAt: null },
                 { new: true, session }
             );
@@ -400,10 +451,15 @@ export const resolveAuctionTurn = async (triggeredByTimer = false) => {
                 return;
             }
             state = success; // Update local ref
-            updateAuctionTimer(null);
 
             // Update Team (WITH SESSION)
             const teamDoc = await Team.findOne({ code: teamCode }).session(session);
+            if (!teamDoc) throw new Error("Winning team no longer exists");
+
+            if (teamDoc.remainingPurse < amount) {
+                throw new Error("Insufficient purse for winning team");
+            }
+
             teamDoc.remainingPurse -= amount;
             teamDoc.squadSize += 1;
             if (player.country !== 'India') teamDoc.overseasCount += 1;
@@ -420,6 +476,7 @@ export const resolveAuctionTurn = async (triggeredByTimer = false) => {
             await teamDoc.save({ session });
 
             await session.commitTransaction();
+            updateAuctionTimer(null); // Execute only AFTER successful commit
 
             if (io) {
                 // Legacy event for toasts
@@ -444,7 +501,7 @@ export const resolveAuctionTurn = async (triggeredByTimer = false) => {
             // UNSOLD
             // Atomic Update
             const success = await AuctionState.findOneAndUpdate(
-                { _id: state._id, status: 'ACTIVE', currentPlayer: player._id },
+                { _id: state._id, status: { $in: ['ACTIVE', 'RESOLVING'] }, currentPlayer: player._id },
                 { status: 'UNSOLD', timerEndsAt: null },
                 { new: true, session }
             );
@@ -455,13 +512,13 @@ export const resolveAuctionTurn = async (triggeredByTimer = false) => {
                 return;
             }
             state = success;
-            updateAuctionTimer(null);
 
             const playerDoc = await Player.findById(player._id).session(session);
             playerDoc.status = 'UNSOLD';
             await playerDoc.save({ session });
 
             await session.commitTransaction();
+            updateAuctionTimer(null);
 
             if (io) {
                 io.emit('playerSold', {

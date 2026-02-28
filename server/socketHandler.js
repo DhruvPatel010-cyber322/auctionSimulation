@@ -69,7 +69,7 @@ export const setupSocket = (io) => {
 
             // Validate Session from DB (Strict Consistency)
             // Admin bypasses this check as they might have a different auth flow or static token
-            if (decoded.role === 'TEAM') {
+            if (decoded.role?.toLowerCase() === 'team') {
                 try {
                     const team = await Team.findOne({ code: decoded.teamCode });
                     if (!team) {
@@ -133,6 +133,40 @@ export const setupSocket = (io) => {
         } catch (err) {
             console.error(err);
         }
+
+        socket.on('auction:request_sync', async () => {
+            try {
+                const state = await AuctionState.findOne().populate('currentPlayer');
+                const teams = await Team.find({});
+
+                let timerVal = 0;
+                if (state?.timerEndsAt && state.status === 'ACTIVE') {
+                    timerVal = Math.max(0, Math.ceil((new Date(state.timerEndsAt) - new Date()) / 1000));
+                }
+
+                const standardizedTeams = teams.map(t => ({
+                    ...t.toObject(),
+                    id: t.code,
+                    budget: t.remainingPurse
+                }));
+
+                let highestBidderObj = null;
+                if (state && state.highestBidder) {
+                    const bidderTeam = standardizedTeams.find(t => t.code === state.highestBidder);
+                    highestBidderObj = bidderTeam ? { id: bidderTeam.code, name: bidderTeam.name } : { id: state.highestBidder, name: 'Unknown' };
+                }
+
+                socket.emit('auction:sync', {
+                    ...state?.toObject(),
+                    highestBidder: highestBidderObj,
+                    teams: standardizedTeams,
+                    timer: timerVal,
+                    timerEndsAt: state?.timerEndsAt
+                });
+            } catch (err) {
+                console.error("Manual sync error", err);
+            }
+        });
 
         socket.on('disconnect', async () => {
             console.log(`Socket disconnected: ${socket.id} (User: ${teamCode})`);

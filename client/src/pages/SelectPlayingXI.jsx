@@ -23,6 +23,25 @@ const getRequiredGroupForPos = (pos) => {
     return null;
 };
 
+const decodeJwtPayload = (token) => {
+    try {
+        const base64Url = token.split('.')[1];
+        if (!base64Url) return null;
+
+        let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+
+        // Add required padding
+        while (base64.length % 4) {
+            base64 += '=';
+        }
+
+        return JSON.parse(atob(base64));
+    } catch (err) {
+        console.error('Invalid token', err);
+        return null;
+    }
+};
+
 const SelectPlayingXI = () => {
     const { user, token } = useAuth(); // User object might contain username, not tournament-team info directly
     const [myTeamCode, setMyTeamCode] = useState(null);
@@ -51,8 +70,17 @@ const SelectPlayingXI = () => {
             if (!localToken) return;
 
             try {
-                const payload = JSON.parse(atob(localToken.split('.')[1]));
+                const payload = decodeJwtPayload(localToken);
+                if (!payload) {
+                    window.location.href = '/email-login';
+                    return;
+                }
                 const tournamentId = payload.tournamentId;
+                if (!tournamentId) {
+                    setError("No active tournament session.");
+                    setLoading(false);
+                    return;
+                }
                 const fbToken = sessionStorage.getItem('firebase_token');
 
                 // Get All Teams
@@ -65,10 +93,11 @@ const SelectPlayingXI = () => {
                     setAllTeams(data.teams);
                     // Determine My Team
                     if (data.myTeamCode) {
-                        setMyTeamCode(data.myTeamCode);
-                        setSelectedTeam(data.myTeamCode); // Default to viewing my team
+                        const myTeam = data.myTeamCode.toLowerCase();
+                        setMyTeamCode(myTeam);
+                        setSelectedTeam(myTeam); // Default to viewing my team
                     } else if (data.teams.length > 0) {
-                        setSelectedTeam(data.teams[0].id); // Default to first if I have no team
+                        setSelectedTeam(data.teams[0].id.toLowerCase()); // Default to first if I have no team
                     }
                 }
             } catch (e) {
@@ -90,8 +119,13 @@ const SelectPlayingXI = () => {
             if (!localToken) return;
 
             try {
-                const payload = JSON.parse(atob(localToken.split('.')[1]));
+                const payload = decodeJwtPayload(localToken);
+                if (!payload) {
+                    window.location.href = '/email-login';
+                    return;
+                }
                 const tournamentId = payload.tournamentId;
+                if (!tournamentId) return;
                 const fbToken = sessionStorage.getItem('firebase_token');
 
                 // Use the Public Endpoint for consistency
@@ -181,8 +215,13 @@ const SelectPlayingXI = () => {
         const fbToken = sessionStorage.getItem('firebase_token');
         const localToken = localStorage.getItem('token');
         try {
-            const payload = JSON.parse(atob(localToken.split('.')[1]));
+            const payload = decodeJwtPayload(localToken);
+            if (!payload) {
+                window.location.href = '/email-login';
+                return;
+            }
             const tournamentId = payload.tournamentId;
+            if (!tournamentId) throw new Error("Missing Tournament ID");
             const payloadData = Object.keys(slots).map(pos => ({ playerId: slots[pos]._id, battingPosition: parseInt(pos) }));
 
             const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${tournamentId}/playing11`, {

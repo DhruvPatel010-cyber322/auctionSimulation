@@ -11,8 +11,12 @@ const PlayerListPage = () => {
 
     useEffect(() => {
         fetchPlayers();
-        // Poll for updates
-        const interval = setInterval(fetchPlayers, 5000);
+        // Poll for updates (reduced frequency and visibility check for performance)
+        const interval = setInterval(() => {
+            if (document.visibilityState === 'visible') {
+                fetchPlayers();
+            }
+        }, 30000);
         return () => clearInterval(interval);
     }, []);
 
