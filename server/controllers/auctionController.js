@@ -164,8 +164,20 @@ export const startAuction = async (req, res) => {
         // 0. Hard Reset any stranded LIVE players to prevent ghost states
         await Player.updateMany({ status: 'LIVE' }, { $set: { status: 'AVAILABLE' } });
 
-        // Find next available player based on Set then Serial Number
-        const nextPlayer = await Player.findOne({ status: 'AVAILABLE' }).sort({ set: 1, srNo: 1 });
+        // Find next available player based on Set (randomly within the earliest set)
+        const minSetDoc = await Player.findOne({ status: 'AVAILABLE' }).sort({ set: 1 }).select('set');
+
+        let nextPlayer = null;
+        if (minSetDoc) {
+            const randomPlayers = await Player.aggregate([
+                { $match: { status: 'AVAILABLE', set: minSetDoc.set } },
+                { $sample: { size: 1 } }
+            ]);
+
+            if (randomPlayers.length > 0) {
+                nextPlayer = await Player.findById(randomPlayers[0]._id);
+            }
+        }
 
         if (!nextPlayer) {
             return res.status(404).json({ message: 'No available players left' });
@@ -228,9 +240,23 @@ export const nextPlayer = async (req, res) => {
             bidHistory: []
         });
 
-        // 2. Find Next Available Player
-        // 2. Find Next Available Player (Set then SrNo)
-        const nextP = await Player.findOne({ status: 'AVAILABLE' }).sort({ set: 1, srNo: 1 });
+        // 1. Find the lowest available set number
+        const minSetDoc = await Player.findOne({ status: 'AVAILABLE' }).sort({ set: 1 }).select('set');
+
+        let nextP = null;
+        if (minSetDoc) {
+            // 2. Select a RANDOM player from that specific set
+            const randomPlayers = await Player.aggregate([
+                { $match: { status: 'AVAILABLE', set: minSetDoc.set } },
+                { $sample: { size: 1 } }
+            ]);
+
+            if (randomPlayers.length > 0) {
+                // Aggregate returns plain objects, so we need to instantiate a Mongoose document 
+                // or just findById the selected random ID to save it properly
+                nextP = await Player.findById(randomPlayers[0]._id);
+            }
+        }
 
         console.log('[nextPlayer] Next Player Found:', nextP ? nextP.name : 'None');
 
@@ -249,8 +275,8 @@ export const nextPlayer = async (req, res) => {
             currentBid: nextP.basePrice,
             highestBidder: null,
             bidHistory: [],
-            timerEndsAt: new Date(Date.now() + 30000)
-        }, { new: true, upsert: true });
+            timerEndsAt: new Date(Date.now() + 30000) // Default 30s
+        }, { new: true, upsert: true }).populate('currentPlayer');
 
         // Sync In-Memory Timer
         updateAuctionTimer(newState.timerEndsAt);
