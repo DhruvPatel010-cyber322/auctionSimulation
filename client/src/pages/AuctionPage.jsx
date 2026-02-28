@@ -210,7 +210,8 @@ const AuctionPage = () => {
     }
 
     // Rule: Min Increment Dynamic
-    const canBid = !isSold && !isUnsold && !isMyBid && currentPlayer && myTeam?.budget >= nextBidValue;
+    const isSpectator = myTeam?.role === 'spectator';
+    const canBid = !isSpectator && !isSold && !isUnsold && !isMyBid && currentPlayer && myTeam?.budget >= nextBidValue;
     const myColor = myTeam ? (TEAM_COLORS[myTeam.id?.toLowerCase()] || '#2563eb') : '#2563eb';
 
     const handleBid = async (amount) => {
@@ -389,64 +390,76 @@ const AuctionPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1 min-h-[200px]">
                     {/* Bidding Controls */}
                     <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="font-bold text-gray-800">Place Your Bid</h3>
-
-                            {/* Middle Refresh Button */}
-                            <button
-                                onClick={handleRefresh}
-                                className="p-2 bg-gray-50 rounded-full hover:bg-blue-50 text-gray-400 hover:text-blue-600 transition-colors mx-2"
-                                title="Sync State"
-                            >
-                                <RefreshCw size={16} />
-                            </button>
-
-                            <div className="text-right flex flex-col items-end">
-                                <span className="text-[10px] font-bold text-gray-400 uppercase">My Budget</span>
-                                <p className={cn("text-lg font-bold tabular-nums leading-none", myTeam?.budget < 5 ? 'text-red-500' : 'text-green-600')}>
-                                    {formatPrice(myTeam?.budget || 0)}
+                        {isSpectator ? (
+                            <div className="flex-1 flex flex-col items-center justify-center text-center p-4">
+                                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-gray-400">
+                                    <User size={32} />
+                                </div>
+                                <h3 className="text-xl font-black text-gray-800 mb-2">Spectator Mode</h3>
+                                <p className="text-sm font-bold text-gray-500 max-w-xs mx-auto">
+                                    You are watching the auction live. Bidding features are disabled for spectators.
                                 </p>
                             </div>
-                        </div>
+                        ) : (
+                            <>
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="font-bold text-gray-800">Place Your Bid</h3>
 
-                        <div className="flex-1 flex flex-col justify-end">
-                            <button
-                                onClick={() => handleBid(nextBidValue)}
-                                disabled={!canBid || isBidding}
-                                className={cn(
-                                    "w-full relative overflow-hidden rounded-2xl flex flex-col items-center justify-center py-6 border-2 transition-all duration-150 group active:scale-95 shadow-md",
-                                    (!canBid || isBidding)
-                                        ? "bg-gray-50 border-gray-100 text-gray-300 cursor-not-allowed"
-                                        : "bg-gradient-to-b from-blue-50 to-white border-blue-200 hover:border-blue-500 hover:shadow-xl hover:shadow-blue-500/20"
-                                )}
-                            >
-                                <span className={cn("text-sm font-bold uppercase mb-1 tracking-wider", (!canBid || isBidding) ? "text-gray-300" : "text-gray-500 group-hover:text-blue-600")}>
-                                    Place Bid
-                                </span>
-                                <div className="flex items-baseline gap-2">
-                                    <span className={cn("text-4xl font-black", (!canBid || isBidding) ? "text-gray-300" : "text-gray-900")}>
-                                        ₹{nextBidDetails.value}
-                                    </span>
-                                    <span className={cn("text-lg font-bold", (!canBid || isBidding) ? "text-gray-300" : "text-gray-400")}>
-                                        {nextBidDetails.unit}
-                                    </span>
+                                    {/* Middle Refresh Button */}
+                                    <button
+                                        onClick={handleRefresh}
+                                        className="p-2 bg-gray-50 rounded-full hover:bg-blue-50 text-gray-400 hover:text-blue-600 transition-colors mx-2"
+                                        title="Sync State"
+                                    >
+                                        <RefreshCw size={16} />
+                                    </button>
+
+                                    <div className="text-right flex flex-col items-end">
+                                        <span className="text-[10px] font-bold text-gray-400 uppercase">My Budget</span>
+                                        <p className={cn("text-lg font-bold tabular-nums leading-none", myTeam?.budget < 5 ? 'text-red-500' : 'text-green-600')}>
+                                            {formatPrice(myTeam?.budget || 0)}
+                                        </p>
+                                    </div>
                                 </div>
 
-                                {!(!canBid || isBidding) && (
-                                    <div
-                                        className="absolute bottom-0 left-0 h-1.5 bg-blue-500 transition-all duration-300 w-0 group-hover:w-full"
-                                        style={{ backgroundColor: myColor }}
-                                    ></div>
+                                <div className="flex-1 flex flex-col justify-end">
+                                    <button
+                                        onClick={() => handleBid(nextBidValue)}
+                                        disabled={!canBid || isBidding}
+                                        className={cn(
+                                            "w-full relative overflow-hidden rounded-2xl flex flex-col items-center justify-center py-6 border-2 transition-all duration-150 group active:scale-95 shadow-md",
+                                            (!canBid || isBidding)
+                                                ? "bg-gray-50 border-gray-100 text-gray-300 cursor-not-allowed"
+                                                : "bg-gradient-to-b from-blue-50 to-white border-blue-200 hover:border-blue-500 hover:shadow-xl hover:shadow-blue-500/20"
+                                        )}
+                                    >
+                                        <span className={cn("text-sm font-bold uppercase mb-1 tracking-wider", (!canBid || isBidding) ? "text-gray-300" : "text-gray-500 group-hover:text-blue-600")}>
+                                            Place Bid
+                                        </span>
+                                        <div className="flex items-baseline gap-2">
+                                            <span className={cn("text-4xl font-black", (!canBid || isBidding) ? "text-gray-300" : "text-gray-900")}>
+                                                ₹{nextBidDetails.value}
+                                            </span>
+                                            <span className={cn("text-lg font-bold", (!canBid || isBidding) ? "text-gray-300" : "text-gray-400")}>
+                                                {nextBidDetails.unit}
+                                            </span>
+                                        </div>
+
+                                        {!(!canBid || isBidding) && (
+                                            <div
+                                                className="absolute bottom-0 left-0 h-1.5 bg-blue-500 transition-all duration-300 w-0 group-hover:w-full"
+                                                style={{ backgroundColor: myColor }}
+                                            ></div>
+                                        )}
+                                    </button>
+                                </div>
+                                {isMyBid && !isSold && (
+                                    <div className="mt-4 bg-green-50 text-green-700 text-center py-2 rounded-xl font-bold text-sm animate-pulse">
+                                        You are the highest bidder!
+                                    </div>
                                 )}
-                            </button>
-                        </div>
-                        {isMyBid && !isSold && (
-                            <div className="mt-4 bg-green-50 text-green-700 text-center py-2 rounded-xl font-bold text-sm animate-pulse">
-                                You are the highest bidder!
-                            </div>
+                            </>
                         )}
-
-
                     </div>
 
 

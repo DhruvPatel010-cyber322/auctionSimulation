@@ -433,6 +433,45 @@ router.post('/tournaments/:id/select-team', firebaseAuth, async (req, res) => {
     }
 });
 
+// 5.5 Watch Auction (Spectator Mode)
+router.post('/tournaments/:id/watch', firebaseAuth, async (req, res) => {
+    const tournamentId = req.params.id;
+    const userId = req.user._id;
+
+    try {
+        const tournament = await Tournament.findById(tournamentId);
+        if (!tournament) return res.status(404).json({ message: 'Tournament not found' });
+
+        // Issue Spectator Token
+        const sessionId = crypto.randomUUID();
+        const token = jwt.sign({
+            teamCode: 'spectator',
+            role: 'spectator',
+            tournamentId: tournament._id,
+            userId: userId,
+            sessionId: sessionId
+        }, process.env.JWT_SECRET, { expiresIn: '12h' });
+
+        res.json({
+            success: true,
+            token,
+            team: {
+                name: 'Spectator',
+                role: 'spectator',
+                code: 'spectator',
+                remainingPurse: 0,
+                squadSize: 0,
+                overseasCount: 0,
+                username: req.user.username
+            }
+        });
+
+    } catch (err) {
+        console.error("Watch Auction Error:", err);
+        res.status(500).json({ message: 'Failed to enter spectator mode' });
+    }
+});
+
 // 6. Admin Login (Exchange Firebase Token for Admin JWT)
 router.post('/admin/login', firebaseAuth, async (req, res) => {
     try {

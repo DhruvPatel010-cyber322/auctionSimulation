@@ -143,6 +143,45 @@ const TournamentTeamSelector = () => {
         }
     };
 
+    // Spectator Mode
+    const handleWatchAuction = async () => {
+        setLoading(true);
+        setError('');
+        const firebaseToken = sessionStorage.getItem('firebase_token');
+        if (!firebaseToken) {
+            navigate('/email-login');
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${tournamentId}/watch`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${firebaseToken}` }
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.team));
+                window.location.href = '/dashboard';
+            } else {
+                setError(data.message || 'Failed to enter watch mode');
+                setLoading(false);
+            }
+        } catch (err) {
+            setError('Network Error');
+            setLoading(false);
+        }
+    };
+
+    // Admin Direct Proceed
+    const handleAdminProceed = () => {
+        // Admins already have a token from login/tournaments fetch that grants them admin rights if they go to dashboard.
+        // Wait, the selector normally issues a NEW token via `select-team`. If they are admin, they ALREADY have a valid token from `/admin/login` or global login.
+        // Let's just navigate them to the dashboard. The `AuthContext` uses localStorage token.
+        window.location.href = '/dashboard';
+    };
+
     // Admin Action: confirm Assign Team
     const confirmAdminAssign = async () => {
         if (!adminSelectingForUser || !selectedTeam) return;
@@ -457,10 +496,27 @@ const TournamentTeamSelector = () => {
 
                 <div ref={bottomRef} className="pb-8"></div>
             </div>
-            {/* Footer Link */}
+            {/* Alternative Access Options */}
             {!selectedTeam && !adminSelectingForUser && (
-                <div className="absolute bottom-4 right-4 z-20">
-                    <Link to="/tournaments" className="text-xs font-bold text-white/30 hover:text-white transition-colors flex items-center gap-1 uppercase tracking-widest">
+                <div className="flex flex-col items-center gap-4 mt-8 pb-12 z-20">
+                    {isAdmin ? (
+                        <button
+                            onClick={handleAdminProceed}
+                            className="px-6 py-3 bg-red-600 hover:bg-red-500 font-bold text-white rounded-full shadow-lg shadow-red-600/30 transition-all flex items-center gap-2"
+                        >
+                            Proceed to Admin Dashboard <ArrowRight size={18} />
+                        </button>
+                    ) : (
+                        <button
+                            onClick={handleWatchAuction}
+                            disabled={loading || assignmentPending}
+                            className="px-6 py-3 bg-slate-800 hover:bg-slate-700 font-bold text-gray-300 hover:text-white rounded-full border border-slate-700 hover:border-slate-500 shadow-lg transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {loading ? 'Joining...' : 'Watch Auction (Spectator Mode)'} <ArrowRight size={18} />
+                        </button>
+                    )}
+
+                    <Link to="/tournaments" className="text-xs font-bold text-white/30 hover:text-white transition-colors flex items-center gap-1 uppercase tracking-widest mt-4">
                         &larr; Back to Tournaments
                     </Link>
                 </div>

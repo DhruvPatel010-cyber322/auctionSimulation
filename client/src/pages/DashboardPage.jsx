@@ -142,83 +142,98 @@ const DashboardPage = () => {
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
-
-                {/* STATS CARDS ROW */}
-                <div className="col-span-1 md:col-span-2 lg:col-span-4 grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* PURSE CARD (Requested "Proper Card") */}
-                    <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-all">
-                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <Wallet size={80} className="text-green-600" />
-                        </div>
+                {/* STATS CARDS ROW OR SPECTATOR WELCOME */}
+                {user?.role === 'spectator' ? (
+                    <div className="col-span-1 md:col-span-2 lg:col-span-4 bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
                         <div>
-                            <p className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Remaining Purse</p>
-                            <h3 className="text-4xl font-black text-gray-900 tracking-tight">
-                                ₹{toCr(stats.budget)} <span className="text-lg text-gray-400 font-bold">Cr</span>
-                            </h3>
-                        </div>
-                        <div className="mt-4">
-                            <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                                <div
-                                    className="h-full bg-gradient-to-r from-green-500 to-emerald-400 transition-all duration-1000 ease-out"
-                                    style={{ width: `${pursePercentage}%` }}
-                                ></div>
-                            </div>
-                            <p className="text-xs font-bold text-gray-400 mt-2 text-right">
-                                {pursePercentage.toFixed(0)}% Budget Left
+                            <h2 className="text-3xl font-black mb-2 flex items-center gap-3">
+                                Welcome to the Arena <Trophy className="text-yellow-400" />
+                            </h2>
+                            <p className="text-blue-100 max-w-lg leading-relaxed">
+                                You are currently in <strong>Spectator Mode</strong>. Watch the drama unfold live, track highest bids, and see which players go to which teams.
                             </p>
                         </div>
+                        <Link to="/auction" className="shrink-0 px-8 py-4 bg-white text-blue-700 font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center gap-2">
+                            Enter Live Auction <ArrowRight size={20} />
+                        </Link>
                     </div>
-
-                    {/* SQUAD CARD */}
-                    <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-all">
-                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <Users size={80} className="text-blue-600" />
-                        </div>
-                        <div>
-                            <p className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Squad Size</p>
-                            <h3 className="text-4xl font-black text-gray-900 tracking-tight">
-                                {stats.squadCount}<span className="text-lg text-gray-400 font-bold">/25</span>
-                            </h3>
-                        </div>
-                        <div className="mt-4">
-                            <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                                <div
-                                    className="h-full bg-gradient-to-r from-blue-500 to-indigo-400 transition-all duration-1000 ease-out"
-                                    style={{ width: `${(stats.squadCount / 25) * 100}%` }}
-                                ></div>
+                ) : (
+                    <div className="col-span-1 md:col-span-2 lg:col-span-4 grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {/* PURSE CARD (Requested "Proper Card") */}
+                        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-all">
+                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                <Wallet size={80} className="text-green-600" />
                             </div>
-                            <p className="text-xs font-bold text-gray-400 mt-2 text-right">
-                                Min 18 to Qualify
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* OVERSEAS CARD */}
-                    <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-all">
-                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <Trophy size={80} className="text-purple-600" />
-                        </div>
-                        <div>
-                            <p className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Overseas Slots</p>
-                            <h3 className="text-4xl font-black text-gray-900 tracking-tight">
-                                {stats.overseasCount}<span className="text-lg text-gray-400 font-bold">/8</span>
-                            </h3>
-                        </div>
-                        <div className="mt-4">
-                            <div className="flex gap-1">
-                                {[...Array(8)].map((_, i) => (
+                            <div>
+                                <p className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Remaining Purse</p>
+                                <h3 className="text-4xl font-black text-gray-900 tracking-tight">
+                                    ₹{toCr(stats.budget)} <span className="text-lg text-gray-400 font-bold">Cr</span>
+                                </h3>
+                            </div>
+                            <div className="mt-4">
+                                <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
                                     <div
-                                        key={i}
-                                        className={`h-2 flex-1 rounded-full ${i < stats.overseasCount ? 'bg-purple-500' : 'bg-gray-100'}`}
+                                        className="h-full bg-gradient-to-r from-green-500 to-emerald-400 transition-all duration-1000 ease-out"
+                                        style={{ width: `${pursePercentage}%` }}
                                     ></div>
-                                ))}
+                                </div>
+                                <p className="text-xs font-bold text-gray-400 mt-2 text-right">
+                                    {pursePercentage.toFixed(0)}% Budget Left
+                                </p>
                             </div>
-                            <p className="text-xs font-bold text-gray-400 mt-2 text-right">
-                                {8 - stats.overseasCount} Slots Left
-                            </p>
+                        </div>
+
+                        {/* SQUAD CARD */}
+                        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-all">
+                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                <Users size={80} className="text-blue-600" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Squad Size</p>
+                                <h3 className="text-4xl font-black text-gray-900 tracking-tight">
+                                    {stats.squadCount}<span className="text-lg text-gray-400 font-bold">/25</span>
+                                </h3>
+                            </div>
+                            <div className="mt-4">
+                                <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full bg-gradient-to-r from-blue-500 to-indigo-400 transition-all duration-1000 ease-out"
+                                        style={{ width: `${(stats.squadCount / 25) * 100}%` }}
+                                    ></div>
+                                </div>
+                                <p className="text-xs font-bold text-gray-400 mt-2 text-right">
+                                    Min 18 to Qualify
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* OVERSEAS CARD */}
+                        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-all">
+                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                <Trophy size={80} className="text-purple-600" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Overseas Slots</p>
+                                <h3 className="text-4xl font-black text-gray-900 tracking-tight">
+                                    {stats.overseasCount}<span className="text-lg text-gray-400 font-bold">/8</span>
+                                </h3>
+                            </div>
+                            <div className="mt-4">
+                                <div className="flex gap-1">
+                                    {[...Array(8)].map((_, i) => (
+                                        <div
+                                            key={i}
+                                            className={`h-2 flex-1 rounded-full ${i < stats.overseasCount ? 'bg-purple-500' : 'bg-gray-100'}`}
+                                        ></div>
+                                    ))}
+                                </div>
+                                <p className="text-xs font-bold text-gray-400 mt-2 text-right">
+                                    {8 - stats.overseasCount} Slots Left
+                                </p>
+                            </div>
                         </div>
                     </div>
-                </div>
+                )}
 
                 {/* LIVE STATUS CARD */}
                 <div className="col-span-1 md:col-span-2 bg-gray-900 text-white p-8 rounded-3xl shadow-xl relative overflow-hidden flex flex-col justify-between">
