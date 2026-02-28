@@ -10,10 +10,9 @@ import Team from './models/Team.js';
 import Player from './models/Player.js';
 // activeSessions removed in favor of strict DB session management
 import { TEAMS } from './data/teams.js';
-import { setupSocket, startAuctionCheckLoop } from './socketHandler.js';
+import { setupSocket, startAuctionCheckLoop, updateAuctionTimer } from './socketHandler.js';
 import * as auctionController from './controllers/auctionController.js';
 import AuctionState from './models/AuctionState.js';
-import { updateAuctionTimer, setupSocket, startAuctionCheckLoop } from './socketHandler.js';
 
 // --- FIX: Restore Timer on Startup ---
 const restoreAuctionTimer = async () => {
