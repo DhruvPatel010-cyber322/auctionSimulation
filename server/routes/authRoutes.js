@@ -289,11 +289,13 @@ router.get('/tournaments/:id/teams', firebaseAuth, async (req, res) => {
         let joinedUsers = [];
         if (req.user.role === 'admin') {
             const allParticipants = await TournamentUser.find({ tournament: tournamentId }).populate('user', 'username');
-            joinedUsers = allParticipants.map(p => ({
-                userId: p.user._id,
-                username: p.user.username,
-                teamCode: p.teamCode
-            }));
+            joinedUsers = allParticipants
+                .filter(p => p.user) // Prevent 500 crash if user was deleted
+                .map(p => ({
+                    userId: p.user._id,
+                    username: p.user.username,
+                    teamCode: p.teamCode
+                }));
         }
 
         res.json({
