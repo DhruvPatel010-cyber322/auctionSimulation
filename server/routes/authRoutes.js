@@ -248,6 +248,25 @@ router.post('/tournaments/:id/assign-team', firebaseAuth, async (req, res) => {
     }
 });
 
+// 3.8 Admin Create Tournament
+router.post('/tournaments/create', firebaseAuth, async (req, res) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Only admins can create tournaments' });
+    }
+
+    const { name } = req.body;
+    if (!name) return res.status(400).json({ message: 'Tournament name is required' });
+
+    try {
+        const newTournament = new Tournament({ name, isActive: true });
+        await newTournament.save();
+        res.status(201).json({ success: true, message: 'Tournament created successfully', tournament: newTournament });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Failed to create tournament' });
+    }
+});
+
 // 4. Get Teams Availability for a Tournament
 router.get('/tournaments/:id/teams', firebaseAuth, async (req, res) => {
     console.log(`[API] Fetching teams for tournament: ${req.params.id}`);

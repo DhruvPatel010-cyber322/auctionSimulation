@@ -85,11 +85,6 @@ const MainLayout = () => {
         { name: 'Points Table', path: '/points-table', icon: Trophy },
     ];
 
-    // Conditionally add Admin Link
-    if (team?.role === 'admin') {
-        navItems.push({ name: 'Admin', path: '/admin', icon: Shield });
-    }
-
     // Add Switch Tournament as a utility item
     navItems.push({ name: 'Switch Tournament', path: '/tournaments', icon: Trophy });
 

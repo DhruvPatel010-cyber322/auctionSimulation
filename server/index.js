@@ -148,8 +148,10 @@ app.post('/api/auth/login', async (req, res) => {
   const id = teamCode ? teamCode.toLowerCase() : req.body.teamId?.toLowerCase();
 
   // --- FIREBASE VERIFICATION START ---
-  // Bypass for 'admin' to preserve existing admin login behavior perfectly
-  if (id !== 'admin') {
+  // Bypass for admin username to preserve existing admin login behavior perfectly
+  const adminUsername = process.env.ADMIN_USERNAME || 'admin';
+
+  if (id !== adminUsername.toLowerCase()) {
     const { firebaseToken } = req.body;
     if (!firebaseToken) {
       console.warn(`[Auth] Login blocked: Missing Firebase Token for team ${id}`);
@@ -167,7 +169,7 @@ app.post('/api/auth/login', async (req, res) => {
 
   try {
     // Admin Login (no session restriction for admin)
-    if (id === 'admin' && password === process.env.ADMIN_PASSWORD) {
+    if (id === adminUsername.toLowerCase() && password === process.env.ADMIN_PASSWORD) {
       const sessionId = crypto.randomUUID();
       const token = jwt.sign({ teamCode: 'admin', role: 'admin', sessionId }, process.env.JWT_SECRET, { expiresIn: '12h' });
       return res.json({

@@ -143,12 +143,6 @@ const LoginPage = () => {
                     )}
                 </div>
             </div>
-            {/* Footer / Admin Link */}
-            <div className="absolute bottom-4 right-4 z-20">
-                <Link to="/admin" className="text-xs font-bold text-white/30 hover:text-white transition-colors flex items-center gap-1 uppercase tracking-widest">
-                    <Shield size={12} /> Admin Access
-                </Link>
-            </div>
         </div>
     );
 };

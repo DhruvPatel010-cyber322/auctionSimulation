@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from '../firebase';
 import { Mail, Lock, ArrowRight, Chrome } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const EmailLoginPage = () => {
     const navigate = useNavigate();
+    const { login } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -24,6 +26,18 @@ const EmailLoginPage = () => {
         setLoading(true);
 
         try {
+            // Intercept Admin Login bypassing Firebase
+            if (email.toLowerCase() === 'wugon') {
+                const res = await login('wugon', password); // Uses backend login
+                if (res.success) {
+                    navigate('/admin');
+                } else {
+                    setError(res.message || 'Invalid Admin Credentials');
+                }
+                setLoading(false);
+                return;
+            }
+
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             await handleSuccess(userCredential.user);
         } catch (err) {
@@ -76,15 +90,15 @@ const EmailLoginPage = () => {
 
                 <form onSubmit={handleEmailLogin} className="space-y-4">
                     <div className="space-y-1">
-                        <label className="text-xs font-bold text-gray-500 uppercase ml-1">Email Address</label>
+                        <label className="text-xs font-bold text-gray-500 uppercase ml-1">Email Address / Admin ID</label>
                         <div className="relative">
                             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                             <input
-                                type="email"
+                                type="text"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium"
-                                placeholder="name@example.com"
+                                placeholder="name@example.com or admin ID"
                                 required
                             />
                         </div>

@@ -8,15 +8,14 @@ import TeamSelector from '../components/TeamSelector';
 
 import { API_BASE_URL as API_URL } from '../config';
 
+import { Navigate } from 'react-router-dom';
 
 const AdminPage = () => {
     const { socket } = useSocket();
     const { login, logout, user, isAuthenticated: isAuth } = useAuth();
 
-    // Auth State
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+    // Auth Check
+    const isAdmin = isAuth && user?.role === 'admin';
 
     // Auction Control State
     const [teams, setTeams] = useState([]); // Global teams or specific tournament teams
@@ -42,6 +41,41 @@ const AdminPage = () => {
     const [tournamentUsers, setTournamentUsers] = useState([]);
     const [isManagingTournament, setIsManagingTournament] = useState(false); // Toggle visibility
 
+    // Create Tournament State
+    const [newTournamentName, setNewTournamentName] = useState('');
+    const [isCreatingTournament, setIsCreatingTournament] = useState(false);
+
+    const handleCreateTournament = async (e) => {
+        e.preventDefault();
+        if (!newTournamentName.trim()) return;
+
+        setIsCreatingTournament(true);
+        const firebaseToken = sessionStorage.getItem('firebase_token');
+        try {
+            const res = await fetch(`${API_URL}/api/v2/auth/tournaments/create`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${firebaseToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name: newTournamentName })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setNewTournamentName('');
+                alert('Tournament created successfully!');
+                fetchTournaments(); // Refresh list
+            } else {
+                alert(data.message || 'Failed to create tournament');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Network Error');
+        } finally {
+            setIsCreatingTournament(false);
+        }
+    };
+
     // Assignment Modal State
     const [assignModalOpen, setAssignModalOpen] = useState(false);
     const [userToAssign, setUserToAssign] = useState(null); // { userId, username, currentTeam }
@@ -49,15 +83,13 @@ const AdminPage = () => {
     const [selectedTeamForAssign, setSelectedTeamForAssign] = useState(null);
     const [assignLoading, setAssignLoading] = useState(false);
 
-    // Auth Check
+    // Keep context for backend compatibility
     useEffect(() => {
-        if (isAuth && user?.role === 'admin') {
-            setIsAuthenticated(true);
+        // Nothing needed here anymore since we rely on `isAdmin`.
+        if (isAdmin) {
             fetchTournaments();
-        } else {
-            setIsAuthenticated(false);
         }
-    }, [isAuth, user]);
+    }, [isAuth, user, isAdmin]);
 
     // Fetch Tournaments
     const fetchTournaments = async () => {
@@ -106,7 +138,7 @@ const AdminPage = () => {
         };
 
         fetchDetails();
-    }, [selectedTournamentId, isAuthenticated, assignModalOpen]);
+    }, [selectedTournamentId, isAdmin, assignModalOpen]);
     // Re-fetch when modal closes/updates to get fresh data
 
     // --- SOCKET SYNC ---
@@ -141,16 +173,7 @@ const AdminPage = () => {
         return () => clearInterval(interval);
     }, [timerEndsAt]);
 
-
     // Action Handlers
-    const handleLogin = async (e) => {
-        e.preventDefault();
-        setError('');
-        const res = await login('admin', password);
-        if (res.success) setIsAuthenticated(true);
-        else setError(res.message || 'Login Failed');
-    };
-
     const handleStart = () => controlTimer('resume').catch(console.error);
     const handlePause = () => controlTimer('pause').catch(console.error);
     const handleResetTimer = () => controlTimer('reset').catch(console.error);
@@ -175,7 +198,6 @@ const AdminPage = () => {
             alert('Failed to requeue: ' + (error.response?.data?.message || error.message));
         }
     };
-
     // Unsold Modal Loader
     useEffect(() => {
         if (showUnsoldModal) {
@@ -225,20 +247,9 @@ const AdminPage = () => {
         }
     };
 
-    if (!isAuthenticated) {
-        return (
-            <div className="flex items-center justify-center h-screen bg-gray-100">
-                <form onSubmit={handleLogin} className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-sm">
-                    <div className="flex flex-col items-center mb-6">
-                        <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center text-red-600 mb-3"><Lock size={24} /></div>
-                        <h2 className="text-xl font-bold text-gray-900">Admin Access</h2>
-                    </div>
-                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter Password" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl mb-4 outline-none" />
-                    {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
-                    <button type="submit" className="w-full py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition">Unlock Panel</button>
-                </form>
-            </div>
-        );
+    // Route Guard
+    if (!isAdmin) {
+        return <Navigate to="/email-login" replace />;
     }
 
     return (
@@ -311,6 +322,33 @@ const AdminPage = () => {
 
                 {/* COL 1 & 2: Main Controls & Setup */}
                 <div className="lg:col-span-2 space-y-6">
+
+                    {/* NEW: Create Tournament Card */}
+                    <div className="bg-auction-surface rounded-3xl border border-white/5 overflow-hidden p-6 animate-in slide-in-from-top-2">
+                        <div className="flex items-center gap-4 mb-4">
+                            <div className="p-3 bg-green-500/10 text-green-400 rounded-xl"><Trophy size={20} /></div>
+                            <div>
+                                <h3 className="font-bold text-white text-lg">Create New Tournament</h3>
+                                <p className="text-xs text-gray-500 font-medium mt-0.5">Spawn a new event for players to join.</p>
+                            </div>
+                        </div>
+                        <form onSubmit={handleCreateTournament} className="flex gap-4">
+                            <input
+                                type="text"
+                                value={newTournamentName}
+                                onChange={(e) => setNewTournamentName(e.target.value)}
+                                placeholder="Enter Tournament Name (e.g. Winter League 2026)"
+                                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500/50 transition-all font-bold"
+                            />
+                            <button
+                                type="submit"
+                                disabled={isCreatingTournament || !newTournamentName.trim()}
+                                className="px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl shadow-lg border border-white/10 transition-all active:scale-95"
+                            >
+                                {isCreatingTournament ? 'Creating...' : 'Create'}
+                            </button>
+                        </form>
+                    </div>
 
                     {/* NEW: Tournament Participants & Assignment Card */}
                     <div className="bg-auction-surface rounded-3xl border border-white/5 overflow-hidden">
