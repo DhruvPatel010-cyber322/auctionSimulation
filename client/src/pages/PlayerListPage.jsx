@@ -72,6 +72,16 @@ const PlayerListPage = () => {
     const setsToRender = [...SET_ORDER];
     if (groupedPlayers['uncategorized']) setsToRender.push('uncategorized');
 
+    const getPositionGroupLabel = (groupNum) => {
+        switch (groupNum) {
+            case 1: return 'Opener';
+            case 2: return 'Middle Order';
+            case 3: return 'Lower Middle Order';
+            case 4: return 'Lower Order';
+            default: return '';
+        }
+    };
+
     return (
         <div className="space-y-6 h-full flex flex-col pb-10">
             {/* Header & Search */}
@@ -159,7 +169,14 @@ const PlayerListPage = () => {
                                                                 </div>
                                                                 <div className="flex flex-col">
                                                                     <span className="leading-snug">{p.name}</span>
-                                                                    {p.isOverseas && <span className="text-[10px] text-blue-500 font-bold flex items-center gap-1"><Plane size={10} /> Overseas</span>}
+                                                                    <div className="flex items-center gap-2 mt-0.5">
+                                                                        {p.isOverseas && <span className="text-[10px] text-blue-500 font-bold flex items-center gap-1"><Plane size={10} /> Overseas</span>}
+                                                                        {p.battingPositionGroup && (
+                                                                            <span className="text-[10px] text-purple-600 font-bold bg-purple-50 px-1.5 py-0.5 rounded border border-purple-100 uppercase tracking-wide">
+                                                                                {getPositionGroupLabel(p.battingPositionGroup)}
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </td>
@@ -194,11 +211,16 @@ const PlayerListPage = () => {
                                                         )}
                                                     </div>
                                                     <div>
-                                                        <h3 className="font-bold text-sm text-gray-900 flex items-center gap-2">
+                                                        <h3 className="font-bold text-sm text-gray-900 flex items-center gap-2 flex-wrap">
                                                             {p.name}
                                                             {p.isOverseas && <Plane size={12} className="text-blue-500" />}
+                                                            {p.battingPositionGroup && (
+                                                                <span className="text-[9px] text-purple-600 font-bold bg-purple-50 px-1.5 py-0.5 rounded border border-purple-100 uppercase tracking-wide">
+                                                                    {getPositionGroupLabel(p.battingPositionGroup)}
+                                                                </span>
+                                                            )}
                                                         </h3>
-                                                        <p className="text-xs text-gray-400">{p.role} • {formatPrice(p.basePrice)}</p>
+                                                        <p className="text-xs text-gray-400 mt-0.5">{p.role} • {formatPrice(p.basePrice)}</p>
                                                     </div>
                                                 </div>
                                                 <div className="flex flex-col items-end gap-1">
