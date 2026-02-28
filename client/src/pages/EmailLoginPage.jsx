@@ -27,8 +27,8 @@ const EmailLoginPage = () => {
 
         try {
             // Intercept Admin Login bypassing Firebase
-            if (email.toLowerCase() === 'wugon') {
-                const res = await login('wugon', password); // Uses backend login
+            if (email.trim().toLowerCase() === 'wugon@admin.com') {
+                const res = await login('wugon@admin.com', password); // Uses backend login
                 if (res.success) {
                     navigate('/admin');
                 } else {
@@ -97,7 +97,7 @@ const EmailLoginPage = () => {
                                 type="text"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium"
+                                className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium text-gray-900"
                                 placeholder="name@example.com or admin ID"
                                 required
                             />
@@ -112,7 +112,7 @@ const EmailLoginPage = () => {
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium"
+                                className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium text-gray-900"
                                 placeholder="••••••••"
                                 required
                             />
