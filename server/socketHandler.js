@@ -69,7 +69,7 @@ export const setupSocket = (io) => {
 
             // Validate Session from DB (Strict Consistency)
             // Admin bypasses this check as they might have a different auth flow or static token
-            if (decoded.role?.toLowerCase() === 'team') {
+            if (decoded.role?.toLowerCase() === 'team' && !decoded.tournamentId) {
                 try {
                     const team = await Team.findOne({ code: decoded.teamCode });
                     if (!team) {

@@ -181,12 +181,24 @@ router.post('/tournaments/:id/join', firebaseAuth, async (req, res) => {
             const dbTeam = await Team.findOne({ code: teamCode.toUpperCase() });
 
             if (dbTeam) {
+                // Check if they already have an active session, otherwise we should create one.
+                // However, since they are routing to dashboard, we must provide a matching sessionId.
+                let sessionId = dbTeam.activeSessionId;
+                if (!sessionId) {
+                    sessionId = crypto.randomUUID();
+                    dbTeam.activeSessionId = sessionId;
+                    dbTeam.isLoggedIn = true;
+                    dbTeam.lastLoginAt = new Date();
+                    await dbTeam.save();
+                }
+
                 const userRole = req.user.role === 'admin' ? 'admin' : 'team';
                 const token = jwt.sign({
                     teamCode: dbTeam.code,
                     role: userRole,
                     tournamentId: tournament._id,
-                    userId: userId
+                    userId: userId,
+                    sessionId: sessionId
                 }, process.env.JWT_SECRET, { expiresIn: '12h' });
 
                 const teamConfig = TEAMS.find(t => t.id === dbTeam.code.toLowerCase()) || {};
@@ -398,6 +410,8 @@ router.post('/tournaments/:id/select-team', firebaseAuth, async (req, res) => {
         // --- NEW SESSION LOGIC ---
         const sessionId = crypto.randomUUID();
         dbTeam.activeSessionId = sessionId;
+        dbTeam.isLoggedIn = true;
+        dbTeam.lastLoginAt = new Date();
         await dbTeam.save();
         // -------------------------
 
