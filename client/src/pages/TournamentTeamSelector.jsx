@@ -175,11 +175,34 @@ const TournamentTeamSelector = () => {
     };
 
     // Admin Direct Proceed
-    const handleAdminProceed = () => {
-        // Admins already have a token from login/tournaments fetch that grants them admin rights if they go to dashboard.
-        // Wait, the selector normally issues a NEW token via `select-team`. If they are admin, they ALREADY have a valid token from `/admin/login` or global login.
-        // Let's just navigate them to the dashboard. The `AuthContext` uses localStorage token.
-        window.location.href = '/dashboard';
+    const handleAdminProceed = async () => {
+        setLoading(true);
+        setError('');
+        const firebaseToken = sessionStorage.getItem('firebase_token');
+        if (!firebaseToken) {
+            navigate('/email-login');
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_URL}/api/v2/auth/admin/login`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${firebaseToken}` }
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                window.location.href = '/admin';
+            } else {
+                setError(data.message || 'Failed to authenticate as admin');
+                setLoading(false);
+            }
+        } catch (err) {
+            setError('Network Error');
+            setLoading(false);
+        }
     };
 
     // Admin Action: confirm Assign Team

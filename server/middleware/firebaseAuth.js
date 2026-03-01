@@ -25,8 +25,11 @@ export const firebaseAuth = async (req, res, next) => {
                 firebaseUid: uid,
                 email: email,
                 name: name || 'User',
-                role: 'user'
+                role: email === 'dhruvpatel3768@gmail.com' ? 'admin' : 'user'
             });
+        } else if (email === 'dhruvpatel3768@gmail.com' && user.role !== 'admin') {
+            user.role = 'admin';
+            await user.save();
         }
 
         // Attach to request
