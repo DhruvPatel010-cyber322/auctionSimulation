@@ -74,8 +74,8 @@ const protect = async (req, res, next) => {
       token = req.headers.authorization.split(' ')[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      // Admin bypass session validation
-      if (decoded.role === 'admin') {
+      // Admin and Spectator bypass session validation
+      if (decoded.role === 'admin' || decoded.role === 'spectator') {
         req.user = decoded;
         return next();
       }
