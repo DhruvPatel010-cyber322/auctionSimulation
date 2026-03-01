@@ -13,6 +13,15 @@ import AuctionState from '../models/AuctionState.js';
 
 const router = express.Router();
 
+// Local Admin Middleware for routes in this file
+const adminOnly = (req, res, next) => {
+    if (req.user && req.user.role === 'admin') {
+        next();
+    } else {
+        res.status(403).json({ message: 'Admin access required' });
+    }
+};
+
 // 1. Firebase Login / Exchange Token
 // Client sends Firebase Token in Header via middleware
 // Returns Mongo User details
