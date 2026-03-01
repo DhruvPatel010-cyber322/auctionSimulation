@@ -470,6 +470,39 @@ router.post('/tournaments/:id/select-team', firebaseAuth, async (req, res) => {
     }
 });
 
+// 5.5 Unassign Team (Admin Only)
+router.post('/tournaments/:id/unassign-team', firebaseAuth, adminOnly, async (req, res) => {
+    const tournamentId = req.params.id;
+    const { userId } = req.body;
+
+    if (!userId) return res.status(400).json({ message: 'User ID is required' });
+
+    try {
+        const assignment = await TournamentUser.findOneAndUpdate(
+            { tournament: tournamentId, user: userId },
+            { $set: { teamCode: null } },
+            { new: true }
+        );
+
+        if (!assignment) {
+            return res.status(404).json({ message: 'User assignment not found in this tournament.' });
+        }
+
+        // Emit Socket event so active clients drop the user from the team slot
+        if (req.io) {
+            req.io.emit('tournament:team_freed', {
+                tournamentId,
+                userId: userId
+            });
+        }
+
+        res.json({ success: true, message: 'User unassigned successfully' });
+    } catch (err) {
+        console.error("[API] Error unassigning team:", err);
+        res.status(500).json({ message: 'Failed to unassign team' });
+    }
+});
+
 // 5.5 Watch Auction (Spectator Mode)
 router.post('/tournaments/:id/watch', firebaseAuth, async (req, res) => {
     const tournamentId = req.params.id;

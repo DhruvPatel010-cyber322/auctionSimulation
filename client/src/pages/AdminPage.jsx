@@ -241,6 +241,34 @@ const AdminPage = () => {
         }
     };
 
+    const handleUnassignTeam = async (userId, username, teamCode) => {
+        if (!window.confirm(`Are you sure you want to remove ${username} from Team ${teamCode}? This team will become available for others to claim.`)) return;
+
+        const firebaseToken = sessionStorage.getItem('firebase_token');
+        try {
+            const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${selectedTournamentId}/unassign-team`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${firebaseToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ userId })
+            });
+
+            if (res.ok) {
+                // Trigger refresh by toggling off and on
+                const currentId = selectedTournamentId;
+                setSelectedTournamentId('');
+                setTimeout(() => setSelectedTournamentId(currentId), 10);
+            } else {
+                alert("Failed to unassign team");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Network Error");
+        }
+    };
+
 
     return (
         <div className="p-6 md:p-10 max-w-7xl mx-auto min-h-screen pb-40 bg-auction-bg text-white font-sans">
@@ -392,9 +420,18 @@ const AdminPage = () => {
                                                         </td>
                                                         <td className="px-4 py-4">
                                                             {u.teamCode ? (
-                                                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-green-500/10 text-green-400 border border-green-500/20">
-                                                                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span> {u.teamCode}
-                                                                </span>
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-green-500/10 text-green-400 border border-green-500/20">
+                                                                        <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span> {u.teamCode}
+                                                                    </span>
+                                                                    <button
+                                                                        onClick={() => handleUnassignTeam(u.userId, u.username, u.teamCode)}
+                                                                        title={`Unassign ${u.username} from Team ${u.teamCode}`}
+                                                                        className="p-1 rounded-md text-red-500 hover:text-white hover:bg-red-500 transition-colors border border-transparent hover:border-red-500/50"
+                                                                    >
+                                                                        <XIcon size={14} strokeWidth={3} />
+                                                                    </button>
+                                                                </div>
                                                             ) : (
                                                                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20">
                                                                     <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Unassigned
