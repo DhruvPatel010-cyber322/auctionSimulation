@@ -148,12 +148,12 @@ const AuctionPage = () => {
                 if (soldTo) {
                     addToast(`SOLD! ${player.name} to ${soldTo.name} for ₹${price} Cr`, 'success');
 
-                    // Trigger Full-Screen 5s Popup
+                    // Trigger Full-Screen 3s Popup
                     setSoldPopupData({ player, soldTo, price });
                     setShowSoldPopup(true);
                     setTimeout(() => {
                         setShowSoldPopup(false);
-                    }, 5000);
+                    }, 3000);
 
                     // Add to recent sales feed
                     setRecentSales(prev => [{
@@ -293,13 +293,10 @@ const AuctionPage = () => {
                     onClick={() => setShowSoldPopup(false)}
                 >
                     <div
-                        className="bg-white rounded-3xl p-8 flex flex-col items-center justify-center max-w-md w-full mx-4 shadow-2xl overflow-hidden relative"
-                        style={{
-                            animation: "slideDownCenter 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards",
-                            top: "50%",
-                            left: "50%",
-                            transform: "translate(-50%, -50%)"
-                        }}
+                        className={cn(
+                            "bg-white rounded-3xl p-8 flex flex-col items-center justify-center max-w-md w-full mx-4 overflow-hidden relative animate-sold-popup",
+                            soldPopupData.price >= 10 ? "shadow-[0_0_80px_rgba(234,179,8,0.4)] border-4 border-yellow-400" : "shadow-2xl"
+                        )}
                     >
                         {/* Dramatic Team Color Background FX */}
                         <div
@@ -307,11 +304,26 @@ const AuctionPage = () => {
                             style={{ backgroundColor: TEAM_COLORS[soldPopupData.soldTo?.id?.toLowerCase()] || '#2563eb' }}
                         />
 
+                        {soldPopupData.price >= 10 && (
+                            <div className="absolute inset-0 bg-gradient-to-tr from-yellow-300/10 via-transparent to-yellow-500/10 pointer-events-none mix-blend-overlay"></div>
+                        )}
+
                         <div className="relative z-10 flex flex-col items-center text-center">
-                            <Trophy className="w-20 h-20 text-yellow-500 mb-4 animate-bounce drop-shadow-lg" />
+                            {soldPopupData.player.set === 0 && (
+                                <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-yellow-950 font-black text-[10px] px-4 py-1.5 rounded-full uppercase tracking-[0.2em] shadow-lg mb-4 -mt-2 animate-pulse">
+                                    ⭐ Marquee Signing ⭐
+                                </div>
+                            )}
+                            {soldPopupData.player.set !== 0 && (
+                                <Trophy className={cn("w-16 h-16 mb-4 animate-bounce drop-shadow-lg", soldPopupData.price >= 10 ? "text-yellow-400" : "text-yellow-500")} />
+                            )}
+
                             <h2 className="text-5xl font-black text-gray-900 mb-2 uppercase tracking-wider">SOLD!</h2>
 
-                            <div className="w-32 h-32 rounded-2xl bg-gray-100 mt-4 mb-2 overflow-hidden border-4 border-white shadow-lg">
+                            <div className={cn(
+                                "w-32 h-32 rounded-2xl bg-gray-100 mt-4 mb-2 overflow-hidden border-4 shadow-lg",
+                                soldPopupData.price >= 10 ? "border-yellow-400" : "border-white"
+                            )}>
                                 {soldPopupData.player.image ? (
                                     <img src={soldPopupData.player.image} alt={soldPopupData.player.name} className="w-full h-full object-cover" />
                                 ) : (

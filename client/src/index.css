@@ -57,3 +57,19 @@ body {
     transform: translateX(-50%);
   }
 }
+
+@keyframes slideDownCenter {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(-30px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-sold-popup {
+  animation: slideDownCenter 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
