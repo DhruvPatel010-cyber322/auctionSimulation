@@ -105,7 +105,7 @@ export const resetTimer = async (req, res) => {
             state.timerEndsAt = new Date(Date.now() + durationToAdd);
             state.remainingTime = null; // Clear after using
         } else if (req.query.action === 'reset') {
-            state.timerEndsAt = new Date(Date.now() + 30000);
+            state.timerEndsAt = new Date(Date.now() + 20000); // 20 seconds
             state.status = 'ACTIVE';
             state.remainingTime = null;
             state.highestBidder = null;
@@ -191,7 +191,7 @@ export const startAuction = async (req, res) => {
         state.currentBid = nextPlayer.basePrice;
         state.highestBidder = null;
         state.bidHistory = [];
-        state.bidDuration = state.bidDuration || 30;
+        state.bidDuration = state.bidDuration || 20; // 20 seconds default
         state.timerEndsAt = new Date(Date.now() + (state.bidDuration * 1000));
         await state.save();
 

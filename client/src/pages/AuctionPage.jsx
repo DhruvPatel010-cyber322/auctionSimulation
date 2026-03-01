@@ -24,6 +24,10 @@ const AuctionPage = () => {
     const [toasts, setToasts] = useState([]);
     const [recentSales, setRecentSales] = useState([]);
 
+    // Sold Popup State
+    const [showSoldPopup, setShowSoldPopup] = useState(false);
+    const [soldPopupData, setSoldPopupData] = useState(null);
+
     // Initial Fetch for Recent Deals
     useEffect(() => {
         const fetchRecent = async () => {
@@ -143,6 +147,14 @@ const AuctionPage = () => {
             const handlePlayerSold = ({ player, soldTo, price }) => {
                 if (soldTo) {
                     addToast(`SOLD! ${player.name} to ${soldTo.name} for ₹${price} Cr`, 'success');
+
+                    // Trigger Full-Screen 5s Popup
+                    setSoldPopupData({ player, soldTo, price });
+                    setShowSoldPopup(true);
+                    setTimeout(() => {
+                        setShowSoldPopup(false);
+                    }, 5000);
+
                     // Add to recent sales feed
                     setRecentSales(prev => [{
                         ...player,
@@ -273,6 +285,63 @@ const AuctionPage = () => {
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-140px)] relative">
+
+            {/* Sold Popup Overlay */}
+            {showSoldPopup && soldPopupData && (
+                <div
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md transition-opacity duration-300"
+                    onClick={() => setShowSoldPopup(false)}
+                >
+                    <div
+                        className="bg-white rounded-3xl p-8 flex flex-col items-center justify-center max-w-md w-full mx-4 shadow-2xl overflow-hidden relative"
+                        style={{
+                            animation: "slideDownCenter 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards",
+                            top: "50%",
+                            left: "50%",
+                            transform: "translate(-50%, -50%)"
+                        }}
+                    >
+                        {/* Dramatic Team Color Background FX */}
+                        <div
+                            className="absolute inset-0 opacity-10"
+                            style={{ backgroundColor: TEAM_COLORS[soldPopupData.soldTo?.id?.toLowerCase()] || '#2563eb' }}
+                        />
+
+                        <div className="relative z-10 flex flex-col items-center text-center">
+                            <Trophy className="w-20 h-20 text-yellow-500 mb-4 animate-bounce drop-shadow-lg" />
+                            <h2 className="text-5xl font-black text-gray-900 mb-2 uppercase tracking-wider">SOLD!</h2>
+
+                            <div className="w-32 h-32 rounded-2xl bg-gray-100 mt-4 mb-2 overflow-hidden border-4 border-white shadow-lg">
+                                {soldPopupData.player.image ? (
+                                    <img src={soldPopupData.player.image} alt={soldPopupData.player.name} className="w-full h-full object-cover" />
+                                ) : (
+                                    <User className="w-full h-full text-gray-400 p-4" />
+                                )}
+                            </div>
+
+                            <h3 className="text-3xl font-black text-gray-800 mt-2">{soldPopupData.player.name}</h3>
+                            <p className="text-gray-500 uppercase font-black tracking-widest text-sm mt-1 mb-6">{soldPopupData.player.role}</p>
+
+                            <div
+                                className="w-full bg-white rounded-2xl p-5 border-2 flex flex-col items-center shadow-inner"
+                                style={{ borderColor: TEAM_COLORS[soldPopupData.soldTo?.id?.toLowerCase()] || '#2563eb' }}
+                            >
+                                <p className="text-xs text-gray-400 font-bold uppercase mb-1 tracking-widest">To Team</p>
+                                <span
+                                    className="text-2xl font-black mb-3"
+                                    style={{ color: TEAM_COLORS[soldPopupData.soldTo?.id?.toLowerCase()] || '#2563eb' }}
+                                >
+                                    {soldPopupData.soldTo.name || soldPopupData.soldTo.id}
+                                </span>
+
+                                <div className="bg-green-50 border border-green-200 text-green-700 font-black text-4xl px-8 py-3 rounded-xl w-full text-center shadow-sm">
+                                    {formatPrice(soldPopupData.price)}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* TOASTS */}
             <div className="fixed top-24 right-6 z-50 flex flex-col gap-3 pointer-events-none">

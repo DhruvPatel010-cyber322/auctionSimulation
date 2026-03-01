@@ -290,26 +290,24 @@ router.get('/tournaments/:id/teams', firebaseAuth, async (req, res) => {
     console.log(`[API] Fetching teams for tournament: ${req.params.id}`);
     try {
         const tournamentId = req.params.id;
-        const tournament = await Tournament.findById(tournamentId);
 
-        // Get all taken teams in this tournament and populate user to get username
-        const takenAssignments = await TournamentUser.find({
-            tournament: tournamentId,
-            teamCode: { $ne: null }
-        }).populate('user', 'username');
+        // PARALLELIZE 4 Queries to eliminate sequential blocking delay and remove massive population overhead
+        const [tournament, takenAssignments, dbTeams, userAssignment] = await Promise.all([
+            Tournament.findById(tournamentId).lean(),
+            TournamentUser.find({
+                tournament: tournamentId,
+                teamCode: { $ne: null }
+            }).populate('user', 'username').lean(),
+            Team.find({}).lean(), // Optimized: Removed heavy .populate('playersBought') as it delays initial page load 
+            TournamentUser.findOne({
+                tournament: tournamentId,
+                user: req.user._id
+            }).lean()
+        ]);
+
         const takenTeamMap = new Map(takenAssignments.map(a => [a.teamCode, a.user?.username]));
         const takenTeamCodes = new Set(takenAssignments.map(a => a.teamCode));
-
-        // Fetch all teams from DB to get logos
-        // Fetch all teams from DB to get logos and populate purchase details
-        const dbTeams = await Team.find({}).populate('playersBought');
         const dbTeamsMap = new Map(dbTeams.map(t => [t.code, t]));
-
-        // Map static teams to include availability and DB logo
-        const userAssignment = await TournamentUser.findOne({
-            tournament: tournamentId,
-            user: req.user._id
-        });
 
         const teamsWithStatus = TEAMS.map(team => {
             const dbTeam = dbTeamsMap.get(team.id.toUpperCase());
