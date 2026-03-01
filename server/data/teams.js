@@ -85,7 +85,7 @@ export const TEAMS = [
         name: 'Lucknow Super Giants',
         password: 'lsg',
         color: 'from-cyan-400 to-blue-600',
-        primaryColor: '#0057B8',
+        primaryColor: '#DA291C',
         secondaryColor: '#00B5E2',
         textColor: '#FFFFFF',
         budget: 1200000000

@@ -6,7 +6,7 @@ export const TEAM_COLORS = {
     rr: '#EA1A85',
     dc: '#17479E',
     srh: '#F26522',
-    lsg: '#0057B8',
+    lsg: '#DA291C',
     gt: '#C5A24A',
     pbks: '#DD1F2D'
 };
