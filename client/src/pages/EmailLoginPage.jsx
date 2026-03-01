@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { signInWithEmailAndPassword, signInWithRedirect, getRedirectResult, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from '../firebase';
 import { Mail, Lock, ArrowRight, Chrome } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -19,6 +19,22 @@ const EmailLoginPage = () => {
         // Redirect to the Tournament Selection Page
         navigate('/tournaments');
     };
+
+    // Handle Google Redirect Result on Mount
+    useEffect(() => {
+        const checkRedirectResult = async () => {
+            try {
+                const result = await getRedirectResult(auth);
+                if (result && result.user) {
+                    await handleSuccess(result.user);
+                }
+            } catch (err) {
+                console.error("Redirect Login Error:", err);
+                setError(err.message || 'Google Sign-In failed.');
+            }
+        };
+        checkRedirectResult();
+    }, []);
 
     const handleEmailLogin = async (e) => {
         e.preventDefault();
@@ -53,8 +69,8 @@ const EmailLoginPage = () => {
         setLoading(true);
         try {
             const provider = new GoogleAuthProvider();
-            const result = await signInWithPopup(auth, provider);
-            await handleSuccess(result.user);
+            await signInWithRedirect(auth, provider);
+            // The success handling happens in the useEffect on redirect return
         } catch (err) {
             setError(err.message || 'Google Sign-In failed.');
             console.error("Google Login Error:", err);
