@@ -336,6 +336,7 @@ router.get('/tournaments/:id/teams', firebaseAuth, async (req, res) => {
             joinedUsers = allParticipants
                 .filter(p => p.user) // Prevent 500 crash if user was deleted
                 .map(p => ({
+                    assignmentId: p._id,
                     userId: p.user._id,
                     username: p.user.username,
                     teamCode: p.teamCode
@@ -482,18 +483,25 @@ router.post('/tournaments/:id/select-team', firebaseAuth, async (req, res) => {
 // 5.5 Unassign Team (Admin Only)
 router.post('/tournaments/:id/unassign-team', firebaseAuth, adminOnly, async (req, res) => {
     const tournamentId = req.params.id;
-    const { userId } = req.body;
+    const { assignmentId, userId } = req.body;
 
-    if (!userId) return res.status(400).json({ message: 'User ID is required' });
+    if (!userId && !assignmentId) return res.status(400).json({ message: 'User ID or Assignment ID is required' });
 
     try {
+        console.log(`[API] Unassigning team. Tournament: ${tournamentId}, AssignmentId: ${assignmentId}, UserId: ${userId}`);
+
+        const query = assignmentId
+            ? { _id: assignmentId }
+            : { tournament: tournamentId, user: userId };
+
         const assignment = await TournamentUser.findOneAndUpdate(
-            { tournament: tournamentId, user: userId },
+            query,
             { $set: { teamCode: null } },
             { new: true }
         );
 
         if (!assignment) {
+            console.error(`[API] Unassign Failed: Document not found for query`, query);
             return res.status(404).json({ message: 'User assignment not found in this tournament.' });
         }
 

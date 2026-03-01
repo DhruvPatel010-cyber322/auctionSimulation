@@ -241,7 +241,7 @@ const AdminPage = () => {
         }
     };
 
-    const handleUnassignTeam = async (userId, username, teamCode) => {
+    const handleUnassignTeam = async (assignmentId, userId, username, teamCode) => {
         if (!window.confirm(`Are you sure you want to remove ${username} from Team ${teamCode}? This team will become available for others to claim.`)) return;
 
         const firebaseToken = sessionStorage.getItem('firebase_token');
@@ -252,7 +252,7 @@ const AdminPage = () => {
                     'Authorization': `Bearer ${firebaseToken}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ userId })
+                body: JSON.stringify({ assignmentId, userId })
             });
 
             if (res.ok) {
@@ -425,7 +425,7 @@ const AdminPage = () => {
                                                                         <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span> {u.teamCode}
                                                                     </span>
                                                                     <button
-                                                                        onClick={() => handleUnassignTeam(u.userId, u.username, u.teamCode)}
+                                                                        onClick={() => handleUnassignTeam(u.assignmentId, u.userId, u.username, u.teamCode)}
                                                                         title={`Unassign ${u.username} from Team ${u.teamCode}`}
                                                                         className="p-1 rounded-md text-red-500 hover:text-white hover:bg-red-500 transition-colors border border-transparent hover:border-red-500/50"
                                                                     >
