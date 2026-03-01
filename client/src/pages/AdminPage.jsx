@@ -12,10 +12,7 @@ import { Navigate } from 'react-router-dom';
 
 const AdminPage = () => {
     const { socket } = useSocket();
-    const { login, logout, user, isAuthenticated: isAuth } = useAuth();
-
-    // Auth Check
-    const isAdmin = isAuth && user?.role === 'admin';
+    const { logout, user } = useAuth();
 
     // Auction Control State
     const [teams, setTeams] = useState([]); // Global teams or specific tournament teams
@@ -85,11 +82,8 @@ const AdminPage = () => {
 
     // Keep context for backend compatibility
     useEffect(() => {
-        // Nothing needed here anymore since we rely on `isAdmin`.
-        if (isAdmin) {
-            fetchTournaments();
-        }
-    }, [isAuth, user, isAdmin]);
+        fetchTournaments();
+    }, []);
 
     // Fetch Tournaments
     const fetchTournaments = async () => {
@@ -113,7 +107,7 @@ const AdminPage = () => {
 
     // Fetch Tournament Details (Users & Teams) when selected
     useEffect(() => {
-        if (!selectedTournamentId || !isAuthenticated) return;
+        if (!selectedTournamentId) return;
 
         const fetchDetails = async () => {
             const firebaseToken = sessionStorage.getItem('firebase_token');
@@ -138,7 +132,7 @@ const AdminPage = () => {
         };
 
         fetchDetails();
-    }, [selectedTournamentId, isAdmin, assignModalOpen]);
+    }, [selectedTournamentId, assignModalOpen]);
     // Re-fetch when modal closes/updates to get fresh data
 
     // --- SOCKET SYNC ---
@@ -247,10 +241,6 @@ const AdminPage = () => {
         }
     };
 
-    // Route Guard
-    if (!isAdmin) {
-        return <Navigate to="/email-login" replace />;
-    }
 
     return (
         <div className="p-6 md:p-10 max-w-7xl mx-auto min-h-screen pb-40 bg-auction-bg text-white font-sans">
@@ -269,7 +259,7 @@ const AdminPage = () => {
                     <button onClick={() => window.location.href = '/dashboard'} className="px-5 py-2.5 bg-auction-surface border border-white/5 text-gray-300 rounded-xl font-bold hover:bg-white/5 hover:text-white transition-all">
                         Back to Dashboard
                     </button>
-                    <button onClick={() => { logout(); setIsAuthenticated(false); }} className="text-sm font-bold text-red-500 hover:text-red-400 px-3">
+                    <button onClick={() => { logout(); }} className="text-sm font-bold text-red-500 hover:text-red-400 px-3">
                         Logout
                     </button>
                 </div>

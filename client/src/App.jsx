@@ -17,6 +17,7 @@ import AdminPage from './pages/AdminPage';
 import ErrorBoundary from './components/ErrorBoundary';
 // Revert to RequireAuth logic if changed previously
 import RequireAuth from './components/RequireAuth';
+import RequireAdmin from './components/RequireAdmin';
 
 function App() {
   return (
@@ -30,7 +31,7 @@ function App() {
               <Route path="/tournaments/:id/teams" element={<TournamentTeamSelector />} />
               <Route path="/login" element={<LoginPage />} />
 
-              <Route path="/admin" element={<AdminPage />} />
+              <Route path="/admin" element={<RequireAdmin><AdminPage /></RequireAdmin>} />
 
               {/* Protected Routes (Layout applied) */}
               <Route element={<RequireAuth />}>
