@@ -270,7 +270,13 @@ router.post('/tournaments/create', firebaseAuth, async (req, res) => {
     if (!name) return res.status(400).json({ message: 'Tournament name is required' });
 
     try {
-        const newTournament = new Tournament({ name, isActive: true });
+        const generatedAccessCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        const newTournament = new Tournament({
+            name,
+            accessCode: generatedAccessCode,
+            createdBy: req.user._id,
+            status: 'OPEN'
+        });
         await newTournament.save();
         res.status(201).json({ success: true, message: 'Tournament created successfully', tournament: newTournament });
     } catch (err) {
