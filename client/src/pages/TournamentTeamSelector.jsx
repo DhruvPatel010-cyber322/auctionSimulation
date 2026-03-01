@@ -532,7 +532,7 @@ const TournamentTeamSelector = () => {
                     ) : (
                         <button
                             onClick={handleWatchAuction}
-                            disabled={loading || assignmentPending}
+                            disabled={loading}
                             className="px-6 py-3 bg-slate-800 hover:bg-slate-700 font-bold text-gray-300 hover:text-white rounded-full border border-slate-700 hover:border-slate-500 shadow-lg transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {loading ? 'Joining...' : 'Watch Auction (Spectator Mode)'} <ArrowRight size={18} />
