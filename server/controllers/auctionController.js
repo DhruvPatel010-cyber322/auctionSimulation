@@ -191,7 +191,7 @@ export const startAuction = async (req, res) => {
         state.currentBid = nextPlayer.basePrice;
         state.highestBidder = null;
         state.bidHistory = [];
-        state.bidDuration = state.bidDuration || 20; // 20 seconds default
+        state.bidDuration = 20; // Force 20 seconds default
         state.timerEndsAt = new Date(Date.now() + (state.bidDuration * 1000));
         await state.save();
 
@@ -275,7 +275,7 @@ export const nextPlayer = async (req, res) => {
             currentBid: nextP.basePrice,
             highestBidder: null,
             bidHistory: [],
-            timerEndsAt: new Date(Date.now() + 30000) // Default 30s
+            timerEndsAt: new Date(Date.now() + 20000) // Default 20s
         }, { new: true, upsert: true }).populate('currentPlayer');
 
         // Sync In-Memory Timer
