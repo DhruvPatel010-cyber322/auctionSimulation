@@ -1,4 +1,4 @@
-
+import jwt from 'jsonwebtoken';
 import firebaseAdmin from '../config/firebaseAdmin.js';
 import User from '../models/User.js';
 
@@ -17,7 +17,6 @@ export const firebaseAuth = async (req, res, next) => {
         const { uid, email, name, picture } = decodedToken;
 
         // 3. Find or Create User in Mongo
-        // Upsert ensures we always have the latest data from Firebase
         let user = await User.findOne({ firebaseUid: uid });
 
         if (!user) {
@@ -37,7 +36,20 @@ export const firebaseAuth = async (req, res, next) => {
         req.firebaseUser = decodedToken;
         next();
     } catch (error) {
-        console.error('Firebase Auth Error:', error);
-        return res.status(401).json({ message: 'Invalid token' });
+        // Fallback: If Firebase fails, check if it's our Native Backend JWT
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+            // Reconstruct req.user from JWT payload seamlessly
+            req.user = {
+                _id: decoded.userId,
+                role: decoded.role,
+                teamCode: decoded.teamCode
+            };
+            return next();
+        } catch (jwtErr) {
+            console.error('Both Token Validations Failed:', error.message, '|', jwtErr.message);
+            return res.status(401).json({ message: 'Invalid token' });
+        }
     }
 };

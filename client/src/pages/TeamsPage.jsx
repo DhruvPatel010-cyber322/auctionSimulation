@@ -26,7 +26,7 @@ const TeamsPage = () => {
                 let data = [];
                 // V2: Check if user is in a tournament
                 const tournamentId = user?.tournamentId;
-                const firebaseToken = sessionStorage.getItem('firebase_token');
+                const firebaseToken = (sessionStorage.getItem('firebase_token') || localStorage.getItem('token'));
 
                 if (tournamentId && firebaseToken) {
                     const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${tournamentId}/teams`, {

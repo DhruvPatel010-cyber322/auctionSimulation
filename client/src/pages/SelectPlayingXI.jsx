@@ -85,7 +85,7 @@ const SelectPlayingXI = () => {
 
                 // Get All Teams
                 const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${tournamentId}/teams`, {
-                    headers: { 'Authorization': `Bearer ${fbToken}` }
+                    headers: { 'Authorization': `Bearer ${fbToken || localToken}` }
                 });
                 const data = await res.json();
 
@@ -130,7 +130,7 @@ const SelectPlayingXI = () => {
 
                 // Use the Public Endpoint for consistency
                 const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${tournamentId}/teams/${selectedTeam}/squad`, {
-                    headers: { 'Authorization': `Bearer ${fbToken}` }
+                    headers: { 'Authorization': `Bearer ${fbToken || localToken}` }
                 });
 
                 const data = await res.json();
@@ -212,7 +212,7 @@ const SelectPlayingXI = () => {
             return;
         }
         setSaving(true);
-        const fbToken = sessionStorage.getItem('firebase_token');
+        const fbToken = sessionStorage.getItem('firebase_token') || localStorage.getItem('token');
         const localToken = localStorage.getItem('token');
         try {
             const payload = decodeJwtPayload(localToken);

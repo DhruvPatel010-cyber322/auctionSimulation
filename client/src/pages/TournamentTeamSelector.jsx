@@ -34,7 +34,7 @@ const TournamentTeamSelector = () => {
             interval = setInterval(() => {
                 // Silent fetch to refresh data
                 const fetchUpdate = async () => {
-                    const firebaseToken = sessionStorage.getItem('firebase_token');
+                    const firebaseToken = (sessionStorage.getItem('firebase_token') || localStorage.getItem('token'));
                     try {
                         const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${tournamentId}/teams`, {
                             headers: { 'Authorization': `Bearer ${firebaseToken}` }
@@ -64,7 +64,7 @@ const TournamentTeamSelector = () => {
 
     useEffect(() => {
         const fetchTeams = async () => {
-            const firebaseToken = sessionStorage.getItem('firebase_token');
+            const firebaseToken = (sessionStorage.getItem('firebase_token') || localStorage.getItem('token'));
             if (!firebaseToken) {
                 navigate('/email-login');
                 return;
@@ -111,7 +111,7 @@ const TournamentTeamSelector = () => {
         if (!isAuto) setLoading(true);
         setError('');
 
-        const firebaseToken = sessionStorage.getItem('firebase_token');
+        const firebaseToken = (sessionStorage.getItem('firebase_token') || localStorage.getItem('token'));
         if (!firebaseToken) {
             navigate('/email-login');
             return;
@@ -147,7 +147,7 @@ const TournamentTeamSelector = () => {
     const handleWatchAuction = async () => {
         setLoading(true);
         setError('');
-        const firebaseToken = sessionStorage.getItem('firebase_token');
+        const firebaseToken = (sessionStorage.getItem('firebase_token') || localStorage.getItem('token'));
         if (!firebaseToken) {
             navigate('/email-login');
             return;
@@ -178,7 +178,7 @@ const TournamentTeamSelector = () => {
     const handleAdminProceed = async () => {
         setLoading(true);
         setError('');
-        const firebaseToken = sessionStorage.getItem('firebase_token');
+        const firebaseToken = (sessionStorage.getItem('firebase_token') || localStorage.getItem('token'));
         if (!firebaseToken) {
             navigate('/email-login');
             return;
@@ -210,7 +210,7 @@ const TournamentTeamSelector = () => {
         if (!adminSelectingForUser || !selectedTeam) return;
 
         setAssignLoading(true);
-        const firebaseToken = sessionStorage.getItem('firebase_token');
+        const firebaseToken = (sessionStorage.getItem('firebase_token') || localStorage.getItem('token'));
         try {
             const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${tournamentId}/assign-team`, {
                 method: 'POST',
