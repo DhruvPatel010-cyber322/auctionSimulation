@@ -261,11 +261,10 @@ const AdminPage = () => {
                 setSelectedTournamentId('');
                 setTimeout(() => setSelectedTournamentId(currentId), 10);
             } else {
-                alert("Failed to unassign team");
+                console.error("Failed to unassign team");
             }
         } catch (e) {
-            console.error(e);
-            alert("Network Error");
+            console.error("Network Error:", e);
         }
     };
 
