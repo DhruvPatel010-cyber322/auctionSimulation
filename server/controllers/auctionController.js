@@ -1,6 +1,7 @@
 import AuctionState from '../models/AuctionState.js';
 import Player from '../models/Player.js';
 import Team from '../models/Team.js';
+import User from '../models/User.js';
 import mongoose from 'mongoose';
 import { getIO, updateAuctionTimer } from '../socketHandler.js';
 
@@ -382,6 +383,15 @@ export const placeBid = async (req, res) => {
             return res.status(400).json({ message: `Insufficient purse. You need ₹${newBidAmount} but have ₹${team.remainingPurse}` });
         }
 
+        // Fetch User to get the username for the bid history logs
+        let userName = "Admin";
+        if (req.user && req.user._id) {
+            const userDoc = await User.findById(req.user._id);
+            if (userDoc) {
+                userName = userDoc.username || userDoc.name || "User";
+            }
+        }
+
         // Update State Atomically
         const atomicUpdate = await AuctionState.findOneAndUpdate(
             {
@@ -400,7 +410,7 @@ export const placeBid = async (req, res) => {
                 },
                 $push: {
                     bidHistory: {
-                        $each: [{ team: team.code, amount: newBidAmount, timestamp: new Date() }],
+                        $each: [{ team: team.code, userName: userName, amount: newBidAmount, timestamp: new Date() }],
                         $position: 0
                     }
                 }
