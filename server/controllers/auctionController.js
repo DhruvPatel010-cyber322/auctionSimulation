@@ -385,8 +385,8 @@ export const placeBid = async (req, res) => {
 
         // Fetch User to get the username for the bid history logs
         let userName = "Admin";
-        if (req.user && req.user._id) {
-            const userDoc = await User.findById(req.user._id);
+        if (req.user && (req.user._id || req.user.userId)) {
+            const userDoc = await User.findById(req.user._id || req.user.userId);
             if (userDoc) {
                 userName = userDoc.username || userDoc.name || "User";
             }
