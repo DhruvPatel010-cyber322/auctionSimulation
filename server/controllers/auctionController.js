@@ -101,7 +101,7 @@ export const resetTimer = async (req, res) => {
             state.timerEndsAt = null;
         } else if (req.query.action === 'resume') {
             state.status = 'ACTIVE';
-            const durationToAdd = state.remainingTime || 30000;
+            const durationToAdd = state.remainingTime || 20000;
             state.timerEndsAt = new Date(Date.now() + durationToAdd);
             state.remainingTime = null; // Clear after using
         } else if (req.query.action === 'reset') {
@@ -396,7 +396,7 @@ export const placeBid = async (req, res) => {
                 $set: {
                     currentBid: newBidAmount,
                     highestBidder: team.code,
-                    timerEndsAt: new Date(Date.now() + 30000)
+                    timerEndsAt: new Date(Date.now() + 20000)
                 },
                 $push: {
                     bidHistory: {
