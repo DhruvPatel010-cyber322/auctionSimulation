@@ -20,7 +20,7 @@ const DashboardPage = () => {
         currentPlayer: null,
         currentBid: 0,
         highestBidder: null,
-        timer: 30,
+        timer: 20,
         isSold: false
     });
 
