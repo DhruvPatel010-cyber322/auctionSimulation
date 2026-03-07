@@ -68,8 +68,11 @@ const TeamsPage = () => {
                             return {
                                 ...existing,
                                 ...t,
+                                // Preserve squad data from initial fetch — socket payload doesn't include populated players
+                                playersBought: existing.playersBought || t.playersBought,
+                                playing11: existing.playing11 || t.playing11,
                                 budget: t.remainingPurse || t.budget,
-                                ownerUsername: t.ownerUsername || existing.ownerUsername // Persist owner
+                                ownerUsername: t.ownerUsername || existing.ownerUsername
                             };
                         });
                     });
