@@ -15,7 +15,7 @@ const AuctionPage = () => {
         currentPlayer: null,
         currentBid: 0,
         highestBidder: null,
-        timer: 20,
+        timer: 15,
         isSold: false,
         bidHistory: [],
         teams: []
@@ -80,7 +80,7 @@ const AuctionPage = () => {
     };
 
     const [timerEndsAt, setTimerEndsAt] = useState(null);
-    const [displayTimer, setDisplayTimer] = useState(20);
+    const [displayTimer, setDisplayTimer] = useState(15);
 
     useEffect(() => {
         if (!timerEndsAt) return;
@@ -410,6 +410,11 @@ const AuctionPage = () => {
                                     <span className="px-3 py-1 rounded-full bg-purple-100 text-purple-700 text-sm font-bold uppercase tracking-wide">
                                         {PLAYER_SETS[currentPlayer.set] || `Set ${currentPlayer.set}`}
                                     </span>
+                                    {currentPlayer.battingPositionGroup != null && (
+                                        <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-sm font-bold uppercase tracking-wide">
+                                            {[null,'Opener','Middle Order','Lower Middle','Tail'][currentPlayer.battingPositionGroup] || `Grp ${currentPlayer.battingPositionGroup}`}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
 
