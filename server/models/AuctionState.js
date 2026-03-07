@@ -21,7 +21,6 @@ const auctionStateSchema = new mongoose.Schema({
     },
     bidHistory: [{
         team: String, // Team Code
-        userName: String, // Name of the user placing the bid
         amount: Number,
         timestamp: { type: Date, default: Date.now }
     }],

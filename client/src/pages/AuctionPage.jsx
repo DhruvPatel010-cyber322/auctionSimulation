@@ -622,9 +622,9 @@ const AuctionPage = () => {
                                                     >
                                                         {bid.teamName || bid.team}
                                                     </span>
-                                                    {(bid.userName || auctionState.teams.find(t => t.id === bid.team)?.ownerUsername) && (
+                                                    {auctionState.teams.find(t => t.id === bid.team)?.ownerUsername && (
                                                         <span className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
-                                                            @{bid.userName || auctionState.teams.find(t => t.id === bid.team)?.ownerUsername}
+                                                            @{auctionState.teams.find(t => t.id === bid.team)?.ownerUsername}
                                                         </span>
                                                     )}
                                                 </div>
