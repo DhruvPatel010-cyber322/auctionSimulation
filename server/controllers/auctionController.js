@@ -101,11 +101,11 @@ export const resetTimer = async (req, res) => {
             state.timerEndsAt = null;
         } else if (req.query.action === 'resume') {
             state.status = 'ACTIVE';
-            const durationToAdd = state.remainingTime || 20000;
+            const durationToAdd = state.remainingTime || 15000;
             state.timerEndsAt = new Date(Date.now() + durationToAdd);
             state.remainingTime = null; // Clear after using
         } else if (req.query.action === 'reset') {
-            state.timerEndsAt = new Date(Date.now() + 20000); // 20 seconds
+            state.timerEndsAt = new Date(Date.now() + 15000); // 15 seconds
             state.status = 'ACTIVE';
             state.remainingTime = null;
             state.highestBidder = null;
