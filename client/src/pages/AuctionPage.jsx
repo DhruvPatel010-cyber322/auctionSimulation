@@ -15,7 +15,7 @@ const AuctionPage = () => {
         currentPlayer: null,
         currentBid: 0,
         highestBidder: null,
-        timer: 15,
+        timer: 10,
         isSold: false,
         bidHistory: [],
         teams: []
@@ -80,7 +80,7 @@ const AuctionPage = () => {
     };
 
     const [timerEndsAt, setTimerEndsAt] = useState(null);
-    const [displayTimer, setDisplayTimer] = useState(15);
+    const [displayTimer, setDisplayTimer] = useState(10);
 
     useEffect(() => {
         if (!timerEndsAt) return;

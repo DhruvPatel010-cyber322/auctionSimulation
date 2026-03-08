@@ -101,11 +101,11 @@ export const resetTimer = async (req, res) => {
             state.timerEndsAt = null;
         } else if (req.query.action === 'resume') {
             state.status = 'ACTIVE';
-            const durationToAdd = state.remainingTime || 15000;
+            const durationToAdd = state.remainingTime || 10000;
             state.timerEndsAt = new Date(Date.now() + durationToAdd);
             state.remainingTime = null; // Clear after using
         } else if (req.query.action === 'reset') {
-            state.timerEndsAt = new Date(Date.now() + 15000); // 15 seconds
+            state.timerEndsAt = new Date(Date.now() + 10000); // 10 seconds
             state.status = 'ACTIVE';
             state.remainingTime = null;
             state.highestBidder = null;
@@ -191,7 +191,7 @@ export const startAuction = async (req, res) => {
         state.currentBid = nextPlayer.basePrice;
         state.highestBidder = null;
         state.bidHistory = [];
-        state.bidDuration = 15; // Force 15 seconds default
+        state.bidDuration = 10; // Force 10 seconds default
         state.timerEndsAt = new Date(Date.now() + (state.bidDuration * 1000));
         await state.save();
 
@@ -275,7 +275,7 @@ export const nextPlayer = async (req, res) => {
             currentBid: nextP.basePrice,
             highestBidder: null,
             bidHistory: [],
-            timerEndsAt: new Date(Date.now() + 15000) // Default 15s
+            timerEndsAt: new Date(Date.now() + 10000) // Default 10s
         }, { new: true, upsert: true }).populate('currentPlayer');
 
         // Sync In-Memory Timer
@@ -396,7 +396,7 @@ export const placeBid = async (req, res) => {
                 $set: {
                     currentBid: newBidAmount,
                     highestBidder: team.code,
-                    timerEndsAt: new Date(Date.now() + 15000)
+                    timerEndsAt: new Date(Date.now() + 10000)
                 },
                 $push: {
                     bidHistory: {
