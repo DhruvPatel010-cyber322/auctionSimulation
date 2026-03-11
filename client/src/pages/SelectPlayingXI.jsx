@@ -16,7 +16,7 @@ const getBattingGroupLabel = (groups) => {
 const getRequiredGroupForPos = (pos) => {
     if (pos <= 2) return [1];
     if (pos <= 8) return [2, 3, 4];
-    if (pos <= 11) return [3, 4];
+    if (pos <= 11) return [4];
     return [];
 };
 
