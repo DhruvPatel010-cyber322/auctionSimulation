@@ -267,6 +267,37 @@ const AdminPage = () => {
             console.error("Network Error:", e);
         }
     };
+    const handleTogglePlayingXILock = async () => {
+        const activeTourney = tournaments.find(t => t._id === selectedTournamentId);
+        if (!activeTourney) return;
+
+        const newLockState = !activeTourney.isPlayingXILocked;
+        if (!window.confirm(`Are you sure you want to ${newLockState ? 'LOCK' : 'UNLOCK'} Playing XI selections for this tournament?`)) return;
+
+        const firebaseToken = (sessionStorage.getItem('firebase_token') || localStorage.getItem('token'));
+        try {
+            const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${selectedTournamentId}/lock-playing-xi`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${firebaseToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ isPlayingXILocked: newLockState })
+            });
+
+            if (res.ok) {
+                // Update local state to reflect change without full reload
+                setTournaments(prev => prev.map(t => 
+                    t._id === selectedTournamentId ? { ...t, isPlayingXILocked: newLockState } : t
+                ));
+            } else {
+                console.error("Failed to toggle lock");
+                alert("Failed to toggle lock status");
+            }
+        } catch (e) {
+            console.error("Network Error:", e);
+        }
+    };
 
 
     return (
@@ -390,7 +421,23 @@ const AdminPage = () => {
                                     </p>
                                 </div>
                             </div>
-                            {isManagingTournament ? <ChevronUp size={20} className="text-gray-500" /> : <ChevronDown size={20} className="text-gray-500" />}
+                            <div className="flex items-center gap-3">
+                                {selectedTournamentId && (
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); handleTogglePlayingXILock(); }}
+                                        className={cn(
+                                            "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border",
+                                            tournaments.find(t => t._id === selectedTournamentId)?.isPlayingXILocked 
+                                                ? "bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20"
+                                                : "bg-green-500/10 text-green-500 border-green-500/20 hover:bg-green-500/20"
+                                        )}
+                                    >
+                                        <Lock size={14} />
+                                        {tournaments.find(t => t._id === selectedTournamentId)?.isPlayingXILocked ? 'XI Locked' : 'XI Unlocked'}
+                                    </button>
+                                )}
+                                {isManagingTournament ? <ChevronUp size={20} className="text-gray-500" /> : <ChevronDown size={20} className="text-gray-500" />}
+                            </div>
                         </div>
 
                         {/* Expanded Content */}

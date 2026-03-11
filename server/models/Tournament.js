@@ -22,6 +22,10 @@ const tournamentSchema = new mongoose.Schema({
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
+    },
+    isPlayingXILocked: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true

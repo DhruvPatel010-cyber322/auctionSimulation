@@ -294,6 +294,30 @@ router.post('/tournaments/create', firebaseAuth, async (req, res) => {
     }
 });
 
+// 3.9 Admin Toggle Playing XI Lock
+router.put('/tournaments/:id/lock-playing-xi', firebaseAuth, async (req, res) => {
+    const tournamentId = req.params.id;
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Only admins can toggle the Playing XI lock' });
+    }
+
+    const { isPlayingXILocked } = req.body;
+
+    try {
+        const tournament = await Tournament.findByIdAndUpdate(
+            tournamentId,
+            { isPlayingXILocked },
+            { new: true }
+        );
+        if (!tournament) return res.status(404).json({ message: 'Tournament not found' });
+
+        res.json({ success: true, message: `Playing XI is now ${isPlayingXILocked ? 'Locked' : 'Unlocked'}`, isPlayingXILocked: tournament.isPlayingXILocked });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Failed to toggle lock status' });
+    }
+});
+
 // 4. Get Teams Availability for a Tournament
 router.get('/tournaments/:id/teams', firebaseAuth, async (req, res) => {
     console.log(`[API] Fetching teams for tournament: ${req.params.id}`);
@@ -627,6 +651,12 @@ router.post('/tournaments/:id/playing11', firebaseAuth, async (req, res) => {
     const userId = req.user._id;
 
     try {
+        const tournament = await Tournament.findById(tournamentId);
+        if (!tournament) return res.status(404).json({ message: 'Tournament not found.' });
+        if (tournament.isPlayingXILocked) {
+            return res.status(403).json({ message: 'Playing XI submissions are locked by the Admin.' });
+        }
+
         // 1. Get User's Team in this Tournament
         const userAssignment = await TournamentUser.findOne({ tournament: tournamentId, user: userId });
         if (!userAssignment || !userAssignment.teamCode) {
@@ -761,7 +791,7 @@ router.get('/tournaments/:id/my-squad', firebaseAuth, async (req, res) => {
 
 // 9. Public Squad View (For "View Other Team")
 router.get('/tournaments/:id/teams/:teamCode/squad', firebaseAuth, async (req, res) => {
-    const { teamCode } = req.params;
+    const { teamCode, id: tournamentId } = req.params;
 
     try {
         const team = await Team.findOne({ code: teamCode.toUpperCase() })
@@ -769,6 +799,8 @@ router.get('/tournaments/:id/teams/:teamCode/squad', firebaseAuth, async (req, r
             .populate('playing11');
 
         if (!team) return res.status(404).json({ message: 'Team not found.' });
+        
+        const tournament = await Tournament.findById(tournamentId).select('isPlayingXILocked');
 
         res.json({
             success: true,
@@ -776,7 +808,8 @@ router.get('/tournaments/:id/teams/:teamCode/squad', firebaseAuth, async (req, r
             playing11: team.playing11,
             captain: team.captain,
             viceCaptain: team.viceCaptain,
-            teamCode: team.code
+            teamCode: team.code,
+            isPlayingXILocked: tournament?.isPlayingXILocked || false
         });
     } catch (err) {
         console.error("Get Team Squad Error:", err);

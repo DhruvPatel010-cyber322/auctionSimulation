@@ -64,6 +64,11 @@ const SelectPlayingXI = () => {
         Array.from({ length: 11 }, (_, i) => i + 1).reduce((acc, pos) => ({ ...acc, [pos]: null }), {})
     );
 
+    // Feature Lock & Drag-and-Drop State
+    const [isLocked, setIsLocked] = useState(false);
+    const [draggedPlayer, setDraggedPlayer] = useState(null);
+    const [dragSourcePos, setDragSourcePos] = useState(null);
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [saving, setSaving] = useState(false);
@@ -145,6 +150,7 @@ const SelectPlayingXI = () => {
                     setPlaying11(data.playing11 || []);
                     setCaptain(data.captain || null);
                     setViceCaptain(data.viceCaptain || null);
+                    setIsLocked(data.isPlayingXILocked || false);
 
                     // If switching to My Team and I have saved data, View Mode.
                     // If no saved data, maybe Auto-Edit? No, stick to View -> Edit.
@@ -212,6 +218,67 @@ const SelectPlayingXI = () => {
     };
 
     const handleRemove = (pos) => setSlots(prev => ({ ...prev, [pos]: null }));
+
+    // --- DRAG AND DROP HANDLERS ---
+    const handleDragStart = (e, player, sourcePos = null) => {
+        setDraggedPlayer(player);
+        setDragSourcePos(sourcePos);
+        // Required for Firefox
+        if (e.dataTransfer) {
+            e.dataTransfer.setData('text/plain', player._id);
+            e.dataTransfer.effectAllowed = 'move';
+        }
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault(); // allow drop
+        if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+    };
+
+    const handleDrop = (e, targetPos) => {
+        e.preventDefault();
+        if (!draggedPlayer) return;
+
+        // Perform validation against the new slot
+        const reqGroups = getRequiredGroupForPos(targetPos);
+        if (draggedPlayer.battingPositionGroup && reqGroups.length > 0 && !reqGroups.includes(draggedPlayer.battingPositionGroup)) {
+            setError(`Invalid Position: Requires ${getBattingGroupLabel(reqGroups)}`);
+            setTimeout(() => setError(''), 2000);
+            setDraggedPlayer(null);
+            setDragSourcePos(null);
+            return;
+        }
+
+        setSlots(prev => {
+            const newSlots = { ...prev };
+            const existingPlayerAtTarget = newSlots[targetPos];
+            
+            // If dragging from another slot and dropping here
+            if (dragSourcePos !== null) {
+                // If there was someone already here, swap them if valid
+                if (existingPlayerAtTarget) {
+                    const sourceReqGroups = getRequiredGroupForPos(dragSourcePos);
+                    // Check if existing player is allowed in the original slot
+                    if (existingPlayerAtTarget.battingPositionGroup && sourceReqGroups.length > 0 && !sourceReqGroups.includes(existingPlayerAtTarget.battingPositionGroup)) {
+                        setError(`Cannot swap: ${existingPlayerAtTarget.name} cannot bat at position ${dragSourcePos}`);
+                        setTimeout(() => setError(''), 2000);
+                        return prev; // abort
+                    }
+                    newSlots[dragSourcePos] = existingPlayerAtTarget;
+                } else {
+                    newSlots[dragSourcePos] = null; // Blank the old slot
+                }
+            }
+            
+            // Assign dragged player to target slot
+            newSlots[targetPos] = draggedPlayer;
+            return newSlots;
+        });
+
+        setError('');
+        setDraggedPlayer(null);
+        setDragSourcePos(null);
+    };
 
     const handleProceedToCaptainModal = () => {
         if (!stats.isValid) {
@@ -292,16 +359,29 @@ const SelectPlayingXI = () => {
 
     // Edit Mode Data
     const assignedIds = Object.values(slots).filter(p => p).map(p => p._id);
-    const availableForEdit = squad
-        .filter(p => !assignedIds.includes(p._id))
-        .sort((a, b) => {
-            // Sort by Batting Group (1 -> 4)
-            const groupA = a.battingPositionGroup || 99; // 99 for undefined (put at end)
-            const groupB = b.battingPositionGroup || 99;
-            if (groupA !== groupB) return groupA - groupB;
-            // Then by Name
-            return a.name.localeCompare(b.name);
-        });
+    const availableForEdit = squad.filter(p => !assignedIds.includes(p._id));
+
+    // Group players for sidebar visibly by category
+    const groupedAvailable = {
+        'Opener': [],
+        'Middle Order': [],
+        'Lower Middle': [],
+        'Tail': [],
+        'Other': []
+    };
+
+    availableForEdit.forEach(p => {
+        if (p.battingPositionGroup === 1) groupedAvailable['Opener'].push(p);
+        else if (p.battingPositionGroup === 2) groupedAvailable['Middle Order'].push(p);
+        else if (p.battingPositionGroup === 3) groupedAvailable['Lower Middle'].push(p);
+        else if (p.battingPositionGroup === 4) groupedAvailable['Tail'].push(p);
+        else groupedAvailable['Other'].push(p);
+    });
+
+    // Sort alphabetically within each group
+    Object.keys(groupedAvailable).forEach(key => {
+        groupedAvailable[key].sort((a, b) => a.name.localeCompare(b.name));
+    });
 
     return (
         <div className="max-w-7xl mx-auto p-4 md:p-8">
@@ -330,14 +410,21 @@ const SelectPlayingXI = () => {
                         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
                     </div>
 
-                    {isMyTeam && !isEditMode && (
-                        <button
-                            onClick={() => setIsEditMode(true)}
-                            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-bold transition-colors"
-                        >
-                            <Edit2 size={16} /> Edit XI
-                        </button>
-                    )}
+                    <div className="flex gap-2">
+                        {isLocked && (
+                            <div className="flex items-center gap-2 px-3 py-1.5 bg-red-50 text-red-600 rounded-xl text-sm font-bold border border-red-200">
+                                <Lock size={14} /> Locked
+                            </div>
+                        )}
+                        {isMyTeam && !isEditMode && !isLocked && (
+                            <button
+                                onClick={() => setIsEditMode(true)}
+                                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-bold transition-colors"
+                            >
+                                <Edit2 size={16} /> Edit XI
+                            </button>
+                        )}
+                    </div>
 
                     {isEditMode && (
                         <button
@@ -364,8 +451,8 @@ const SelectPlayingXI = () => {
                             <Shield size={48} className="mx-auto text-gray-300 mb-4" />
                             <h3 className="text-xl font-bold text-gray-900">No Playing XI Selected</h3>
                             <p className="text-gray-500 mb-6">{isMyTeam ? "You haven't finalized your team yet." : "This team hasn't announced their Playing XI."}</p>
-                            {isMyTeam && (
-                                <button onClick={() => setIsEditMode(true)} className="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold">
+                            {isMyTeam && !isLocked && (
+                                <button onClick={() => setIsEditMode(true)} className="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-colors">
                                     Create Playing XI
                                 </button>
                             )}
@@ -459,18 +546,35 @@ const SelectPlayingXI = () => {
                         <div className="lg:col-span-4 space-y-4">
                             <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto">
                                 <h2 className="font-bold text-gray-800 mb-4">Available Squad ({availableForEdit.length})</h2>
-                                <div className="space-y-2">
-                                    {availableForEdit.map(p => (
-                                        <div key={p._id} onClick={() => handleAssign(p)} className="p-3 border rounded-xl hover:bg-blue-50 cursor-pointer flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden shrink-0">
-                                                {p.image ? <img src={p.image} className="w-full h-full object-cover" /> : <User className="w-full h-full p-2 text-gray-300" />}
+                                <div className="space-y-4">
+                                    {Object.entries(groupedAvailable).map(([groupName, players]) => {
+                                        if (players.length === 0) return null;
+                                        return (
+                                            <div key={groupName} className="space-y-2">
+                                                <h3 className="text-xs font-bold uppercase text-gray-500 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100 shadow-sm">{groupName} ({players.length})</h3>
+                                                {players.map(p => (
+                                                    <div 
+                                                        key={p._id} 
+                                                        onClick={() => handleAssign(p)} 
+                                                        draggable
+                                                        onDragStart={(e) => handleDragStart(e, p, null)}
+                                                        className={cn(
+                                                            "p-3 border rounded-xl flex items-center gap-3 transition-all",
+                                                            draggedPlayer?._id === p._id ? "opacity-50 ring-2 ring-blue-500 cursor-grabbing bg-blue-50" : "hover:bg-blue-50 bg-white border-gray-100 cursor-grab hover:shadow-md"
+                                                        )}
+                                                    >
+                                                        <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden shrink-0 pointer-events-none">
+                                                            {p.image ? <img src={p.image} className="w-full h-full object-cover" /> : <User className="w-full h-full p-2 text-gray-300" />}
+                                                        </div>
+                                                        <div className="pointer-events-none">
+                                                            <div className="text-sm font-bold">{p.name} {p.isOverseas && '✈️'}</div>
+                                                            <div className="text-xs text-gray-500">{p.role}</div>
+                                                        </div>
+                                                    </div>
+                                                ))}
                                             </div>
-                                            <div>
-                                                <div className="text-sm font-bold">{p.name} {p.isOverseas && '✈️'}</div>
-                                                <div className="text-xs text-gray-500">{p.role}</div>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             </div>
                         </div>
@@ -482,11 +586,24 @@ const SelectPlayingXI = () => {
                                     const pos = i + 1;
                                     const p = slots[pos];
                                     return (
-                                        <div key={pos} className={cn("relative p-4 rounded-2xl border-2 min-h-[90px] flex items-center", p ? "bg-white border-blue-500" : "bg-gray-50 border-dashed")}>
+                                        <div 
+                                            key={pos} 
+                                            onDragOver={handleDragOver}
+                                            onDrop={(e) => handleDrop(e, pos)}
+                                            className={cn(
+                                                "relative p-4 rounded-2xl border-2 min-h-[90px] flex items-center transition-all", 
+                                                p ? "bg-white border-blue-500 shadow-sm" : "bg-gray-50 border-dashed",
+                                                draggedPlayer && !p ? "border-blue-400 bg-blue-50/50" : ""
+                                            )}
+                                        >
                                             <span className="absolute top-0 left-0 bg-blue-600 text-white text-xs px-2 py-0.5 rounded-br">{pos}</span>
                                             {p ? (
-                                                <div className="w-full pl-6 flex justify-between items-center">
-                                                    <div className="flex items-center gap-3">
+                                                <div 
+                                                    className={cn("w-full pl-6 flex justify-between items-center", draggedPlayer?._id === p._id ? "opacity-30 cursor-grabbing" : "cursor-grab")}
+                                                    draggable
+                                                    onDragStart={(e) => handleDragStart(e, p, pos)}
+                                                >
+                                                    <div className="flex items-center gap-3 pointer-events-none">
                                                         <div className="w-10 h-10 rounded-full bg-gray-100 overflow-hidden">
                                                             {p.image ? <img src={p.image} className="w-full h-full object-cover" /> : <User className="w-full h-full p-2 text-gray-300" />}
                                                         </div>
@@ -495,10 +612,10 @@ const SelectPlayingXI = () => {
                                                             <div className="text-xs text-gray-500">{p.role}</div>
                                                         </div>
                                                     </div>
-                                                    <button onClick={() => handleRemove(pos)} className="p-2 hover:bg-red-50 text-red-500 rounded-full"><X size={16} /></button>
+                                                    <button onClick={(e) => { e.stopPropagation(); handleRemove(pos); }} className="p-2 hover:bg-red-50 text-red-500 rounded-full"><X size={16} /></button>
                                                 </div>
                                             ) : (
-                                                <div className="w-full text-center text-xs text-gray-400 font-bold uppercase tracking-wider pl-6">
+                                                <div className="w-full text-center text-xs text-gray-400 font-bold uppercase tracking-wider pl-6 pointer-events-none">
                                                     Required: {getBattingGroupLabel(getRequiredGroupForPos(pos))}
                                                 </div>
                                             )}
