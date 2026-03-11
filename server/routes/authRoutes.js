@@ -592,16 +592,22 @@ const validateBattingPositionRules = (player, position) => {
     if (!player.battingPositionGroup) return { valid: true };
 
     const group = player.battingPositionGroup;
-    let requiredGroup = null;
+    let validGroups = [];
+    let reqName = "";
 
-    if (position >= 1 && position <= 2) requiredGroup = 1;      // Openers
-    else if (position >= 3 && position <= 4) requiredGroup = 2; // Middle
-    else if (position >= 5 && position <= 7) requiredGroup = 3; // Lower Middle
-    else if (position >= 8 && position <= 11) requiredGroup = 4;// Lower Order
+    if (position >= 1 && position <= 2) {
+        validGroups = [1];
+        reqName = "Opener";
+    } else if (position >= 3 && position <= 8) {
+        validGroups = [2, 3, 4];
+        reqName = "Middle Order, Lower Middle, or Tail";
+    } else if (position >= 9 && position <= 11) {
+        validGroups = [4];
+        reqName = "Tail";
+    }
 
-    if (requiredGroup && group !== requiredGroup) {
+    if (validGroups.length > 0 && !validGroups.includes(group)) {
         const groupName = group === 1 ? "Opener" : group === 2 ? "Middle Order" : group === 3 ? "Lower Middle" : "Tail";
-        const reqName = requiredGroup === 1 ? "Openers" : requiredGroup === 2 ? "Middle Order" : requiredGroup === 3 ? "Lower Middle" : "Lower Order";
         return {
             valid: false,
             message: `Player ${player.name} (${groupName}) cannot bat at position ${position} (${reqName} required)`
@@ -611,10 +617,11 @@ const validateBattingPositionRules = (player, position) => {
 };
 
 // 7. Save Playing XI
-// 7. Save Playing XI
 router.post('/tournaments/:id/playing11', firebaseAuth, async (req, res) => {
-    const { playerIds } = req.body; // Legacy payload
+    const { playerIds, captainId, viceCaptainId } = req.body; // updated payload structure: either Array from legacy or Object { players, captainId, viceCaptainId }
     let itemsToProcess = [];
+    let selectedCaptain = null;
+    let selectedViceCaptain = null;
 
     const tournamentId = req.params.id;
     const userId = req.user._id;
@@ -631,8 +638,13 @@ router.post('/tournaments/:id/playing11', firebaseAuth, async (req, res) => {
         if (!team) return res.status(404).json({ message: 'Team not found.' });
 
         // 3. Normalize Input
-        if (Array.isArray(req.body)) {
-            // NEW Payload: [ { playerId, battingPosition } ]
+        if (req.body.players && Array.isArray(req.body.players)) {
+            // V2 Payload: { players: [ { playerId, battingPosition } ], captainId, viceCaptainId }
+            itemsToProcess = req.body.players;
+            selectedCaptain = req.body.captainId;
+            selectedViceCaptain = req.body.viceCaptainId;
+        } else if (Array.isArray(req.body)) {
+            // V1 Payload: [ { playerId, battingPosition } ]
             itemsToProcess = req.body;
         } else if (Array.isArray(playerIds)) {
             // LEGACY Payload: [ id1, id2... ] - Infer Position from Index (1-based)
@@ -693,12 +705,24 @@ router.post('/tournaments/:id/playing11', firebaseAuth, async (req, res) => {
                 return res.status(400).json({ message: result.message });
             }
         }
+        // 5. Check Captain and Vice-Captain if provided
+        if (selectedCaptain && !uniqueParams.has(selectedCaptain)) {
+            return res.status(400).json({ message: 'Captain must be part of the Playing XI.' });
+        }
+        if (selectedViceCaptain && !uniqueParams.has(selectedViceCaptain)) {
+            return res.status(400).json({ message: 'Vice-Captain must be part of the Playing XI.' });
+        }
+        if (selectedCaptain && selectedViceCaptain && selectedCaptain === selectedViceCaptain) {
+            return res.status(400).json({ message: 'Captain and Vice-Captain cannot be the same player.' });
+        }
 
-        // 5. Save if all valid
+        // 6. Save if all valid
         team.playing11 = inputIds;
+        team.captain = selectedCaptain || null;
+        team.viceCaptain = selectedViceCaptain || null;
         await team.save();
 
-        res.json({ success: true, message: 'Playing XI saved successfully', playing11: team.playing11 });
+        res.json({ success: true, message: 'Playing XI saved successfully', playing11: team.playing11, captain: team.captain, viceCaptain: team.viceCaptain });
 
     } catch (err) {
         console.error("Save Playing XI Error:", err);
@@ -724,6 +748,8 @@ router.get('/tournaments/:id/my-squad', firebaseAuth, async (req, res) => {
             success: true,
             players: team.playersBought,
             playing11: team.playing11, // Array of objects
+            captain: team.captain,
+            viceCaptain: team.viceCaptain,
             teamCode: team.code
         });
 
@@ -748,6 +774,8 @@ router.get('/tournaments/:id/teams/:teamCode/squad', firebaseAuth, async (req, r
             success: true,
             players: team.playersBought,
             playing11: team.playing11,
+            captain: team.captain,
+            viceCaptain: team.viceCaptain,
             teamCode: team.code
         });
     } catch (err) {

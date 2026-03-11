@@ -4,23 +4,20 @@ import { API_BASE_URL as API_URL } from '../config';
 import { Shield, Check, AlertCircle, X, User, Plane, AlertTriangle, Lock, Edit2, ChevronDown, Users } from 'lucide-react';
 import { cn } from '../lib/utils';
 
-// Helper for Batting Groups
-const getBattingGroupLabel = (groupCode) => {
-    switch (groupCode) {
-        case 1: return "Opener";
-        case 2: return "Middle Order";
-        case 3: return "Lower Middle";
-        case 4: return "Tail";
-        default: return "Any";
-    }
+const getBattingGroupLabel = (groups) => {
+    if (!Array.isArray(groups)) return "Any";
+    if (groups.includes(1) && groups.includes(2)) return "Any"; // simplification
+    if (groups.includes(1)) return "Opener";
+    if (groups.includes(2) && groups.includes(4)) return "Middle/Lower Order";
+    if (groups.includes(3) && groups.includes(4)) return "Lower Order/Tail";
+    return "Any";
 };
 
 const getRequiredGroupForPos = (pos) => {
-    if (pos <= 2) return 1;
-    if (pos <= 4) return 2;
-    if (pos <= 7) return 3;
-    if (pos <= 11) return 4;
-    return null;
+    if (pos <= 2) return [1];
+    if (pos <= 8) return [2, 3, 4];
+    if (pos <= 11) return [3, 4];
+    return [];
 };
 
 const decodeJwtPayload = (token) => {
@@ -51,9 +48,14 @@ const SelectPlayingXI = () => {
     // Data State
     const [squad, setSquad] = useState([]);
     const [playing11, setPlaying11] = useState([]); // Read-only Array
+    const [captain, setCaptain] = useState(null); // ID of captain
+    const [viceCaptain, setViceCaptain] = useState(null); // ID of vice-captain
 
     // Edit Mode State
     const [isEditMode, setIsEditMode] = useState(false);
+    const [showCaptainModal, setShowCaptainModal] = useState(false);
+    const [tempCaptain, setTempCaptain] = useState(null);
+    const [tempViceCaptain, setTempViceCaptain] = useState(null);
     const [slots, setSlots] = useState(
         Array.from({ length: 11 }, (_, i) => i + 1).reduce((acc, pos) => ({ ...acc, [pos]: null }), {})
     );
@@ -137,6 +139,8 @@ const SelectPlayingXI = () => {
                 if (res.ok) {
                     setSquad(data.players || []);
                     setPlaying11(data.playing11 || []);
+                    setCaptain(data.captain || null);
+                    setViceCaptain(data.viceCaptain || null);
 
                     // If switching to My Team and I have saved data, View Mode.
                     // If no saved data, maybe Auto-Edit? No, stick to View -> Edit.
@@ -193,9 +197,9 @@ const SelectPlayingXI = () => {
     };
 
     const assignToSlot = (player, pos) => {
-        const reqGroup = getRequiredGroupForPos(pos);
-        if (player.battingPositionGroup && player.battingPositionGroup !== reqGroup) {
-            setError(`Invalid Position: Requires ${getBattingGroupLabel(reqGroup)}`);
+        const reqGroups = getRequiredGroupForPos(pos);
+        if (player.battingPositionGroup && reqGroups.length > 0 && !reqGroups.includes(player.battingPositionGroup)) {
+            setError(`Invalid Position: Requires ${getBattingGroupLabel(reqGroups)}`);
             setTimeout(() => setError(''), 2000);
             return;
         }
@@ -205,9 +209,27 @@ const SelectPlayingXI = () => {
 
     const handleRemove = (pos) => setSlots(prev => ({ ...prev, [pos]: null }));
 
-    const handleSave = async () => {
+    const handleProceedToCaptainModal = () => {
         if (!stats.isValid) {
             setError("Cannot save: Squad rules validation failed.");
+            setTimeout(() => setError(''), 3000);
+            return;
+        }
+        // pre-fill with existing if re-editing and they are in the current slots
+        const assignedIds = Object.values(slots).map(p => p?._id);
+        setTempCaptain(assignedIds.includes(captain) ? captain : null);
+        setTempViceCaptain(assignedIds.includes(viceCaptain) ? viceCaptain : null);
+        setShowCaptainModal(true);
+    };
+
+    const handleSaveFinal = async () => {
+        if (!tempCaptain || !tempViceCaptain) {
+            setError("Must select both Captain and Vice-Captain.");
+            setTimeout(() => setError(''), 3000);
+            return;
+        }
+        if (tempCaptain === tempViceCaptain) {
+            setError("Captain and Vice-Captain cannot be the same player.");
             setTimeout(() => setError(''), 3000);
             return;
         }
@@ -222,7 +244,11 @@ const SelectPlayingXI = () => {
             }
             const tournamentId = payload.tournamentId;
             if (!tournamentId) throw new Error("Missing Tournament ID");
-            const payloadData = Object.keys(slots).map(pos => ({ playerId: slots[pos]._id, battingPosition: parseInt(pos) }));
+            const payloadData = {
+                players: Object.keys(slots).map(pos => ({ playerId: slots[pos]._id, battingPosition: parseInt(pos) })),
+                captainId: tempCaptain,
+                viceCaptainId: tempViceCaptain
+            };
 
             const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${tournamentId}/playing11`, {
                 method: 'POST',
@@ -235,7 +261,10 @@ const SelectPlayingXI = () => {
                 // Refresh Data to View Mode
                 const data = await res.json();
                 setPlaying11(data.playing11); // Optimistic update or from response
+                setCaptain(data.captain);
+                setViceCaptain(data.viceCaptain);
                 setIsEditMode(false);
+                setShowCaptainModal(false);
                 setTimeout(() => setMsg(''), 3000);
             } else {
                 const data = await res.json();
@@ -308,7 +337,10 @@ const SelectPlayingXI = () => {
 
                     {isEditMode && (
                         <button
-                            onClick={() => setIsEditMode(false)}
+                            onClick={() => {
+                                setIsEditMode(false);
+                                setShowCaptainModal(false);
+                            }}
                             className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-2 rounded-xl font-bold transition-colors"
                         >
                             <X size={16} /> Cancel
@@ -354,7 +386,9 @@ const SelectPlayingXI = () => {
                                             <div>
                                                 <div className="flex items-center gap-1">
                                                     <h3 className="font-bold text-gray-900">{p.name}</h3>
-                                                    {p.isOverseas && <Plane size={14} className="text-blue-500 fill-blue-500" />}
+                                                    {p._id === captain && <span className="bg-orange-100 text-orange-700 text-[10px] font-black px-1.5 py-0.5 rounded ml-1">C</span>}
+                                                    {p._id === viceCaptain && <span className="bg-blue-100 text-blue-700 text-[10px] font-black px-1.5 py-0.5 rounded ml-1">VC</span>}
+                                                    {p.isOverseas && <Plane size={14} className="text-blue-500 fill-blue-500 ml-1" />}
                                                 </div>
                                                 <p className="text-xs font-bold text-gray-500 uppercase">{p.role}</p>
                                             </div>
@@ -429,7 +463,7 @@ const SelectPlayingXI = () => {
                                             </div>
                                             <div>
                                                 <div className="text-sm font-bold">{p.name} {p.isOverseas && '✈️'}</div>
-                                                <div className="text-xs text-gray-500">{p.role} • {getBattingGroupLabel(p.battingPositionGroup)}</div>
+                                                <div className="text-xs text-gray-500">{p.role}</div>
                                             </div>
                                         </div>
                                     ))}
@@ -471,13 +505,87 @@ const SelectPlayingXI = () => {
 
                             <div className="mt-8 flex justify-end">
                                 <button
-                                    onClick={handleSave}
+                                    onClick={handleProceedToCaptainModal}
                                     disabled={!stats.isValid || saving}
-                                    className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="bg-blue-600 hover:bg-blue-700 transition-colors text-white px-8 py-3 rounded-xl font-bold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    {saving ? 'Saving...' : 'Save Playing XI'}
+                                    Select Captain & Vice-Captain
                                 </button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Captaincy Selection Modal */}
+            {isEditMode && showCaptainModal && (
+                <div className="fixed inset-0 z-50 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+                        <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+                            <div>
+                                <h2 className="text-2xl font-black text-gray-900">Select Leadership</h2>
+                                <p className="text-gray-500 text-sm mt-1">Choose your Captain (C) and Vice-Captain (VC) from your selected 11.</p>
+                            </div>
+                            <button onClick={() => setShowCaptainModal(false)} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 object-top">
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        <div className="p-6 overflow-y-auto flex-1">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                {Object.values(slots).filter(p => p !== null).map(p => (
+                                    <div key={p._id} className={cn(
+                                        "p-3 rounded-xl border-2 flex items-center justify-between cursor-pointer transition-colors",
+                                        tempCaptain === p._id ? "border-orange-500 bg-orange-50" : tempViceCaptain === p._id ? "border-blue-500 bg-blue-50" : "border-gray-100 hover:border-gray-300"
+                                    )}>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 shrink-0">
+                                                {p.image ? <img src={p.image} className="w-full h-full object-cover" /> : <User className="w-full h-full p-2 text-gray-300" />}
+                                            </div>
+                                            <div className="min-w-0">
+                                                <div className="font-bold text-sm truncate">{p.name} {p.isOverseas && '✈️'}</div>
+                                                <div className="text-xs text-gray-500">{p.role}</div>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => {
+                                                    if (tempViceCaptain === p._id) setTempViceCaptain(null);
+                                                    setTempCaptain(tempCaptain === p._id ? null : p._id);
+                                                }}
+                                                className={cn("w-8 h-8 rounded-full font-black text-xs flex items-center justify-center transition-colors", tempCaptain === p._id ? "bg-orange-500 text-white shadow-md shadow-orange-500/30" : "bg-gray-100 text-gray-400 hover:bg-orange-100 hover:text-orange-600")}
+                                            >
+                                                C
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    if (tempCaptain === p._id) setTempCaptain(null);
+                                                    setTempViceCaptain(tempViceCaptain === p._id ? null : p._id);
+                                                }}
+                                                className={cn("w-8 h-8 rounded-full font-black text-xs flex items-center justify-center transition-colors", tempViceCaptain === p._id ? "bg-blue-600 text-white shadow-md shadow-blue-600/30" : "bg-gray-100 text-gray-400 hover:bg-blue-100 hover:text-blue-600")}
+                                            >
+                                                VC
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="p-6 bg-gray-50 border-t border-gray-100 flex justify-end gap-4">
+                            <button
+                                onClick={() => setShowCaptainModal(false)}
+                                className="px-6 py-2.5 font-bold text-gray-500 hover:bg-gray-200 rounded-xl transition-colors"
+                            >
+                                Back
+                            </button>
+                            <button
+                                onClick={handleSaveFinal}
+                                disabled={!tempCaptain || !tempViceCaptain || saving}
+                                className="px-8 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg border border-blue-500 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                            >
+                                {saving ? 'Saving...' : 'Confirm & Save'} <Check size={18} />
+                            </button>
                         </div>
                     </div>
                 </div>

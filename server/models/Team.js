@@ -32,6 +32,16 @@ const teamSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Player'
     }],
+    captain: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Player',
+        default: null
+    },
+    viceCaptain: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Player',
+        default: null
+    },
     squadSize: {
         type: Number,
         default: 0
