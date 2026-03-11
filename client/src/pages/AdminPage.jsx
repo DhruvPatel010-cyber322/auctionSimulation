@@ -5,6 +5,7 @@ import { Shield, Play, RotateCcw, Lock, AlertTriangle, Users, Trophy, Edit2, Che
 import { controlTimer, endTurn, nextPlayer, getPlayers, requeuePlayer } from '../services/api';
 import { toCr } from '../utils/formatCurrency';
 import TeamSelector from '../components/TeamSelector';
+import { cn } from '../lib/utils';
 
 import { API_BASE_URL as API_URL } from '../config';
 
