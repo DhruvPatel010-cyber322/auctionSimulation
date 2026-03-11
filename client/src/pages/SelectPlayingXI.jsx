@@ -6,8 +6,12 @@ import { cn } from '../lib/utils';
 
 const getBattingGroupLabel = (groups) => {
     if (!Array.isArray(groups)) return "Any";
-    if (groups.includes(1) && groups.includes(2)) return "Any"; // simplification
-    if (groups.includes(1)) return "Opener";
+    // Exact match for Tail-only
+    if (groups.length === 1 && groups[0] === 4) return "Tail";
+    // Exact match for Opener-only
+    if (groups.length === 1 && groups[0] === 1) return "Opener";
+    // Complex combinations
+    if (groups.includes(1) && groups.includes(2)) return "Any";
     if (groups.includes(2) && groups.includes(4)) return "Middle/Lower Order";
     if (groups.includes(3) && groups.includes(4)) return "Lower Order/Tail";
     return "Any";
