@@ -300,6 +300,37 @@ const AdminPage = () => {
         }
     };
 
+    const handleToggleCaptaincyLock = async () => {
+        const activeTourney = tournaments.find(t => t._id === selectedTournamentId);
+        if (!activeTourney) return;
+
+        const newLockState = !activeTourney.isCaptaincyLocked;
+        if (!window.confirm(`Are you sure you want to ${newLockState ? 'LOCK' : 'UNLOCK'} Captain & Vice-Captain selections for this tournament?`)) return;
+
+        const firebaseToken = (sessionStorage.getItem('firebase_token') || localStorage.getItem('token'));
+        try {
+            const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${selectedTournamentId}/lock-captaincy`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${firebaseToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ isCaptaincyLocked: newLockState })
+            });
+
+            if (res.ok) {
+                setTournaments(prev => prev.map(t => 
+                    t._id === selectedTournamentId ? { ...t, isCaptaincyLocked: newLockState } : t
+                ));
+            } else {
+                console.error("Failed to toggle Captaincy lock");
+                alert("Failed to toggle Captaincy lock status");
+            }
+        } catch (e) {
+            console.error("Network Error:", e);
+        }
+    };
+
 
     return (
         <div className="p-6 md:p-10 max-w-7xl mx-auto min-h-screen pb-40 bg-auction-bg text-white font-sans">
@@ -424,18 +455,32 @@ const AdminPage = () => {
                             </div>
                             <div className="flex items-center gap-3">
                                 {selectedTournamentId && (
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); handleTogglePlayingXILock(); }}
-                                        className={cn(
-                                            "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border",
-                                            tournaments.find(t => t._id === selectedTournamentId)?.isPlayingXILocked 
-                                                ? "bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20"
-                                                : "bg-green-500/10 text-green-500 border-green-500/20 hover:bg-green-500/20"
-                                        )}
-                                    >
-                                        <Lock size={14} />
-                                        {tournaments.find(t => t._id === selectedTournamentId)?.isPlayingXILocked ? 'XI Locked' : 'XI Unlocked'}
-                                    </button>
+                                    <>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleTogglePlayingXILock(); }}
+                                            className={cn(
+                                                "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border",
+                                                tournaments.find(t => t._id === selectedTournamentId)?.isPlayingXILocked 
+                                                    ? "bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20"
+                                                    : "bg-green-500/10 text-green-500 border-green-500/20 hover:bg-green-500/20"
+                                            )}
+                                        >
+                                            <Lock size={14} />
+                                            {tournaments.find(t => t._id === selectedTournamentId)?.isPlayingXILocked ? 'XI Locked' : 'XI Unlocked'}
+                                        </button>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleToggleCaptaincyLock(); }}
+                                            className={cn(
+                                                "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border",
+                                                tournaments.find(t => t._id === selectedTournamentId)?.isCaptaincyLocked 
+                                                    ? "bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20"
+                                                    : "bg-green-500/10 text-green-500 border-green-500/20 hover:bg-green-500/20"
+                                            )}
+                                        >
+                                            <Lock size={14} />
+                                            {tournaments.find(t => t._id === selectedTournamentId)?.isCaptaincyLocked ? 'C/VC Locked' : 'C/VC Unlocked'}
+                                        </button>
+                                    </>
                                 )}
                                 {isManagingTournament ? <ChevronUp size={20} className="text-gray-500" /> : <ChevronDown size={20} className="text-gray-500" />}
                             </div>

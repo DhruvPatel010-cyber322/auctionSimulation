@@ -26,6 +26,10 @@ const tournamentSchema = new mongoose.Schema({
     isPlayingXILocked: {
         type: Boolean,
         default: false
+    },
+    isCaptaincyLocked: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true

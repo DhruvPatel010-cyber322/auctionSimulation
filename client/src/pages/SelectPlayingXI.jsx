@@ -66,6 +66,7 @@ const SelectPlayingXI = () => {
 
     // Feature Lock & Drag-and-Drop State
     const [isLocked, setIsLocked] = useState(false);
+    const [isCaptaincyLocked, setIsCaptaincyLocked] = useState(false);
     const [draggedPlayer, setDraggedPlayer] = useState(null);
     const [dragSourcePos, setDragSourcePos] = useState(null);
 
@@ -151,6 +152,7 @@ const SelectPlayingXI = () => {
                     setCaptain(data.captain || null);
                     setViceCaptain(data.viceCaptain || null);
                     setIsLocked(data.isPlayingXILocked || false);
+                    setIsCaptaincyLocked(data.isCaptaincyLocked || false);
 
                     // If switching to My Team and I have saved data, View Mode.
                     // If no saved data, maybe Auto-Edit? No, stick to View -> Edit.
@@ -249,6 +251,17 @@ const SelectPlayingXI = () => {
             return;
         }
 
+        const existingPlayerAtTarget = slots[targetPos];
+
+        // 🛑 NEW: Prevent dropping overwrites onto locked executives
+        if (isCaptaincyLocked && existingPlayerAtTarget && (existingPlayerAtTarget._id === captain || existingPlayerAtTarget._id === viceCaptain)) {
+            setError(`Cannot replace locked Captain/Vice-Captain`);
+            setTimeout(() => setError(''), 2000);
+            setDraggedPlayer(null);
+            setDragSourcePos(null);
+            return;
+        }
+
         setSlots(prev => {
             const newSlots = { ...prev };
             const existingPlayerAtTarget = newSlots[targetPos];
@@ -286,11 +299,69 @@ const SelectPlayingXI = () => {
             setTimeout(() => setError(''), 3000);
             return;
         }
+
+        // 🛑 NEW: If Captaincy is locked, bypass the popup entirely and just save existing C and VC.
+        if (isCaptaincyLocked) {
+            setTempCaptain(captain);
+            setTempViceCaptain(viceCaptain);
+            // Must delay slightly as state might not reflect immediately for handleSaveFinal
+            setTimeout(() => {
+                handleSaveFinalOverwrite(captain, viceCaptain);
+            }, 0);
+            return;
+        }
+
         // pre-fill with existing if re-editing and they are in the current slots
         const assignedIds = Object.values(slots).map(p => p?._id);
         setTempCaptain(assignedIds.includes(captain) ? captain : null);
         setTempViceCaptain(assignedIds.includes(viceCaptain) ? viceCaptain : null);
         setShowCaptainModal(true);
+    };
+
+    const handleSaveFinalOverwrite = async (forcedC, forcedVC) => {
+        setSaving(true);
+        const fbToken = sessionStorage.getItem('firebase_token') || localStorage.getItem('token');
+        const localToken = localStorage.getItem('token');
+        try {
+            const payload = decodeJwtPayload(localToken);
+            if (!payload) {
+                window.location.href = '/email-login';
+                return;
+            }
+            const tournamentId = payload.tournamentId;
+            if (!tournamentId) throw new Error("Missing Tournament ID");
+            const payloadData = {
+                players: Object.keys(slots).map(pos => ({ playerId: slots[pos]._id, battingPosition: parseInt(pos) })),
+                captainId: forcedC,
+                viceCaptainId: forcedVC
+            };
+
+            const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${tournamentId}/playing11`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${fbToken}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify(payloadData)
+            });
+
+            if (res.ok) {
+                setMsg('Saved Successfully!');
+                // Refresh Data to View Mode
+                const data = await res.json();
+                setPlaying11(data.playing11); // Optimistic update or from response
+                setCaptain(data.captain);
+                setViceCaptain(data.viceCaptain);
+                setIsEditMode(false);
+                setShowCaptainModal(false);
+                setTimeout(() => setMsg(''), 3000);
+            } else {
+                const data = await res.json();
+                setError(data.message || 'Save failed');
+                setTimeout(() => setError(''), 3000);
+            }
+        } catch (e) {
+            setError('Network error');
+            setTimeout(() => setError(''), 3000);
+        }
+        finally { setSaving(false); }
     };
 
     const handleSaveFinal = async () => {
@@ -585,6 +656,8 @@ const SelectPlayingXI = () => {
                                 {[...Array(11)].map((_, i) => {
                                     const pos = i + 1;
                                     const p = slots[pos];
+                                    const isExecutivesLocked = isCaptaincyLocked && p && (p._id === captain || p._id === viceCaptain);
+
                                     return (
                                         <div 
                                             key={pos} 
@@ -599,9 +672,9 @@ const SelectPlayingXI = () => {
                                             <span className="absolute top-0 left-0 bg-blue-600 text-white text-xs px-2 py-0.5 rounded-br">{pos}</span>
                                             {p ? (
                                                 <div 
-                                                    className={cn("w-full pl-6 flex justify-between items-center", draggedPlayer?._id === p._id ? "opacity-30 cursor-grabbing" : "cursor-grab")}
-                                                    draggable
-                                                    onDragStart={(e) => handleDragStart(e, p, pos)}
+                                                    className={cn("w-full pl-6 flex justify-between items-center", draggedPlayer?._id === p._id ? "opacity-30 cursor-grabbing" : isExecutivesLocked ? "cursor-not-allowed" : "cursor-grab")}
+                                                    draggable={!isExecutivesLocked}
+                                                    onDragStart={!isExecutivesLocked ? ((e) => handleDragStart(e, p, pos)) : undefined}
                                                 >
                                                     <div className="flex items-center gap-3 pointer-events-none">
                                                         <div className="w-10 h-10 rounded-full bg-gray-100 overflow-hidden">
@@ -612,7 +685,13 @@ const SelectPlayingXI = () => {
                                                             <div className="text-xs text-gray-500">{p.role}</div>
                                                         </div>
                                                     </div>
-                                                    <button onClick={(e) => { e.stopPropagation(); handleRemove(pos); }} className="p-2 hover:bg-red-50 text-red-500 rounded-full"><X size={16} /></button>
+                                                    {isExecutivesLocked ? (
+                                                        <div className="p-2 text-gray-400">
+                                                            <Lock size={14} />
+                                                        </div>
+                                                    ) : (
+                                                        <button onClick={(e) => { e.stopPropagation(); handleRemove(pos); }} className="p-2 hover:bg-red-50 text-red-500 rounded-full"><X size={16} /></button>
+                                                    )}
                                                 </div>
                                             ) : (
                                                 <div className="w-full text-center text-xs text-gray-400 font-bold uppercase tracking-wider pl-6 pointer-events-none">

@@ -318,6 +318,30 @@ router.put('/tournaments/:id/lock-playing-xi', firebaseAuth, async (req, res) =>
     }
 });
 
+// 3.10 Admin Toggle Captaincy Lock
+router.put('/tournaments/:id/lock-captaincy', firebaseAuth, async (req, res) => {
+    const tournamentId = req.params.id;
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Only admins can toggle the Captaincy lock' });
+    }
+
+    const { isCaptaincyLocked } = req.body;
+
+    try {
+        const tournament = await Tournament.findByIdAndUpdate(
+            tournamentId,
+            { isCaptaincyLocked },
+            { new: true }
+        );
+        if (!tournament) return res.status(404).json({ message: 'Tournament not found' });
+
+        res.json({ success: true, message: `Captaincy Selection is now ${isCaptaincyLocked ? 'Locked' : 'Unlocked'}`, isCaptaincyLocked: tournament.isCaptaincyLocked });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Failed to toggle captaincy lock status' });
+    }
+});
+
 // 4. Get Teams Availability for a Tournament
 router.get('/tournaments/:id/teams', firebaseAuth, async (req, res) => {
     console.log(`[API] Fetching teams for tournament: ${req.params.id}`);
@@ -736,13 +760,20 @@ router.post('/tournaments/:id/playing11', firebaseAuth, async (req, res) => {
             }
         }
         // 5. Check Captain and Vice-Captain if provided
-        if (selectedCaptain && !uniqueParams.has(selectedCaptain)) {
+        
+        // Captaincy Lock Logic: If Captaincy is locked, Force Overwrite payload values with Team DB values
+        if (tournament.isCaptaincyLocked) {
+            selectedCaptain = team.captain;
+            selectedViceCaptain = team.viceCaptain;
+        }
+
+        if (selectedCaptain && !uniqueParams.has(selectedCaptain.toString())) {
             return res.status(400).json({ message: 'Captain must be part of the Playing XI.' });
         }
-        if (selectedViceCaptain && !uniqueParams.has(selectedViceCaptain)) {
+        if (selectedViceCaptain && !uniqueParams.has(selectedViceCaptain.toString())) {
             return res.status(400).json({ message: 'Vice-Captain must be part of the Playing XI.' });
         }
-        if (selectedCaptain && selectedViceCaptain && selectedCaptain === selectedViceCaptain) {
+        if (selectedCaptain && selectedViceCaptain && selectedCaptain.toString() === selectedViceCaptain.toString()) {
             return res.status(400).json({ message: 'Captain and Vice-Captain cannot be the same player.' });
         }
 
@@ -800,7 +831,7 @@ router.get('/tournaments/:id/teams/:teamCode/squad', firebaseAuth, async (req, r
 
         if (!team) return res.status(404).json({ message: 'Team not found.' });
         
-        const tournament = await Tournament.findById(tournamentId).select('isPlayingXILocked');
+        const tournament = await Tournament.findById(tournamentId).select('isPlayingXILocked isCaptaincyLocked');
 
         res.json({
             success: true,
@@ -809,7 +840,8 @@ router.get('/tournaments/:id/teams/:teamCode/squad', firebaseAuth, async (req, r
             captain: team.captain,
             viceCaptain: team.viceCaptain,
             teamCode: team.code,
-            isPlayingXILocked: tournament?.isPlayingXILocked || false
+            isPlayingXILocked: tournament?.isPlayingXILocked || false,
+            isCaptaincyLocked: tournament?.isCaptaincyLocked || false
         });
     } catch (err) {
         console.error("Get Team Squad Error:", err);

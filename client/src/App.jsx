@@ -13,6 +13,7 @@ import TeamsPage from './pages/TeamsPage';
 import RulesPage from './pages/RulesPage';
 import SelectPlayingXI from './pages/SelectPlayingXI';
 import PointsTablePage from './pages/PointsTablePage';
+import TradePage from './pages/TradePage';
 import AdminPage from './pages/AdminPage';
 import ErrorBoundary from './components/ErrorBoundary';
 // Revert to RequireAuth logic if changed previously
@@ -41,6 +42,7 @@ function App() {
                   <Route path="auction" element={<AuctionPage />} />
                   <Route path="players" element={<PlayerListPage />} />
                   <Route path="teams" element={<TeamsPage />} />
+                  <Route path="trade" element={<TradePage />} />
                   <Route path="rules" element={<RulesPage />} />
                   <Route path="select-playing-xi" element={<SelectPlayingXI />} />
                   <Route path="points-table" element={<PointsTablePage />} />
