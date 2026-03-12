@@ -36,6 +36,10 @@ const auctionStateSchema = new mongoose.Schema({
         type: Number,
         default: null // Store milliseconds remaining when paused
     },
+    isTradingOpen: {
+        type: Boolean,
+        default: false // Admin must explicitly turn this on
+    },
     updatedAt: { type: Date, default: Date.now }
 }, {
     timestamps: true

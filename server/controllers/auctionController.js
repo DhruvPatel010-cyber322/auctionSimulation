@@ -598,3 +598,21 @@ export const requeueUnsoldPlayer = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+export const toggleTrading = async (req, res) => {
+    try {
+        let state = await getAuctionState();
+        state.isTradingOpen = !state.isTradingOpen;
+        await state.save();
+        
+        const io = getIO();
+        if (io) {
+            // Broadcast new trading state to all clients
+            io.emit('trading:status', { isOpen: state.isTradingOpen });
+        }
+        
+        res.json({ success: true, isTradingOpen: state.isTradingOpen });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};

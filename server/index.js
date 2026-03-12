@@ -37,6 +37,7 @@ import firebaseAdmin from './config/firebaseAdmin.js';
 import authRoutes from './routes/authRoutes.js';
 import Tournament from './models/Tournament.js';
 import TournamentUser from './models/TournamentUser.js';
+import tradeRoutes from './routes/tradeRoutes.js';
 
 dotenv.config();
 
@@ -353,6 +354,9 @@ app.post('/api/auction/requeue', protect, adminOnly, auctionController.requeueUn
 
 // --- V2 AUTH ROUTES (Refactor) ---
 app.use('/api/v2/auth', authRoutes);
+
+// --- TRADE ROUTES ---
+app.use('/api/trades', protect, tradeRoutes);
 
 // Basic Route
 app.get('/', (req, res) => {

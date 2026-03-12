@@ -1,0 +1,259 @@
+import Trade from '../models/Trade.js';
+import Team from '../models/Team.js';
+import Player from '../models/Player.js';
+import AuctionState from '../models/AuctionState.js';
+
+const getIsTradingOpen = async () => {
+    let state = await AuctionState.findOne();
+    return state ? state.isTradingOpen : false;
+};
+
+export const createProposal = async (req, res) => {
+    try {
+        const isOpen = await getIsTradingOpen();
+        if (!isOpen) {
+            return res.status(403).json({ message: 'Trading window is currently closed.' });
+        }
+
+        const { receiverTeamId, offerPlayerIds, requestPlayerIds } = req.body;
+        const senderTeamCode = req.user.teamCode;
+        
+        const senderTeam = await Team.findOne({ code: senderTeamCode });
+        if (!senderTeam) return res.status(404).json({ message: 'Sender team not found' });
+        
+        if (senderTeam._id.toString() === receiverTeamId) {
+            return res.status(400).json({ message: 'Cannot trade with yourself' });
+        }
+
+        if (!offerPlayerIds || !requestPlayerIds || offerPlayerIds.length === 0 || requestPlayerIds.length === 0) {
+            return res.status(400).json({ message: 'Must provide at least one player to offer and request' });
+        }
+        
+        const offerPlayers = await Player.find({ _id: { $in: offerPlayerIds } });
+        const requestPlayers = await Player.find({ _id: { $in: requestPlayerIds } });
+        
+        if (offerPlayers.length !== offerPlayerIds.length || requestPlayers.length !== requestPlayerIds.length) {
+            return res.status(400).json({ message: 'Some players not found' });
+        }
+        
+        // Validate ownership
+        const invalidOffer = offerPlayers.some(p => p.soldToTeam !== senderTeam.code);
+        if (invalidOffer) {
+            return res.status(400).json({ message: 'You do not own all the players you are offering' });
+        }
+        
+        const receiverTeam = await Team.findById(receiverTeamId);
+        if (!receiverTeam) return res.status(404).json({ message: 'Receiver team not found' });
+        
+        const invalidRequest = requestPlayers.some(p => p.soldToTeam !== receiverTeam.code);
+        if (invalidRequest) {
+            return res.status(400).json({ message: 'Requested players do not all belong to the target team' });
+        }
+        
+        // Check exact match existing pending
+        const existingTrade = await Trade.findOne({
+            senderTeam: senderTeam._id,
+            receiverTeam: receiverTeam._id,
+            offerPlayers: { $size: offerPlayerIds.length, $all: offerPlayerIds },
+            requestPlayers: { $size: requestPlayerIds.length, $all: requestPlayerIds },
+            status: 'PENDING'
+        });
+        
+        if (existingTrade) {
+            return res.status(400).json({ message: 'An identical exact trade proposal is already pending' });
+        }
+        
+        const trade = new Trade({
+            senderTeam: senderTeam._id,
+            receiverTeam: receiverTeam._id,
+            offerPlayers: offerPlayerIds,
+            requestPlayers: requestPlayerIds
+        });
+        
+        await trade.save();
+        
+        res.status(201).json({ message: 'Trade proposal created successfully', trade });
+    } catch (error) {
+        console.error('Error creating trade proposal:', error);
+        res.status(500).json({ message: 'Server error creating trade proposal', error: error.message });
+    }
+};
+
+export const getProposals = async (req, res) => {
+    try {
+        const teamCode = req.user.teamCode;
+        const team = await Team.findOne({ code: teamCode });
+        
+        if (!team) return res.status(404).json({ message: 'Team not found' });
+        
+        const sentProposals = await Trade.find({ senderTeam: team._id })
+            .populate('receiverTeam', 'name code')
+            .populate('offerPlayers', 'name basePrice soldPrice isOverseas role')
+            .populate('requestPlayers', 'name basePrice soldPrice isOverseas role')
+            .sort({ createdAt: -1 });
+            
+        const receivedProposals = await Trade.find({ receiverTeam: team._id })
+            .populate('senderTeam', 'name code')
+            .populate('offerPlayers', 'name basePrice soldPrice isOverseas role')
+            .populate('requestPlayers', 'name basePrice soldPrice isOverseas role')
+            .sort({ createdAt: -1 });
+            
+        res.json({ sent: sentProposals, received: receivedProposals });
+    } catch (error) {
+        console.error('Error fetching trade proposals:', error);
+        res.status(500).json({ message: 'Server error fetching trade proposals', error: error.message });
+    }
+};
+
+export const updateProposalStatus = async (req, res) => {
+    try {
+        const isOpen = await getIsTradingOpen();
+        if (!isOpen) {
+            return res.status(403).json({ message: 'Trading window is currently closed.' });
+        }
+
+        const { proposalId } = req.params;
+        const { status } = req.body; 
+        const teamCode = req.user.teamCode;
+        
+        if (!['ACCEPTED', 'REJECTED'].includes(status)) {
+            return res.status(400).json({ message: 'Invalid status' });
+        }
+        
+        const currentTeam = await Team.findOne({ code: teamCode });
+        if (!currentTeam) return res.status(404).json({ message: 'Team not found' });
+        
+        const trade = await Trade.findById(proposalId)
+            .populate('senderTeam')
+            .populate('receiverTeam')
+            .populate('offerPlayers')
+            .populate('requestPlayers');
+            
+        if (!trade) return res.status(404).json({ message: 'Trade proposal not found' });
+        
+        if (trade.status !== 'PENDING') {
+            return res.status(400).json({ message: `Trade is already ${trade.status}` });
+        }
+        
+        if (trade.receiverTeam._id.toString() !== currentTeam._id.toString()) {
+            return res.status(403).json({ message: 'Only the receiving team can accept or reject this proposal' });
+        }
+        
+        if (status === 'REJECTED') {
+            trade.status = 'REJECTED';
+            await trade.save();
+            return res.json({ message: 'Trade rejected', trade });
+        }
+        
+        // ACCEPTED LOGIC
+        const sender = trade.senderTeam;
+        const receiver = trade.receiverTeam;
+        const offerPlayers = trade.offerPlayers; // Array, going to receiver
+        const requestPlayers = trade.requestPlayers; // Array, going to sender
+        
+        // Sums
+        const totalOfferValue = offerPlayers.reduce((sum, p) => sum + (p.soldPrice || 0), 0);
+        const totalRequestValue = requestPlayers.reduce((sum, p) => sum + (p.soldPrice || 0), 0);
+        
+        // Calculate new remaining purses
+        const senderNewPurse = sender.remainingPurse + totalOfferValue - totalRequestValue;
+        const receiverNewPurse = receiver.remainingPurse + totalRequestValue - totalOfferValue;
+        
+        if (senderNewPurse < 0) {
+            return res.status(400).json({ message: `Sender team does not have enough purse to complete this trade. Required: ${totalRequestValue - totalOfferValue}` });
+        }
+        if (receiverNewPurse < 0) {
+            return res.status(400).json({ message: `You do not have enough purse to complete this trade. Required: ${totalOfferValue - totalRequestValue}` });
+        }
+        
+        // Squad Size Validations
+        const senderSizeChange = requestPlayers.length - offerPlayers.length;
+        const receiverSizeChange = offerPlayers.length - requestPlayers.length;
+
+        if (sender.squadSize + senderSizeChange > 25) {
+            return res.status(400).json({ message: 'Trade invalid: Sender team would exceed maximum squad size of 25' });
+        }
+        if (receiver.squadSize + receiverSizeChange > 25) {
+            return res.status(400).json({ message: 'Trade invalid: You would exceed maximum squad size of 25' });
+        }
+
+        // Overseas Validations
+        const offerOverseasCount = offerPlayers.filter(p => p.isOverseas).length;
+        const requestOverseasCount = requestPlayers.filter(p => p.isOverseas).length;
+
+        const senderOverseasChange = requestOverseasCount - offerOverseasCount;
+        const receiverOverseasChange = offerOverseasCount - requestOverseasCount;
+
+        if (sender.overseasCount + senderOverseasChange > 8) {
+             return res.status(400).json({ message: 'Trade invalid: Sender team would exceed maximum of 8 overseas players' });
+        }
+        if (receiver.overseasCount + receiverOverseasChange > 8) {
+             return res.status(400).json({ message: 'Trade invalid: You would exceed maximum of 8 overseas players' });
+        }
+
+        // --- EXECUTE ---
+        
+        // 1. Update Players
+        const offerIds = offerPlayers.map(p => p._id.toString());
+        const requestIds = requestPlayers.map(p => p._id.toString());
+
+        for (const p of offerPlayers) {
+            p.soldToTeam = receiver.code;
+            await p.save();
+        }
+        for (const p of requestPlayers) {
+            p.soldToTeam = sender.code;
+            await p.save();
+        }
+        
+        // 2. Update Sender Team
+        sender.remainingPurse = senderNewPurse;
+        sender.totalSpent = sender.totalPurse - senderNewPurse;
+        sender.overseasCount += senderOverseasChange;
+        sender.squadSize += senderSizeChange;
+        
+        sender.playersBought = sender.playersBought.filter(pId => !offerIds.includes(pId.toString()));
+        for (const id of requestIds) sender.playersBought.push(id);
+        
+        sender.playing11 = sender.playing11.filter(pId => !offerIds.includes(pId.toString()));
+        if (sender.captain && offerIds.includes(sender.captain.toString())) sender.captain = null;
+        if (sender.viceCaptain && offerIds.includes(sender.viceCaptain.toString())) sender.viceCaptain = null;
+        
+        // 3. Update Receiver Team
+        receiver.remainingPurse = receiverNewPurse;
+        receiver.totalSpent = receiver.totalPurse - receiverNewPurse;
+        receiver.overseasCount += receiverOverseasChange;
+        receiver.squadSize += receiverSizeChange;
+        
+        receiver.playersBought = receiver.playersBought.filter(pId => !requestIds.includes(pId.toString()));
+        for (const id of offerIds) receiver.playersBought.push(id);
+        
+        receiver.playing11 = receiver.playing11.filter(pId => !requestIds.includes(pId.toString()));
+        if (receiver.captain && requestIds.includes(receiver.captain.toString())) receiver.captain = null;
+        if (receiver.viceCaptain && requestIds.includes(receiver.viceCaptain.toString())) receiver.viceCaptain = null;
+        
+        await sender.save();
+        await receiver.save();
+        
+        // 4. Mark status
+        trade.status = 'ACCEPTED';
+        await trade.save();
+        
+        // 5. Auto-reject other pending trades involving these players
+        const allInvolvedIds = [...offerPlayers.map(p => p._id), ...requestPlayers.map(p => p._id)];
+        
+        await Trade.updateMany({
+            status: 'PENDING',
+            _id: { $ne: trade._id },
+            $or: [
+                { offerPlayers: { $in: allInvolvedIds } },
+                { requestPlayers: { $in: allInvolvedIds } }
+            ]
+        }, { status: 'REJECTED' });
+        
+        res.json({ message: 'Trade completed successfully', trade });
+    } catch (error) {
+        console.error('Error updating trade status:', error);
+        res.status(500).json({ message: 'Server error updating trade status', error: error.message });
+    }
+};

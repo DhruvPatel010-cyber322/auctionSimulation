@@ -330,7 +330,40 @@ const AdminPage = () => {
             console.error("Network Error:", e);
         }
     };
+    const handleToggleTradingLock = async () => {
+        const activeTourney = tournaments.find(t => t._id === selectedTournamentId);
+        if (!activeTourney) return;
 
+        const newLockState = !activeTourney.isTradingOpen;
+        if (!window.confirm(`Are you sure you want to ${newLockState ? 'OPEN' : 'CLOSE'} the Trading window for this tournament?`)) return;
+
+        try {
+            // We use the same toggleTrading endpoint we created earlier, which modifies AuctionState for now.
+            // Ideally this should be per-tournament if tournaments represent independent DBs, but 
+            // since toggleTrading currently works globally on AuctionState in backend, we'll use api service.
+            const response = await fetch(`${API_URL}/api/trades/toggle`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${sessionStorage.getItem('firebase_token') || localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await response.json();
+            
+            if (response.ok) {
+                // To keep UI in sync, update the dummy property
+                setTournaments(prev => prev.map(t => 
+                    t._id === selectedTournamentId ? { ...t, isTradingOpen: data.isTradingOpen } : t
+                ));
+                alert(`Trading window is now ${data.isTradingOpen ? 'OPEN' : 'CLOSED'}`);
+            } else {
+                console.error("Failed to toggle Trading lock:", data.message);
+                alert("Failed to toggle Trading lock status");
+            }
+        } catch (e) {
+            console.error("Network Error:", e);
+        }
+    };
 
     return (
         <div className="p-6 md:p-10 max-w-7xl mx-auto min-h-screen pb-40 bg-auction-bg text-white font-sans">
@@ -479,6 +512,18 @@ const AdminPage = () => {
                                         >
                                             <Lock size={14} />
                                             {tournaments.find(t => t._id === selectedTournamentId)?.isCaptaincyLocked ? 'C/VC Locked' : 'C/VC Unlocked'}
+                                        </button>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleToggleTradingLock(); }}
+                                            className={cn(
+                                                "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border",
+                                                !tournaments.find(t => t._id === selectedTournamentId)?.isTradingOpen 
+                                                    ? "bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20"
+                                                    : "bg-green-500/10 text-green-500 border-green-500/20 hover:bg-green-500/20"
+                                            )}
+                                        >
+                                            <Lock size={14} />
+                                            {tournaments.find(t => t._id === selectedTournamentId)?.isTradingOpen ? 'Trading Open' : 'Trading Closed'}
                                         </button>
                                     </>
                                 )}

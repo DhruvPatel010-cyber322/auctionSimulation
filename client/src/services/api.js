@@ -119,3 +119,25 @@ export const getAuctionStatus = async () => {
     const response = await api.get('/api/auction/status');
     return response.data;
 };
+
+// --- ADMIN API ---
+export const toggleTradingWindow = async () => {
+    const response = await api.post('/api/trades/toggle');
+    return response.data;
+};
+
+// --- TRADE API ---
+export const createTradeProposal = async (tradeData) => {
+    const response = await api.post('/api/trades/proposal', tradeData);
+    return response.data;
+};
+
+export const getTradeProposals = async (teamId) => {
+    const response = await api.get(`/api/trades/proposals/${teamId}`);
+    return response.data;
+};
+
+export const respondTradeProposal = async (proposalId, status) => {
+    const response = await api.put(`/api/trades/proposal/${proposalId}`, { status });
+    return response.data;
+};
