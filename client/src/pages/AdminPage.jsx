@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSocket } from '../context/SocketContext';
 import { useAuth } from '../context/AuthContext';
 import { Shield, Play, RotateCcw, Lock, AlertTriangle, Users, Trophy, Edit2, Check, X as XIcon, ChevronDown, ChevronUp } from 'lucide-react';
-import { controlTimer, endTurn, nextPlayer, getPlayers, requeuePlayer } from '../services/api';
+import { controlTimer, endTurn, nextPlayer, getPlayers, requeuePlayer, toggleTradingWindow } from '../services/api';
 import { toCr } from '../utils/formatCurrency';
 import TeamSelector from '../components/TeamSelector';
 import { cn } from '../lib/utils';
@@ -338,30 +338,18 @@ const AdminPage = () => {
         if (!window.confirm(`Are you sure you want to ${newLockState ? 'OPEN' : 'CLOSE'} the Trading window for this tournament?`)) return;
 
         try {
-            // We use the same toggleTrading endpoint we created earlier, which modifies AuctionState for now.
-            // Ideally this should be per-tournament if tournaments represent independent DBs, but 
-            // since toggleTrading currently works globally on AuctionState in backend, we'll use api service.
-            const response = await fetch(`${API_URL}/api/trades/toggle`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${sessionStorage.getItem('firebase_token') || localStorage.getItem('token')}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            const data = await response.json();
+            const data = await toggleTradingWindow();
             
-            if (response.ok) {
+            if (data) {
                 // To keep UI in sync, update the dummy property
                 setTournaments(prev => prev.map(t => 
                     t._id === selectedTournamentId ? { ...t, isTradingOpen: data.isTradingOpen } : t
                 ));
                 alert(`Trading window is now ${data.isTradingOpen ? 'OPEN' : 'CLOSED'}`);
-            } else {
-                console.error("Failed to toggle Trading lock:", data.message);
-                alert("Failed to toggle Trading lock status");
             }
         } catch (e) {
-            console.error("Network Error:", e);
+            console.error("Failed to toggle Trading lock:", e);
+            alert("Failed to toggle Trading lock status: " + (e.response?.data?.message || e.message));
         }
     };
 

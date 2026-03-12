@@ -13,6 +13,7 @@ import { TEAMS } from './data/teams.js';
 import { setupSocket, startAuctionCheckLoop, updateAuctionTimer } from './socketHandler.js';
 import * as auctionController from './controllers/auctionController.js';
 import AuctionState from './models/AuctionState.js';
+import User from './models/User.js';
 
 // --- FIX: Restore Timer on Startup ---
 const restoreAuctionTimer = async () => {
@@ -73,7 +74,26 @@ const protect = async (req, res, next) => {
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     try {
       token = req.headers.authorization.split(' ')[1];
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      
+      // Try verify with Firebase First (for V2 integrated users)
+      let decoded;
+      try {
+        const firebaseUser = await firebaseAdmin.auth().verifyIdToken(token);
+        // Find Mongo User
+        const user = await User.findOne({ firebaseUid: firebaseUser.uid });
+        if (user) {
+          decoded = {
+             userId: user._id,
+             role: user.role,
+             teamCode: user.role === 'admin' ? 'admin' : (req.body?.teamId || null) // Partial reconstruction
+          };
+        }
+      } catch (fbErr) {
+        // Fallback to local JWT
+        decoded = jwt.verify(token, process.env.JWT_SECRET);
+      }
+
+      if (!decoded) throw new Error('Invalid Token');
 
       // Admin and Spectator bypass session validation
       if (decoded.role === 'admin' || decoded.role === 'spectator') {
@@ -89,17 +109,15 @@ const protect = async (req, res, next) => {
       }
 
       const normalizedCode = teamCodeFromToken.toUpperCase();
-      // console.log(`[Protect] Verifying team: ${normalizedCode}`);
-
       const team = await Team.findOne({ code: normalizedCode });
+      
       if (!team) {
-        console.error(`[Protect] Team not found for code: ${normalizedCode} (Token Code: ${teamCodeFromToken})`);
+        console.error(`[Protect] Team not found for code: ${normalizedCode}`);
         return res.status(401).json({ message: 'Team not found', forceLogout: true });
       }
 
-      // Check for New Auth Flow (Multi-Tournament)
+      // Check for Multi-Tournament Flow
       if (decoded.tournamentId) {
-        // Bypass session check. Trust the JWT signature.
         req.user = {
           teamCode: normalizedCode,
           role: decoded.role,
@@ -109,7 +127,7 @@ const protect = async (req, res, next) => {
         return next();
       }
 
-      // Legacy Session Validation (Only if no tournamentId)
+      // Legacy Session Validation
       if (team.activeSessionId !== decoded.sessionId) {
         return res.status(401).json({
           message: 'Session invalid. You have been logged out from another location.',
@@ -117,7 +135,6 @@ const protect = async (req, res, next) => {
         });
       }
 
-      // STRICT FIX: Explicitly attach user object
       req.user = {
         teamCode: normalizedCode,
         role: decoded.role,
