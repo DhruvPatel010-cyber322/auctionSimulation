@@ -75,8 +75,8 @@ const TradePage = () => {
     const getTotalValue = (players) => players.reduce((sum, p) => sum + (p.soldPrice || 0), 0);
 
     const handleCreateTrade = async () => {
-        if (!targetTeam || offerPlayers.length === 0 || requestPlayers.length === 0) {
-            toast.error("Please select a target team and at least one player from each side.");
+        if (!targetTeam || (offerPlayers.length === 0 && requestPlayers.length === 0)) {
+            toast.error("Please select a target team and at least one player in total to trade.");
             return;
         }
 
@@ -259,7 +259,7 @@ const TradePage = () => {
                                     <ArrowLeftRight size={48} strokeWidth={1} />
                                 </div>
                                 
-                                {offerPlayers.length > 0 && requestPlayers.length > 0 && (
+                                { (offerPlayers.length > 0 || requestPlayers.length > 0) && (
                                     <div className="mt-8 w-full animate-in fade-in zoom-in duration-300">
                                         <div className="bg-gray-900 text-white rounded-2xl p-6 text-center shadow-xl">
                                             <h4 className="font-bold mb-4 text-gray-100">Trade Ready</h4>
@@ -344,7 +344,7 @@ const TradePage = () => {
                             
                             {/* Mobile confirmation button */}
                             <div className="lg:hidden">
-                                {offerPlayers.length > 0 && requestPlayers.length > 0 && (
+                                {(offerPlayers.length > 0 || requestPlayers.length > 0) && (
                                     <button 
                                         onClick={handleCreateTrade}
                                         disabled={submitting}

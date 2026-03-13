@@ -41,14 +41,14 @@ export const createProposal = async (req, res) => {
             return res.status(400).json({ message: 'Cannot trade with yourself' });
         }
 
-        if (!offerPlayerIds || !requestPlayerIds || offerPlayerIds.length === 0 || requestPlayerIds.length === 0) {
-            return res.status(400).json({ message: 'Must provide at least one player to offer and request' });
+        if ((!offerPlayerIds || offerPlayerIds.length === 0) && (!requestPlayerIds || requestPlayerIds.length === 0)) {
+            return res.status(400).json({ message: 'Must provide at least one player to offer or request' });
         }
         
-        const offerPlayers = await Player.find({ _id: { $in: offerPlayerIds } });
-        const requestPlayers = await Player.find({ _id: { $in: requestPlayerIds } });
+        const offerPlayers = offerPlayerIds?.length > 0 ? await Player.find({ _id: { $in: offerPlayerIds } }) : [];
+        const requestPlayers = requestPlayerIds?.length > 0 ? await Player.find({ _id: { $in: requestPlayerIds } }) : [];
         
-        if (offerPlayers.length !== offerPlayerIds.length || requestPlayers.length !== requestPlayerIds.length) {
+        if (offerPlayers.length !== (offerPlayerIds?.length || 0) || requestPlayers.length !== (requestPlayerIds?.length || 0)) {
             return res.status(400).json({ message: 'Some players not found' });
         }
         
@@ -65,8 +65,48 @@ export const createProposal = async (req, res) => {
         if (invalidRequest) {
             return res.status(400).json({ message: 'Requested players do not all belong to the target team' });
         }
+
+        // --- NEW CONSTRAINTS (Prevent invalid trades from entering Pending state) ---
+        // 1. Check if any involved players are ALREADY in a PENDING trade
+        const allInvolvedPlayerIds = [...(offerPlayerIds || []), ...(requestPlayerIds || [])];
+        const playerInPendingTrade = await Trade.findOne({
+            status: 'PENDING',
+            $or: [
+                { offerPlayers: { $in: allInvolvedPlayerIds } },
+                { requestPlayers: { $in: allInvolvedPlayerIds } }
+            ]
+        });
+
+        if (playerInPendingTrade) {
+            return res.status(400).json({ message: 'One or more selected players are already involved in an active pending trade proposal.' });
+        }
+
+        // 2. Validate Squad Limits & Overseas Limits pre-emptively
+        const senderSizeChange = requestPlayers.length - offerPlayers.length;
+        const receiverSizeChange = offerPlayers.length - requestPlayers.length;
+
+        if (senderTeam.squadSize + senderSizeChange > 25) {
+            return res.status(400).json({ message: 'Trade invalid: You would exceed the maximum squad size of 25' });
+        }
+        if (receiverTeam.squadSize + receiverSizeChange > 25) {
+            return res.status(400).json({ message: 'Trade invalid: Target team would exceed the maximum squad size of 25' });
+        }
+
+        const offerOverseasCount = offerPlayers.filter(p => p.isOverseas).length;
+        const requestOverseasCount = requestPlayers.filter(p => p.isOverseas).length;
+
+        const senderOverseasChange = requestOverseasCount - offerOverseasCount;
+        const receiverOverseasChange = offerOverseasCount - requestOverseasCount;
+
+        if (senderTeam.overseasCount + senderOverseasChange > 8) {
+             return res.status(400).json({ message: 'Trade invalid: You would exceed the maximum of 8 overseas players' });
+        }
+        if (receiverTeam.overseasCount + receiverOverseasChange > 8) {
+             return res.status(400).json({ message: 'Trade invalid: Target team would exceed the maximum of 8 overseas players' });
+        }
+        // --------------------------------------------------------------------------
         
-        // Check exact match existing pending
+        // Exact Duplicate Check still applies just in case
         const existingTrade = await Trade.findOne({
             senderTeam: senderTeam._id,
             receiverTeam: receiverTeam._id,
@@ -82,8 +122,8 @@ export const createProposal = async (req, res) => {
         const trade = new Trade({
             senderTeam: senderTeam._id,
             receiverTeam: receiverTeam._id,
-            offerPlayers: offerPlayerIds,
-            requestPlayers: requestPlayerIds
+            offerPlayers: offerPlayerIds || [],
+            requestPlayers: requestPlayerIds || []
         });
         
         await trade.save();
