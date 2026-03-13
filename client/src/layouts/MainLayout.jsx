@@ -12,6 +12,7 @@ const MainLayout = () => {
     const { socket } = useSocket();
     const [teamDetails, setTeamDetails] = useState(team);
     const [budget, setBudget] = useState(team?.remainingPurse || team?.budget || 0);
+    const [activeUserCount, setActiveUserCount] = useState(0);
 
     // Sync Budget & Fetch Team Details
     useEffect(() => {
@@ -53,6 +54,10 @@ const MainLayout = () => {
                     }
                 }
             };
+            
+            const handleUserCount = (count) => {
+                setActiveUserCount(count);
+            };
 
             const handleTeamUpdate = (update) => {
                 if (update.teamCode === team.id || update.teamCode === team.code) {
@@ -63,6 +68,7 @@ const MainLayout = () => {
             socket.on('auction:state', handleUpdate);
             socket.on('auction:sync', handleUpdate);
             socket.on('team:update', handleTeamUpdate);
+            socket.on('users:active_count', handleUserCount);
             // Also Request sync on mount to ensure freshness
             socket.emit('auction:request_sync');
 
@@ -70,6 +76,7 @@ const MainLayout = () => {
                 socket.off('auction:state', handleUpdate);
                 socket.off('auction:sync', handleUpdate);
                 socket.off('team:update', handleTeamUpdate);
+                socket.off('users:active_count', handleUserCount);
             };
         }
     }, [socket, team]);
@@ -134,8 +141,14 @@ const MainLayout = () => {
                     <div className="md:hidden">
                         <h1 className="text-xl font-black text-auction-primary">Auction <span className="text-auction-secondary">Arena</span></h1>
                     </div>
-                    <div className="hidden md:block">
-                        <h2 className="text-lg font-bold text-gray-800">Auction Dashboard</h2>
+                    <div className="hidden md:block flex-1 ml-8">
+                        <div className="flex items-center gap-2">
+                            <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+                            <div className="bg-green-50 border border-green-100 px-3 py-1 rounded-full flex items-center gap-2">
+                                <span className="text-[10px] font-black uppercase tracking-tighter text-green-600">Active</span>
+                                <span className="text-sm font-black text-gray-900">{activeUserCount}</span>
+                            </div>
+                        </div>
                     </div>
 
                     {/* User Menu / Right Side */}

@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 
 let ioInstance;
 let timerInterval = null;
+const connectedUsers = new Map(); // socket.id -> teamCode
 
 export const getIO = () => ioInstance;
 
@@ -93,8 +94,11 @@ export const setupSocket = (io) => {
         const teamCode = socket.user.teamCode || 'ADMIN';
         console.log(`Socket connected: ${socket.id} (User: ${teamCode})`);
 
-        // NOTE: We do NOT track sessions here. Sessions are DB-only.
-        // Socket is just a dumb pipe for real-time events.
+        connectedUsers.set(socket.id, teamCode);
+        
+        // Broadcast active user count
+        const activeCount = new Set(connectedUsers.values()).size;
+        io.emit('users:active_count', activeCount);
 
         // Send current state from DB
         try {
@@ -170,7 +174,9 @@ export const setupSocket = (io) => {
 
         socket.on('disconnect', async () => {
             console.log(`Socket disconnected: ${socket.id} (User: ${teamCode})`);
-            // Do NOTHING. Session remains valid until API logout.
+            connectedUsers.delete(socket.id);
+            const activeCount = new Set(connectedUsers.values()).size;
+            io.emit('users:active_count', activeCount);
         });
     });
 };
