@@ -96,9 +96,9 @@ export const setupSocket = (io) => {
 
         connectedUsers.set(socket.id, teamCode);
         
-        // Broadcast active user count
-        const activeCount = new Set(connectedUsers.values()).size;
-        io.emit('users:active_count', activeCount);
+        // Broadcast active user list (unique team codes)
+        const activeList = Array.from(new Set(connectedUsers.values()));
+        io.emit('users:active_list', activeList);
 
         // Send current state from DB
         try {
@@ -175,8 +175,8 @@ export const setupSocket = (io) => {
         socket.on('disconnect', async () => {
             console.log(`Socket disconnected: ${socket.id} (User: ${teamCode})`);
             connectedUsers.delete(socket.id);
-            const activeCount = new Set(connectedUsers.values()).size;
-            io.emit('users:active_count', activeCount);
+            const activeList = Array.from(new Set(connectedUsers.values()));
+            io.emit('users:active_list', activeList);
         });
     });
 };

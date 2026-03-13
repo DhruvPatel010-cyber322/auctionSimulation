@@ -12,7 +12,7 @@ const MainLayout = () => {
     const { socket } = useSocket();
     const [teamDetails, setTeamDetails] = useState(team);
     const [budget, setBudget] = useState(team?.remainingPurse || team?.budget || 0);
-    const [activeUserCount, setActiveUserCount] = useState(0);
+    const [activeUsers, setActiveUsers] = useState([]);
 
     // Sync Budget & Fetch Team Details
     useEffect(() => {
@@ -55,8 +55,8 @@ const MainLayout = () => {
                 }
             };
             
-            const handleUserCount = (count) => {
-                setActiveUserCount(count);
+            const handleUserList = (list) => {
+                setActiveUsers(list);
             };
 
             const handleTeamUpdate = (update) => {
@@ -68,7 +68,7 @@ const MainLayout = () => {
             socket.on('auction:state', handleUpdate);
             socket.on('auction:sync', handleUpdate);
             socket.on('team:update', handleTeamUpdate);
-            socket.on('users:active_count', handleUserCount);
+            socket.on('users:active_list', handleUserList);
             // Also Request sync on mount to ensure freshness
             socket.emit('auction:request_sync');
 
@@ -76,7 +76,7 @@ const MainLayout = () => {
                 socket.off('auction:state', handleUpdate);
                 socket.off('auction:sync', handleUpdate);
                 socket.off('team:update', handleTeamUpdate);
-                socket.off('users:active_count', handleUserCount);
+                socket.off('users:active_list', handleUserList);
             };
         }
     }, [socket, team]);
@@ -142,11 +142,25 @@ const MainLayout = () => {
                         <h1 className="text-xl font-black text-auction-primary">Auction <span className="text-auction-secondary">Arena</span></h1>
                     </div>
                     <div className="hidden md:block flex-1 ml-8">
-                        <div className="flex items-center gap-2">
+                        <div className="group relative flex items-center gap-2 cursor-help">
                             <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
                             <div className="bg-green-50 border border-green-100 px-3 py-1 rounded-full flex items-center gap-2">
                                 <span className="text-[10px] font-black uppercase tracking-tighter text-green-600">Active</span>
-                                <span className="text-sm font-black text-gray-900">{activeUserCount}</span>
+                                <span className="text-sm font-black text-gray-900">{activeUsers.length}</span>
+                            </div>
+
+                            {/* Tooltip */}
+                            <div className="absolute top-full left-0 mt-2 bg-white border border-gray-100 shadow-xl rounded-xl p-3 min-w-[120px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 pb-1 border-b border-gray-50">Online Teams</p>
+                                <div className="flex flex-wrap gap-1.5">
+                                    {activeUsers.length > 0 ? activeUsers.map(code => (
+                                        <span key={code} className="px-2 py-0.5 bg-gray-50 text-gray-700 rounded text-[10px] font-bold border border-gray-100 uppercase">
+                                            {code}
+                                        </span>
+                                    )) : (
+                                        <span className="text-[10px] text-gray-400">No teams active</span>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
