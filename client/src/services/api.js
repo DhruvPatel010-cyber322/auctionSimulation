@@ -137,6 +137,11 @@ export const getTradeProposals = async (teamId) => {
     return response.data;
 };
 
+export const getCompletedTrades = async () => {
+    const response = await api.get('/api/trades/completed');
+    return response.data;
+};
+
 export const respondTradeProposal = async (proposalId, status) => {
     const response = await api.put(`/api/trades/proposal/${proposalId}`, { status });
     return response.data;

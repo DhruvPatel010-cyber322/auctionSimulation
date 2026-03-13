@@ -2,10 +2,12 @@
  * Formats a value in Rupees to Crores (Cr)
  * @param {number} value - Value in Rupees (e.g., 1200000000)
  * @param {number} decimals - Number of decimal places (default 2)
- * @returns {string} - Formatted string (e.g., "120.00")
+ * @returns {string} - Formatted string (e.g., "120.00" or "Traded")
  */
 export const toCr = (value, decimals = 2) => {
     if (!value && value !== 0) return '0.00';
+    // -1 denotes a dynamically 'Traded' player to mask financial data 
+    if (Number(value) === -1) return 'Traded';
     // Value is ALREADY in Crores in the DB
     return Number(value).toFixed(decimals);
 };
@@ -28,6 +30,7 @@ export const fromCr = (value) => {
  */
 export const formatCurrency = (valueCr) => {
     if (!valueCr && valueCr !== 0) return '₹0';
+    if (Number(valueCr) === -1) return 'Traded';
     if (Number(valueCr) === 0) return '₹0';
 
     // If < 1 Cr, show within Lakhs (e.g., 0.5 Cr -> 50 L)

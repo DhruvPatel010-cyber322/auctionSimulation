@@ -5,6 +5,7 @@ import { toCr } from '../utils/formatCurrency';
 import { ArrowLeftRight, Check, X, Clock, AlertTriangle, Send, User, Plane, Lock } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { toast } from 'react-hot-toast';
+import { getCompletedTrades } from '../services/api';
 
 const TradePage = () => {
     const { user } = useAuth();
@@ -20,8 +21,8 @@ const TradePage = () => {
     const [submitting, setSubmitting] = useState(false);
     
     // Proposals State
-    const [activeTab, setActiveTab] = useState('CREATE'); // CREATE, SENT, RECEIVED
-    const [proposals, setProposals] = useState({ sent: [], received: [] });
+    const [activeTab, setActiveTab] = useState('CREATE'); // CREATE, SENT, RECEIVED, COMPLETED
+    const [proposals, setProposals] = useState({ sent: [], received: [], completed: [] });
 
     useEffect(() => {
         const loadData = async () => {
@@ -55,7 +56,8 @@ const TradePage = () => {
     const fetchProposals = async (teamId) => {
         try {
             const data = await getTradeProposals(teamId);
-            setProposals(data);
+            const completed = await getCompletedTrades();
+            setProposals({ ...data, completed });
         } catch (error) {
             console.error("Error fetching proposals:", error);
         }
@@ -169,7 +171,7 @@ const TradePage = () => {
                     </div>
                     
                     <div className="flex bg-gray-100 p-1 rounded-xl">
-                        {['CREATE', 'RECEIVED', 'SENT'].map(tab => (
+                        {['CREATE', 'RECEIVED', 'SENT', 'COMPLETED'].map(tab => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
@@ -193,7 +195,8 @@ const TradePage = () => {
                                     </div>
                                 )}
                                 {tab === 'SENT' && <Send size={16} />}
-                                {tab === 'CREATE' ? 'Create' : tab === 'SENT' ? 'Sent' : ''}
+                                {tab === 'COMPLETED' && <Check size={16} />}
+                                {tab === 'CREATE' ? 'Create' : tab === 'SENT' ? 'Sent' : tab === 'COMPLETED' ? 'Completed' : ''}
                             </button>
                         ))}
                     </div>
@@ -239,7 +242,7 @@ const TradePage = () => {
                                                         <div className="font-bold text-sm truncate">{p.name}</div>
                                                         <div className="text-xs text-gray-500 flex justify-between items-center mt-1">
                                                             <span className="flex items-center gap-1">{p.role} {p.isOverseas && <Plane size={10} className="text-blue-500" />}</span>
-                                                            <span className="font-mono font-bold text-gray-700">₹{toCr(p.soldPrice)}</span>
+                                                            <span className="font-mono font-bold text-gray-700">{toCr(p.soldPrice) === 'Traded' ? 'Traded' : `₹${toCr(p.soldPrice)}`}</span>
                                                         </div>
                                                     </div>
                                                     {isSelected && <div className="text-blue-500"><Check size={20} className="stroke-[3]" /></div>}
@@ -259,29 +262,14 @@ const TradePage = () => {
                                 {offerPlayers.length > 0 && requestPlayers.length > 0 && (
                                     <div className="mt-8 w-full animate-in fade-in zoom-in duration-300">
                                         <div className="bg-gray-900 text-white rounded-2xl p-6 text-center shadow-xl">
-                                            <h4 className="font-bold mb-4 text-gray-100">Trade Summary</h4>
-                                            
-                                            <div className="flex justify-between text-sm mb-2 text-red-300">
-                                                <span>Purse Out ({requestPlayers.length}):</span>
-                                                <span className="font-mono">₹{toCr(requestValue)}</span>
-                                            </div>
-                                            <div className="flex justify-between text-sm mb-4 text-green-300">
-                                                <span>Purse In ({offerPlayers.length}):</span>
-                                                <span className="font-mono">₹{toCr(offerValue)}</span>
-                                            </div>
-                                            <div className="border-t border-gray-700 pt-3 flex justify-between font-bold text-lg">
-                                                <span>Net Change:</span>
-                                                <span className={cn(netChange >= 0 ? "text-green-400" : "text-red-400", "font-mono")}>
-                                                    {netChange >= 0 ? '+' : ''}₹{toCr(netChange)}
-                                                </span>
-                                            </div>
+                                            <h4 className="font-bold mb-4 text-gray-100">Trade Ready</h4>
                                             
                                             <button 
                                                 onClick={handleCreateTrade}
                                                 disabled={submitting}
                                                 className="w-full mt-6 bg-blue-600 hover:bg-blue-500 text-white py-3.5 rounded-xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg"
                                             >
-                                                {submitting ? 'Sending...' : 'Propose Trade'}
+                                                {submitting ? 'Sending...' : 'Propose Swap'}
                                                 <Send size={18} />
                                             </button>
                                         </div>
@@ -341,7 +329,7 @@ const TradePage = () => {
                                                                 <div className="font-bold text-sm truncate">{p.name}</div>
                                                                 <div className="text-xs text-gray-500 flex justify-between items-center mt-1">
                                                                     <span className="flex items-center gap-1">{p.role} {p.isOverseas && <Plane size={10} className="text-blue-500" />}</span>
-                                                                    <span className="font-mono font-bold text-gray-700">₹{toCr(p.soldPrice)}</span>
+                                                                    <span className="font-mono font-bold text-gray-700">{toCr(p.soldPrice) === 'Traded' ? 'Traded' : `₹${toCr(p.soldPrice)}`}</span>
                                                                 </div>
                                                             </div>
                                                             {isSelected && <div className="text-blue-500"><Check size={20} className="stroke-[3]" /></div>}
@@ -371,13 +359,13 @@ const TradePage = () => {
                     )}
 
 
-                    {/* LIST TABS (SENT & RECEIVED) */}
-                    {(activeTab === 'SENT' || activeTab === 'RECEIVED') && (
+                    {/* LIST TABS (SENT, RECEIVED, COMPLETED) */}
+                    {(activeTab === 'SENT' || activeTab === 'RECEIVED' || activeTab === 'COMPLETED') && (
                         <div className="space-y-4">
                             {proposals[activeTab.toLowerCase()].length === 0 ? (
                                 <div className="bg-white rounded-3xl p-12 text-center border border-gray-100 shadow-sm">
-                                    <ArrowLeftRight size={48} className="mx-auto text-gray-300 mb-4" />
-                                    <h3 className="text-xl font-bold text-gray-500">No {activeTab.toLowerCase()} proposals</h3>
+                                    {activeTab === 'COMPLETED' ? <Check size={48} className="mx-auto text-green-300 mb-4" /> : <ArrowLeftRight size={48} className="mx-auto text-gray-300 mb-4" />}
+                                    <h3 className="text-xl font-bold text-gray-500">No {activeTab.toLowerCase()} trades</h3>
                                 </div>
                             ) : (
                                 proposals[activeTab.toLowerCase()].map(proposal => (
@@ -404,7 +392,7 @@ const TradePage = () => {
                                             {/* Left side: Sender's Offer */}
                                             <div className="flex-1 w-full text-center md:text-right bg-blue-50/50 p-4 rounded-2xl border border-blue-100/50">
                                                 <div className="text-sm font-black text-blue-600 mb-4 uppercase tracking-wider">
-                                                    {activeTab === 'SENT' ? 'You Offer' : `${proposal.senderTeam.name} Offers`}
+                                                    {activeTab === 'SENT' ? 'You Offer' : activeTab === 'COMPLETED' ? `${proposal.senderTeam?.name || 'Sender'} Traded` : `${proposal.senderTeam.name} Offers`}
                                                 </div>
                                                 <div className="flex flex-col gap-2">
                                                     {proposal.offerPlayers.map(p => (
@@ -413,7 +401,7 @@ const TradePage = () => {
                                                                 <div className="font-bold text-sm text-gray-900">{p.name}</div>
                                                                 <div className="text-[10px] text-gray-500 font-medium uppercase mt-0.5">{p.role} {p.isOverseas && '(OS)'}</div>
                                                             </div>
-                                                            <div className="font-mono font-bold text-sm text-gray-700 bg-gray-50 px-2 py-1 rounded-md">₹{toCr(p.soldPrice)}</div>
+                                                            <div className="font-mono font-bold text-sm text-gray-700 bg-gray-50 px-2 py-1 rounded-md">{toCr(p.soldPrice) === 'Traded' ? 'Traded' : `₹${toCr(p.soldPrice)}`}</div>
                                                         </div>
                                                     ))}
                                                 </div>
@@ -427,7 +415,7 @@ const TradePage = () => {
                                             {/* Right side: Receiver's Request */}
                                             <div className="flex-1 w-full text-center md:text-left bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100/50">
                                                 <div className="text-sm font-black text-indigo-600 mb-4 uppercase tracking-wider">
-                                                    {activeTab === 'SENT' ? `${proposal.receiverTeam.name}'s Players` : 'Your Players'}
+                                                    {activeTab === 'SENT' ? `${proposal.receiverTeam?.name || 'Receiver'}'s Players` : activeTab === 'COMPLETED' ? `${proposal.receiverTeam?.name || 'Receiver'} Traded` : 'Your Players'}
                                                 </div>
                                                 <div className="flex flex-col gap-2">
                                                     {proposal.requestPlayers.map(p => (
@@ -436,7 +424,7 @@ const TradePage = () => {
                                                                 <div className="font-bold text-sm text-gray-900">{p.name}</div>
                                                                 <div className="text-[10px] text-gray-500 font-medium uppercase mt-0.5">{p.role} {p.isOverseas && '(OS)'}</div>
                                                             </div>
-                                                            <div className="font-mono font-bold text-sm text-gray-700 bg-gray-50 px-2 py-1 rounded-md">₹{toCr(p.soldPrice)}</div>
+                                                            <div className="font-mono font-bold text-sm text-gray-700 bg-gray-50 px-2 py-1 rounded-md">{toCr(p.soldPrice) === 'Traded' ? 'Traded' : `₹${toCr(p.soldPrice)}`}</div>
                                                         </div>
                                                     ))}
                                                 </div>

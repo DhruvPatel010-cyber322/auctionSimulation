@@ -8,6 +8,22 @@ const getIsTradingOpen = async () => {
     return state ? state.isTradingOpen : false;
 };
 
+export const getCompletedTrades = async (req, res) => {
+    try {
+        const completedProposals = await Trade.find({ status: 'ACCEPTED' })
+            .populate('senderTeam', 'name code logo')
+            .populate('receiverTeam', 'name code logo')
+            .populate('offerPlayers', 'name basePrice soldPrice isOverseas role image')
+            .populate('requestPlayers', 'name basePrice soldPrice isOverseas role image')
+            .sort({ updatedAt: -1 });
+            
+        res.json(completedProposals);
+    } catch (error) {
+        console.error('Error fetching completed trades:', error);
+        res.status(500).json({ message: 'Server error fetching completed trades', error: error.message });
+    }
+};
+
 export const createProposal = async (req, res) => {
     try {
         const isOpen = await getIsTradingOpen();
@@ -145,26 +161,11 @@ export const updateProposalStatus = async (req, res) => {
             return res.json({ message: 'Trade rejected', trade });
         }
         
-        // ACCEPTED LOGIC
+        // ACCEPTED LOGIC (0-Cost True Trading)
         const sender = trade.senderTeam;
         const receiver = trade.receiverTeam;
         const offerPlayers = trade.offerPlayers; // Array, going to receiver
         const requestPlayers = trade.requestPlayers; // Array, going to sender
-        
-        // Sums
-        const totalOfferValue = offerPlayers.reduce((sum, p) => sum + (p.soldPrice || 0), 0);
-        const totalRequestValue = requestPlayers.reduce((sum, p) => sum + (p.soldPrice || 0), 0);
-        
-        // Calculate new remaining purses
-        const senderNewPurse = sender.remainingPurse + totalOfferValue - totalRequestValue;
-        const receiverNewPurse = receiver.remainingPurse + totalRequestValue - totalOfferValue;
-        
-        if (senderNewPurse < 0) {
-            return res.status(400).json({ message: `Sender team does not have enough purse to complete this trade. Required: ${totalRequestValue - totalOfferValue}` });
-        }
-        if (receiverNewPurse < 0) {
-            return res.status(400).json({ message: `You do not have enough purse to complete this trade. Required: ${totalOfferValue - totalRequestValue}` });
-        }
         
         // Squad Size Validations
         const senderSizeChange = requestPlayers.length - offerPlayers.length;
@@ -193,22 +194,22 @@ export const updateProposalStatus = async (req, res) => {
 
         // --- EXECUTE ---
         
-        // 1. Update Players
+        // 1. Update Players: Swap teams and set 'Traded' price flag (-1)
         const offerIds = offerPlayers.map(p => p._id.toString());
         const requestIds = requestPlayers.map(p => p._id.toString());
 
         for (const p of offerPlayers) {
             p.soldToTeam = receiver.code;
+            p.soldPrice = -1; // -1 represents "Traded"
             await p.save();
         }
         for (const p of requestPlayers) {
             p.soldToTeam = sender.code;
+            p.soldPrice = -1; // -1 represents "Traded"
             await p.save();
         }
         
-        // 2. Update Sender Team
-        sender.remainingPurse = senderNewPurse;
-        sender.totalSpent = sender.totalPurse - senderNewPurse;
+        // 2. Update Sender Team (No Purse Impact)
         sender.overseasCount += senderOverseasChange;
         sender.squadSize += senderSizeChange;
         
@@ -219,9 +220,7 @@ export const updateProposalStatus = async (req, res) => {
         if (sender.captain && offerIds.includes(sender.captain.toString())) sender.captain = null;
         if (sender.viceCaptain && offerIds.includes(sender.viceCaptain.toString())) sender.viceCaptain = null;
         
-        // 3. Update Receiver Team
-        receiver.remainingPurse = receiverNewPurse;
-        receiver.totalSpent = receiver.totalPurse - receiverNewPurse;
+        // 3. Update Receiver Team (No Purse Impact)
         receiver.overseasCount += receiverOverseasChange;
         receiver.squadSize += receiverSizeChange;
         
