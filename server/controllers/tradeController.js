@@ -256,9 +256,10 @@ export const updateProposalStatus = async (req, res) => {
         sender.playersBought = sender.playersBought.filter(pId => !offerIds.includes(pId.toString()));
         for (const id of requestIds) sender.playersBought.push(id);
         
-        sender.playing11 = sender.playing11.filter(pId => !offerIds.includes(pId.toString()));
-        if (sender.captain && offerIds.includes(sender.captain.toString())) sender.captain = null;
-        if (sender.viceCaptain && offerIds.includes(sender.viceCaptain.toString())) sender.viceCaptain = null;
+        // Forcefully clear Playing XI logic due to massive roster shift
+        sender.playing11 = [];
+        sender.captain = null;
+        sender.viceCaptain = null;
         
         // 3. Update Receiver Team (No Purse Impact)
         receiver.overseasCount += receiverOverseasChange;
@@ -267,9 +268,10 @@ export const updateProposalStatus = async (req, res) => {
         receiver.playersBought = receiver.playersBought.filter(pId => !requestIds.includes(pId.toString()));
         for (const id of offerIds) receiver.playersBought.push(id);
         
-        receiver.playing11 = receiver.playing11.filter(pId => !requestIds.includes(pId.toString()));
-        if (receiver.captain && requestIds.includes(receiver.captain.toString())) receiver.captain = null;
-        if (receiver.viceCaptain && requestIds.includes(receiver.viceCaptain.toString())) receiver.viceCaptain = null;
+        // Forcefully clear Playing XI logic due to massive roster shift
+        receiver.playing11 = [];
+        receiver.captain = null;
+        receiver.viceCaptain = null;
         
         await sender.save();
         await receiver.save();
