@@ -149,10 +149,9 @@ const MainLayout = () => {
                                 <span className="text-sm font-black text-gray-900">{activeUsers.length}</span>
                             </div>
 
-                            {/* Tooltip */}
-                            <div className="absolute top-full left-0 mt-2 bg-white border border-gray-100 shadow-xl rounded-xl p-3 min-w-[120px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                            <div className="absolute top-full left-0 mt-2 bg-white border border-gray-100 shadow-xl rounded-xl p-3 min-w-max opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 pb-1 border-b border-gray-50">Online Teams</p>
-                                <div className="flex flex-wrap gap-1.5">
+                                <div className="flex items-center gap-1.5 whitespace-nowrap">
                                     {activeUsers.length > 0 ? activeUsers.map(code => (
                                         <span key={code} className="px-2 py-0.5 bg-gray-50 text-gray-700 rounded text-[10px] font-bold border border-gray-100 uppercase">
                                             {code}
