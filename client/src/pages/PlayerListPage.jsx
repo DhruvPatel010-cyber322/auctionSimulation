@@ -48,12 +48,13 @@ const PlayerListPage = () => {
     // Filter Logic
     const filteredPlayers = players.filter(p => {
         const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase());
-        const matchesRole = selectedRole === 'All' || p.role === selectedRole;
+        const matchesRole = selectedRole === 'All' || p.role.toLowerCase() === selectedRole.toLowerCase();
         
         let matchesStatus = true;
-        if (selectedStatus === 'Sold') matchesStatus = p.status === 'Sold';
-        if (selectedStatus === 'Unsold') matchesStatus = p.status === 'Unsold';
-        if (selectedStatus === 'Available') matchesStatus = ['AVAILABLE', 'LIVE'].includes(p.status);
+        const pStatus = p.status ? p.status.toUpperCase() : '';
+        if (selectedStatus === 'Sold') matchesStatus = pStatus === 'SOLD';
+        if (selectedStatus === 'Unsold') matchesStatus = pStatus === 'UNSOLD';
+        if (selectedStatus === 'Available') matchesStatus = ['AVAILABLE', 'LIVE'].includes(pStatus);
 
         return matchesSearch && matchesRole && matchesStatus;
     });

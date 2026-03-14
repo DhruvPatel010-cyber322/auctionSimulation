@@ -114,6 +114,18 @@ const RulesPage = () => {
                 </div>
             </div>
 
+            {/* Points System Placeholder */}
+            <div className="p-8 border-2 border-dashed border-gray-200 rounded-3xl text-center bg-gray-50/50">
+                <div className="inline-flex items-center justify-center p-3 bg-blue-100 text-blue-600 rounded-2xl mb-4">
+                    <AlertCircle size={28} />
+                </div>
+                <h2 className="text-2xl font-black text-gray-900 mb-2">Points System</h2>
+                <span className="inline-block px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold uppercase tracking-wider rounded-lg border border-yellow-200 shadow-sm mb-4">Coming Soon</span>
+                <p className="text-gray-500 max-w-2xl mx-auto">
+                    The intricate scoring matrix that dictates how your playing 11 generates points on match days is currently under final review by the league committee. Check back soon for the official points distribution rules!
+                </p>
+            </div>
+
             {/* Auction Format */}
             <div className="bg-gradient-to-r from-slate-900 to-black p-8 md:p-10 rounded-3xl text-white relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -translate-y-1/2 translate-x-1/4"></div>
@@ -136,18 +148,6 @@ const RulesPage = () => {
                         <p className="text-sm">When the timer hits zero, the player is sold to the highest bidder.</p>
                     </div>
                 </div>
-            </div>
-
-            {/* Points System Placeholder */}
-            <div className="p-8 border-2 border-dashed border-gray-200 rounded-3xl text-center bg-gray-50/50">
-                <div className="inline-flex items-center justify-center p-3 bg-blue-100 text-blue-600 rounded-2xl mb-4">
-                    <AlertCircle size={28} />
-                </div>
-                <h2 className="text-2xl font-black text-gray-900 mb-2">Points System</h2>
-                <span className="inline-block px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold uppercase tracking-wider rounded-lg border border-yellow-200 shadow-sm mb-4">Coming Soon</span>
-                <p className="text-gray-500 max-w-2xl mx-auto">
-                    The intricate scoring matrix that dictates how your playing 11 generates points on match days is currently under final review by the league committee. Check back soon for the official points distribution rules!
-                </p>
             </div>
         </div >
     );

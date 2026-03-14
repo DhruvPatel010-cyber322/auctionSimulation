@@ -87,7 +87,6 @@ const MainLayout = () => {
         { name: 'Auction', path: '/auction', icon: Gavel },
         { name: 'Players', path: '/players', icon: Users },
         { name: 'Teams', path: '/teams', icon: Users },
-        { name: 'Trade', path: '/trade', icon: ArrowLeftRight },
         { name: 'Match Centre', path: '/match-centre', icon: Trophy },
         { name: 'Rules', path: '/rules', icon: BookOpen },
         { name: 'Playing XI', path: '/select-playing-xi', icon: Check },
@@ -103,8 +102,8 @@ const MainLayout = () => {
         return now < expirationDate;
     };
 
-    // Add Switch Tournament as a utility item
-    navItems.push({ name: 'Switch Tournament', path: '/tournaments', icon: Trophy });
+    // Add Switch Tournament as a utility item (Hidden as per request)
+    // navItems.push({ name: 'Switch Tournament', path: '/tournaments', icon: Trophy });
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row font-sans text-gray-900">
