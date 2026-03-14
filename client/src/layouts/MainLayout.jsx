@@ -54,7 +54,7 @@ const MainLayout = () => {
                     }
                 }
             };
-            
+
             const handleUserList = (list) => {
                 setActiveUsers(list);
             };
@@ -87,23 +87,24 @@ const MainLayout = () => {
         { name: 'Auction', path: '/auction', icon: Gavel },
         { name: 'Players', path: '/players', icon: Users },
         { name: 'Teams', path: '/teams', icon: Users },
+        { name: 'Trade', path: '/trade', icon: ArrowLeftRight, hidden: true },
         { name: 'Match Centre', path: '/match-centre', icon: Trophy },
         { name: 'Rules', path: '/rules', icon: BookOpen },
         { name: 'Playing XI', path: '/select-playing-xi', icon: Check },
         { name: 'Points Table', path: '/points-table', icon: Trophy },
     ];
-    
+
     // Logic for NEW badges - target expiration: 24hrs from 2026-03-14T21:06:03+05:30
     const checkIsNew = (itemName) => {
         if (!['Rules', 'Players', 'Match Centre'].includes(itemName)) return false;
-        
+
         const expirationDate = new Date('2026-03-15T21:06:03+05:30');
         const now = new Date();
         return now < expirationDate;
     };
 
-    // Add Switch Tournament as a utility item (Hidden as per request)
-    // navItems.push({ name: 'Switch Tournament', path: '/tournaments', icon: Trophy });
+    // Add Switch Tournament as a utility item
+    navItems.push({ name: 'Switch Tournament', path: '/tournaments', icon: Trophy, hidden: true });
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row font-sans text-gray-900">
@@ -114,7 +115,7 @@ const MainLayout = () => {
                 </div>
                 <nav className="flex-1 overflow-y-auto py-6">
                     <ul className="space-y-2 px-4">
-                        {navItems.map((item) => (
+                        {navItems.filter(item => !item.hidden).map((item) => (
                             <li key={item.path}>
                                 <NavLink
                                     to={item.path}
@@ -214,7 +215,7 @@ const MainLayout = () => {
 
             {/* Mobile Bottom Navigation */}
             <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-30 px-6 py-3 flex justify-between items-center border-t border-gray-100">
-                {navItems.map((item) => (
+                {navItems.filter(item => !item.hidden).map((item) => (
                     <NavLink
                         key={item.path}
                         to={item.path}
