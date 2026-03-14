@@ -7,6 +7,8 @@ import { toCr } from '../utils/formatCurrency';
 const PlayerListPage = () => {
     const [players, setPlayers] = useState([]);
     const [search, setSearch] = useState('');
+    const [selectedRole, setSelectedRole] = useState('All');
+    const [selectedStatus, setSelectedStatus] = useState('All');
     const [expandedSets, setExpandedSets] = useState({}); // { 0: true, 1: true ... }
 
     useEffect(() => {
@@ -46,7 +48,14 @@ const PlayerListPage = () => {
     // Filter Logic
     const filteredPlayers = players.filter(p => {
         const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase());
-        return matchesSearch;
+        const matchesRole = selectedRole === 'All' || p.role === selectedRole;
+        
+        let matchesStatus = true;
+        if (selectedStatus === 'Sold') matchesStatus = p.status === 'Sold';
+        if (selectedStatus === 'Unsold') matchesStatus = p.status === 'Unsold';
+        if (selectedStatus === 'Available') matchesStatus = ['AVAILABLE', 'LIVE'].includes(p.status);
+
+        return matchesSearch && matchesRole && matchesStatus;
     });
 
     // Group By Set
@@ -100,15 +109,38 @@ const PlayerListPage = () => {
                     </div>
                 </div>
 
-                <div className="relative w-full md:w-72">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    <input
-                        type="text"
-                        placeholder="Search by name..."
-                        className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-sm transition-all shadow-sm focus:bg-white"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
+                <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto mt-4 md:mt-0">
+                    <div className="relative w-full sm:w-64">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                        <input
+                            type="text"
+                            placeholder="Search by name..."
+                            className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-sm transition-all shadow-sm focus:bg-white"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
+                    </div>
+                    <select
+                        value={selectedRole}
+                        onChange={(e) => setSelectedRole(e.target.value)}
+                        className="py-2.5 px-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-sm text-gray-700 shadow-sm w-full sm:w-auto"
+                    >
+                        <option value="All">All Roles</option>
+                        <option value="Batsman">Batsman</option>
+                        <option value="Bowler">Bowler</option>
+                        <option value="All-Rounder">All-Rounder</option>
+                        <option value="Wicket Keeper">WK</option>
+                    </select>
+                    <select
+                        value={selectedStatus}
+                        onChange={(e) => setSelectedStatus(e.target.value)}
+                        className="py-2.5 px-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-sm text-gray-700 shadow-sm w-full sm:w-auto"
+                    >
+                        <option value="All">All Statuses</option>
+                        <option value="Available">Available / Live</option>
+                        <option value="Sold">Sold</option>
+                        <option value="Unsold">Unsold</option>
+                    </select>
                 </div>
             </div>
 

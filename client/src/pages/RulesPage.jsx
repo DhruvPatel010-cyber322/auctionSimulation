@@ -73,26 +73,24 @@ const RulesPage = () => {
                     <h2 className="text-2xl font-bold text-gray-900 mb-4">Playing XI Validation Rules</h2>
                     <p className="text-gray-500 mb-6">When selecting your final 11, players must be assigned positions matching their role group.</p>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
-                            <span className="text-xs font-bold text-purple-600 uppercase tracking-widest block mb-1">Positions 1-2</span>
-                            <span className="font-bold text-gray-900">Openers</span>
-                            <p className="text-xs text-gray-400 mt-2">Must be Group 1</p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="p-5 bg-gray-50 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden group hover:border-blue-200 transition-colors">
+                            <div className="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
+                            <span className="text-xs font-black text-blue-600 uppercase tracking-widest block mb-1">Positions 1-2</span>
+                            <span className="font-bold text-gray-900 text-lg">Openers</span>
+                            <p className="text-xs text-gray-500 mt-2 font-medium">Must be assigned to players from <span className="font-bold text-gray-700">Group 1</span>.</p>
                         </div>
-                        <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
-                            <span className="text-xs font-bold text-purple-600 uppercase tracking-widest block mb-1">Positions 3-4</span>
-                            <span className="font-bold text-gray-900">Middle Order</span>
-                            <p className="text-xs text-gray-400 mt-2">Must be Group 2</p>
+                        <div className="p-5 bg-gray-50 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden group hover:border-purple-200 transition-colors">
+                            <div className="absolute top-0 left-0 w-1 h-full bg-purple-500"></div>
+                            <span className="text-xs font-black text-purple-600 uppercase tracking-widest block mb-1">Positions 3-8</span>
+                            <span className="font-bold text-gray-900 text-lg">Middle Order</span>
+                            <p className="text-xs text-gray-500 mt-2 font-medium">Any mix of Middle, Lower Middle, or Tail <span className="font-bold text-gray-700">(Groups 2, 3, or 4)</span>.</p>
                         </div>
-                        <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
-                            <span className="text-xs font-bold text-purple-600 uppercase tracking-widest block mb-1">Positions 5-7</span>
-                            <span className="font-bold text-gray-900">Lower Middle</span>
-                            <p className="text-xs text-gray-400 mt-2">Must be Group 3</p>
-                        </div>
-                        <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
-                            <span className="text-xs font-bold text-purple-600 uppercase tracking-widest block mb-1">Positions 8-11</span>
-                            <span className="font-bold text-gray-900">Tail / Lower</span>
-                            <p className="text-xs text-gray-400 mt-2">Must be Group 4</p>
+                        <div className="p-5 bg-gray-50 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden group hover:border-orange-200 transition-colors">
+                            <div className="absolute top-0 left-0 w-1 h-full bg-orange-500"></div>
+                            <span className="text-xs font-black text-orange-600 uppercase tracking-widest block mb-1">Positions 9-11</span>
+                            <span className="font-bold text-gray-900 text-lg">Tail / Lower Order</span>
+                            <p className="text-xs text-gray-500 mt-2 font-medium">Strictly Lower Middle or Tail <span className="font-bold text-gray-700">(Groups 3 or 4)</span>.</p>
                         </div>
                     </div>
 
@@ -138,6 +136,18 @@ const RulesPage = () => {
                         <p className="text-sm">When the timer hits zero, the player is sold to the highest bidder.</p>
                     </div>
                 </div>
+            </div>
+
+            {/* Points System Placeholder */}
+            <div className="p-8 border-2 border-dashed border-gray-200 rounded-3xl text-center bg-gray-50/50">
+                <div className="inline-flex items-center justify-center p-3 bg-blue-100 text-blue-600 rounded-2xl mb-4">
+                    <AlertCircle size={28} />
+                </div>
+                <h2 className="text-2xl font-black text-gray-900 mb-2">Points System</h2>
+                <span className="inline-block px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold uppercase tracking-wider rounded-lg border border-yellow-200 shadow-sm mb-4">Coming Soon</span>
+                <p className="text-gray-500 max-w-2xl mx-auto">
+                    The intricate scoring matrix that dictates how your playing 11 generates points on match days is currently under final review by the league committee. Check back soon for the official points distribution rules!
+                </p>
             </div>
         </div >
     );

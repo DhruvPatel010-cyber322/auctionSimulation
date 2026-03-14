@@ -14,6 +14,7 @@ import RulesPage from './pages/RulesPage';
 import SelectPlayingXI from './pages/SelectPlayingXI';
 import PointsTablePage from './pages/PointsTablePage';
 import TradePage from './pages/TradePage';
+import MatchCentrePage from './pages/MatchCentrePage';
 import AdminPage from './pages/AdminPage';
 import ErrorBoundary from './components/ErrorBoundary';
 // Revert to RequireAuth logic if changed previously
@@ -46,6 +47,7 @@ function App() {
                   <Route path="rules" element={<RulesPage />} />
                   <Route path="select-playing-xi" element={<SelectPlayingXI />} />
                   <Route path="points-table" element={<PointsTablePage />} />
+                  <Route path="match-centre" element={<MatchCentrePage />} />
                 </Route>
               </Route>
 

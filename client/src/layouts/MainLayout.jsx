@@ -88,10 +88,20 @@ const MainLayout = () => {
         { name: 'Players', path: '/players', icon: Users },
         { name: 'Teams', path: '/teams', icon: Users },
         { name: 'Trade', path: '/trade', icon: ArrowLeftRight },
+        { name: 'Match Centre', path: '/match-centre', icon: Trophy },
         { name: 'Rules', path: '/rules', icon: BookOpen },
         { name: 'Playing XI', path: '/select-playing-xi', icon: Check },
         { name: 'Points Table', path: '/points-table', icon: Trophy },
     ];
+    
+    // Logic for NEW badges - target expiration: 24hrs from 2026-03-14T21:06:03+05:30
+    const checkIsNew = (itemName) => {
+        if (!['Rules', 'Players', 'Match Centre'].includes(itemName)) return false;
+        
+        const expirationDate = new Date('2026-03-15T21:06:03+05:30');
+        const now = new Date();
+        return now < expirationDate;
+    };
 
     // Add Switch Tournament as a utility item
     navItems.push({ name: 'Switch Tournament', path: '/tournaments', icon: Trophy });
@@ -118,8 +128,13 @@ const MainLayout = () => {
                                         )
                                     }
                                 >
-                                    <item.icon size={20} strokeWidth={2.5} />
-                                    <span>{item.name}</span>
+                                    <div className="flex items-center gap-3">
+                                        <item.icon size={20} strokeWidth={2.5} />
+                                        <span>{item.name}</span>
+                                    </div>
+                                    {checkIsNew(item.name) && (
+                                        <span className="ml-auto bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm animate-pulse uppercase tracking-wider">New</span>
+                                    )}
                                 </NavLink>
                             </li>
                         ))}
@@ -212,10 +227,13 @@ const MainLayout = () => {
                         }
                     >
                         {({ isActive }) => (
-                            <>
+                            <div className="relative flex flex-col items-center gap-1">
                                 <item.icon size={24} strokeWidth={isActive ? 2.5 : 2} />
                                 <span className="text-[10px] font-medium">{item.name}</span>
-                            </>
+                                {checkIsNew(item.name) && (
+                                    <span className="absolute -top-2 -right-3 bg-red-500 text-white text-[8px] font-black px-1 py-0.5 rounded-full shadow-sm animate-pulse uppercase tracking-wider">New</span>
+                                )}
+                            </div>
                         )}
                     </NavLink>
                 ))}
