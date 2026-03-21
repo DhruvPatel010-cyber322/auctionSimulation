@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSocket } from '../context/SocketContext';
 import { useAuth } from '../context/AuthContext';
-import { Users, Wallet, Trophy, Gavel, ArrowRight, Clock, AlertCircle, LogOut, Plane } from 'lucide-react';
+import { Users, Wallet, Trophy, Gavel, ArrowRight, Clock, AlertCircle, LogOut, Plane, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { TEAM_COLORS } from '../constants/teamColors';
 import { getTeams } from '../services/api';
@@ -281,6 +281,22 @@ const DashboardPage = () => {
                         </Link>
                     </div>
                 </div>
+            </div>
+
+            {/* Quick Navigation Links */}
+            <div className="grid grid-cols-2 gap-4">
+                <Link to="/select-playing-xi" className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition flex flex-col items-center justify-center text-center gap-3 group">
+                    <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <Check size={28} />
+                    </div>
+                    <span className="font-bold text-gray-900">Playing XI</span>
+                </Link>
+                <Link to="/points-table" className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition flex flex-col items-center justify-center text-center gap-3 group">
+                    <div className="w-14 h-14 bg-yellow-50 text-yellow-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <Trophy size={28} />
+                    </div>
+                    <span className="font-bold text-gray-900">Points Table</span>
+                </Link>
             </div>
 
             {/* Quick Actions / Tips */}
