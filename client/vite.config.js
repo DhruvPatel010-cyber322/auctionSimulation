@@ -9,7 +9,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['logo.png'],
+      includeAssets: ['favicon.png'],
       manifest: {
         name: 'Auction Arena',
         short_name: 'Auction',
@@ -19,17 +19,17 @@ export default defineConfig({
         display: 'standalone',
         icons: [
           {
-            src: 'logo.png',
+            src: 'favicon.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'logo.png',
+            src: 'favicon.png',
             sizes: '512x512',
             type: 'image/png'
           },
           {
-            src: 'logo.png',
+            src: 'favicon.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'
