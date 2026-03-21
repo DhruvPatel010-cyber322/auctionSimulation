@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, Clock, MapPin, Trophy } from 'lucide-react';
+import { Calendar, Clock, MapPin, Trophy, X, Construction } from 'lucide-react';
 import schedule from '../data/ipl_schedule.json';
 
 // Helper to format date nicely: "28 Mar 2026"
@@ -44,7 +44,92 @@ const StatusBadge = ({ status }) => {
     );
 };
 
-const MatchCard = ({ match }) => {
+// Modal shown when a match card is clicked
+const MatchDetailModal = ({ match, onClose }) => {
+    const [t1Err, setT1Err] = useState(false);
+    const [t2Err, setT2Err] = useState(false);
+
+    if (!match) return null;
+
+    return (
+        <div
+            className="fixed inset-0 z-50 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={onClose}
+        >
+            <div
+                className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+                onClick={(e) => e.stopPropagation()}
+            >
+                {/* Modal Header */}
+                <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-5 flex items-center justify-between">
+                    <div>
+                        <p className="text-[10px] font-black text-blue-200 uppercase tracking-widest mb-1">IPL 2026</p>
+                        <StatusBadge status={match.MatchStatus} />
+                    </div>
+                    <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-full transition-colors text-white">
+                        <X size={20} />
+                    </button>
+                </div>
+
+                {/* Teams */}
+                <div className="px-6 py-6 flex items-center justify-between gap-4">
+                    <div className="flex flex-col items-center gap-2 flex-1">
+                        <div className="w-16 h-16 rounded-full bg-gray-50 border-2 border-gray-100 overflow-hidden shadow-sm flex items-center justify-center">
+                            {match.Team1Logo && !t1Err ? (
+                                <img src={match.Team1Logo} alt={match.Team1Code} className="w-full h-full object-contain p-1" onError={() => setT1Err(true)} />
+                            ) : (
+                                <span className="font-black text-gray-500 text-sm">{match.Team1Code}</span>
+                            )}
+                        </div>
+                        <span className="font-black text-gray-900 text-center text-sm leading-snug">{match.Team1Code}</span>
+                    </div>
+
+                    <span className="text-2xl font-black text-gray-200">VS</span>
+
+                    <div className="flex flex-col items-center gap-2 flex-1">
+                        <div className="w-16 h-16 rounded-full bg-gray-50 border-2 border-gray-100 overflow-hidden shadow-sm flex items-center justify-center">
+                            {match.Team2Logo && !t2Err ? (
+                                <img src={match.Team2Logo} alt={match.Team2Code} className="w-full h-full object-contain p-1" onError={() => setT2Err(true)} />
+                            ) : (
+                                <span className="font-black text-gray-500 text-sm">{match.Team2Code}</span>
+                            )}
+                        </div>
+                        <span className="font-black text-gray-900 text-center text-sm leading-snug">{match.Team2Code}</span>
+                    </div>
+                </div>
+
+                {/* Match Info */}
+                <div className="px-6 pb-4 grid grid-cols-2 gap-3">
+                    <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                        <p className="text-[10px] uppercase font-bold text-gray-400 mb-1">Date</p>
+                        <p className="text-sm font-bold text-gray-800">{formatDate(match.MatchDate)}</p>
+                    </div>
+                    <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                        <p className="text-[10px] uppercase font-bold text-gray-400 mb-1">Time</p>
+                        <p className="text-sm font-bold text-gray-800">{formatTime(match.MatchTime)}</p>
+                    </div>
+                    <div className="bg-gray-50 rounded-xl p-3 border border-gray-100 col-span-2">
+                        <p className="text-[10px] uppercase font-bold text-gray-400 mb-1">Venue</p>
+                        <p className="text-sm font-bold text-gray-800">{match.Ground}, {match.City}</p>
+                    </div>
+                </div>
+
+                {/* Coming Soon Banner */}
+                <div className="mx-6 mb-6 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-4 flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
+                        <Construction size={18} className="text-amber-600" />
+                    </div>
+                    <div>
+                        <p className="text-sm font-black text-amber-900">Full Match Details</p>
+                        <p className="text-xs text-amber-700 font-medium">Live scores, stats & scorecards — Coming Soon!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const MatchCard = ({ match, onClick }) => {
     const [team1Error, setTeam1Error] = useState(false);
     const [team2Error, setTeam2Error] = useState(false);
 
@@ -59,11 +144,14 @@ const MatchCard = ({ match }) => {
     );
 
     return (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 overflow-hidden">
+        <div
+            onClick={onClick}
+            className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 overflow-hidden cursor-pointer active:scale-95"
+        >
             {/* Card Header */}
             <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-4 py-2 flex items-center justify-between">
                 <span className="text-[10px] font-black text-blue-100 uppercase tracking-widest">
-                    #{match.MatchID} · IPL 2026
+                    IPL 2026
                 </span>
                 <StatusBadge status={match.MatchStatus} />
             </div>
@@ -125,6 +213,7 @@ const MatchCard = ({ match }) => {
 const MatchCentrePage = () => {
     const grouped = groupByDate(schedule);
     const sortedDates = Object.keys(grouped).sort();
+    const [selectedMatch, setSelectedMatch] = useState(null);
 
     return (
         <div className="max-w-5xl mx-auto">
@@ -162,12 +251,24 @@ const MatchCentrePage = () => {
                         {/* Match Cards for this date */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             {grouped[date].map((match) => (
-                                <MatchCard key={match.MatchID} match={match} />
+                                <MatchCard
+                                    key={match.MatchID}
+                                    match={match}
+                                    onClick={() => setSelectedMatch(match)}
+                                />
                             ))}
                         </div>
                     </div>
                 ))}
             </div>
+
+            {/* Match Detail Modal */}
+            {selectedMatch && (
+                <MatchDetailModal
+                    match={selectedMatch}
+                    onClose={() => setSelectedMatch(null)}
+                />
+            )}
         </div>
     );
 };
