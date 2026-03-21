@@ -122,25 +122,25 @@ const DashboardPage = () => {
     const squadPercentage = (stats.squadCount / 25) * 100;
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-500">
+        <div className="space-y-6 animate-in fade-in duration-500">
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                    <h1 className="text-3xl font-black text-gray-900 tracking-tight">Team Dashboard</h1>
-                    <p className="text-gray-500">Real-time overview of your auction status.</p>
+                    <h1 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">Team Dashboard</h1>
+                    <p className="text-sm text-gray-500">Real-time overview of your auction status.</p>
                 </div>
 
                 {/* Admin Quick Link */}
                 {user?.role === 'admin' && (
-                    <Link to="/admin" className="px-5 py-2.5 bg-red-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-red-500/30 hover:bg-red-700 transition flex items-center gap-2">
-                        <Gavel size={18} />
+                    <Link to="/admin" className="self-start sm:self-auto px-4 py-2 bg-red-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-red-500/30 hover:bg-red-700 transition flex items-center gap-2">
+                        <Gavel size={16} />
                         Admin Controls
                     </Link>
                 )}
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
                 {/* STATS CARDS ROW OR SPECTATOR WELCOME */}
                 {user?.role === 'spectator' ? (
@@ -236,21 +236,21 @@ const DashboardPage = () => {
                 )}
 
                 {/* LIVE STATUS CARD */}
-                <div className="col-span-1 md:col-span-2 bg-gray-900 text-white p-8 rounded-3xl shadow-xl relative overflow-hidden flex flex-col justify-between">
+                <div className="col-span-1 md:col-span-2 bg-gray-900 text-white p-5 md:p-8 rounded-3xl shadow-xl relative overflow-hidden flex flex-col justify-between">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
 
-                    <div className="relative z-10 flex justify-between items-start">
-                        <div>
+                    <div className="relative z-10 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+                        <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-2">
                                 <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
                                 <span className="text-xs font-bold uppercase tracking-widest text-gray-400">Live Auction</span>
                             </div>
-                            <h3 className="text-2xl font-bold">
+                            <h3 className="text-xl md:text-2xl font-bold break-words">
                                 {auctionStatus.currentPlayer ? (
                                     <>
-                                        Current Player: <span className="text-blue-400 flex items-center gap-2">
+                                        Current: <span className="text-blue-400 flex items-center gap-2 flex-wrap">
                                             {auctionStatus.currentPlayer.name}
-                                            {auctionStatus.currentPlayer.isOverseas && <Plane size={20} className="text-blue-300" />}
+                                            {auctionStatus.currentPlayer.isOverseas && <Plane size={18} className="text-blue-300" />}
                                         </span>
                                     </>
                                 ) : (
@@ -259,14 +259,14 @@ const DashboardPage = () => {
                             </h3>
                         </div>
                         {auctionStatus.currentPlayer && (
-                            <div className="text-right">
+                            <div className="sm:text-right shrink-0">
                                 <p className="text-xs font-bold text-gray-400 uppercase mb-1">Current Bid</p>
-                                <p className="text-3xl font-black">₹{auctionStatus.currentBid.toFixed(2)} Cr</p>
+                                <p className="text-2xl md:text-3xl font-black">₹{auctionStatus.currentBid.toFixed(2)} Cr</p>
                             </div>
                         )}
                     </div>
 
-                    <div className="relative z-10 mt-6 flex items-center justify-between">
+                    <div className="relative z-10 mt-5 flex items-center justify-between flex-wrap gap-3">
                         <div className="flex items-center gap-3">
                             {auctionStatus.highestBidder && (
                                 <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg border border-white/10">
@@ -276,7 +276,7 @@ const DashboardPage = () => {
                             )}
                         </div>
 
-                        <Link to="/auction" className="px-6 py-3 bg-white text-gray-900 rounded-xl font-bold text-sm hover:bg-gray-100 transition-colors flex items-center gap-2 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transform duration-200">
+                        <Link to="/auction" className="px-5 py-2.5 bg-white text-gray-900 rounded-xl font-bold text-sm hover:bg-gray-100 transition-colors flex items-center gap-2 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transform duration-200">
                             Join Auction <ArrowRight size={16} />
                         </Link>
                     </div>
@@ -284,18 +284,18 @@ const DashboardPage = () => {
             </div>
 
             {/* Quick Actions / Tips */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-6 rounded-3xl border border-indigo-100/50">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-5 rounded-3xl border border-indigo-100/50">
                     <h3 className="font-bold text-indigo-900 mb-2">Auction Strategy</h3>
-                    <p className="text-sm text-indigo-700/80 mb-4">Keep at least ₹20 Cr for the final round of accelerated bidding.</p>
+                    <p className="text-sm text-indigo-700/80">Keep at least ₹20 Cr for the final round of accelerated bidding.</p>
                 </div>
-                <div className="bg-gradient-to-br from-orange-50 to-amber-50 p-6 rounded-3xl border border-orange-100/50">
+                <div className="bg-gradient-to-br from-orange-50 to-amber-50 p-5 rounded-3xl border border-orange-100/50">
                     <h3 className="font-bold text-orange-900 mb-2">Squad Balance</h3>
-                    <p className="text-sm text-orange-700/80 mb-4">Don't forget to fill your minimum 18 player quota early.</p>
+                    <p className="text-sm text-orange-700/80">Don't forget to fill your minimum 18 player quota early.</p>
                 </div>
-                <div className="bg-gradient-to-br from-cyan-50 to-blue-50 p-6 rounded-3xl border border-cyan-100/50">
+                <div className="bg-gradient-to-br from-cyan-50 to-blue-50 p-5 rounded-3xl border border-cyan-100/50">
                     <h3 className="font-bold text-cyan-900 mb-2">Upcoming</h3>
-                    <p className="text-sm text-cyan-700/80 mb-4">Next set: Marquee All-Rounders. Be prepared.</p>
+                    <p className="text-sm text-cyan-700/80">Next set: Marquee All-Rounders. Be prepared.</p>
                 </div>
             </div>
 

@@ -457,22 +457,22 @@ const SelectPlayingXI = () => {
     return (
         <div className="max-w-7xl mx-auto p-4 md:p-8">
             {/* Header & Controls */}
-            <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <header className="mb-6 flex flex-col gap-3">
                 <div>
-                    <h1 className="text-3xl font-black text-gray-900 flex items-center gap-3">
-                        <User className="text-blue-600" size={32} />
+                    <h1 className="text-2xl md:text-3xl font-black text-gray-900 flex items-center gap-3">
+                        <User className="text-blue-600" size={28} />
                         Playing XI
                     </h1>
-                    <p className="text-gray-500">View and manage squad lineups.</p>
+                    <p className="text-sm text-gray-500">View and manage squad lineups.</p>
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className="flex flex-wrap items-center gap-3">
                     {/* Team Selector */}
-                    <div className="relative">
+                    <div className="relative flex-1 min-w-[160px]">
                         <select
                             value={selectedTeam || ''}
                             onChange={(e) => setSelectedTeam(e.target.value)}
-                            className="appearance-none bg-white border border-gray-200 pl-4 pr-10 py-2 rounded-xl font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full appearance-none bg-white border border-gray-200 pl-4 pr-10 py-2 rounded-xl font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                         >
                             {allTeams.map(t => (
                                 <option key={t.id} value={t.id}>{t.name} {t.id === myTeamCode ? '(You)' : ''}</option>
@@ -481,7 +481,7 @@ const SelectPlayingXI = () => {
                         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 shrink-0">
                         {isLocked && (
                             <div className="flex items-center gap-2 px-3 py-1.5 bg-red-50 text-red-600 rounded-xl text-sm font-bold border border-red-200">
                                 <Lock size={14} /> Locked
@@ -490,7 +490,7 @@ const SelectPlayingXI = () => {
                         {isMyTeam && !isEditMode && !isLocked && (
                             <button
                                 onClick={() => setIsEditMode(true)}
-                                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-bold transition-colors"
+                                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-bold transition-colors text-sm"
                             >
                                 <Edit2 size={16} /> Edit XI
                             </button>
@@ -503,7 +503,7 @@ const SelectPlayingXI = () => {
                                 setIsEditMode(false);
                                 setShowCaptainModal(false);
                             }}
-                            className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-2 rounded-xl font-bold transition-colors"
+                            className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-2 rounded-xl font-bold transition-colors text-sm shrink-0"
                         >
                             <X size={16} /> Cancel
                         </button>
@@ -612,10 +612,10 @@ const SelectPlayingXI = () => {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                        {/* Sidebar */}
-                        <div className="lg:col-span-4 space-y-4">
-                            <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        {/* Sidebar - shows below on mobile, left on desktop */}
+                        <div className="lg:col-span-4 order-2 lg:order-1">
+                            <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 lg:sticky lg:top-24 max-h-64 lg:max-h-[calc(100vh-8rem)] overflow-y-auto">
                                 <h2 className="font-bold text-gray-800 mb-4">Available Squad ({availableForEdit.length})</h2>
                                 <div className="space-y-4">
                                     {Object.entries(groupedAvailable).map(([groupName, players]) => {
@@ -651,7 +651,7 @@ const SelectPlayingXI = () => {
                         </div>
 
                         {/* Slots */}
-                        <div className="lg:col-span-8">
+                        <div className="lg:col-span-8 order-1 lg:order-2">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {[...Array(11)].map((_, i) => {
                                     const pos = i + 1;

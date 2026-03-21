@@ -195,9 +195,9 @@ const TeamsPage = () => {
     return (
         <div className="flex flex-col h-full bg-gray-50/50 pb-10 overflow-hidden">
             {/* Top: Horizontal Team List */}
-            <div className="flex-none p-4 md:p-6 bg-white border-b border-gray-200 shadow-sm z-10 relative">
-                <div className="flex items-center justify-between mb-4 px-2">
-                    <h2 className="text-xl font-black text-gray-900">All Teams</h2>
+            <div className="flex-none p-3 md:p-6 bg-white border-b border-gray-200 shadow-sm z-10 relative">
+                <div className="flex items-center justify-between mb-3 px-2">
+                    <h2 className="text-lg md:text-xl font-black text-gray-900">All Teams</h2>
                 </div>
 
                 <div className="relative group/nav">
@@ -250,7 +250,7 @@ const TeamsPage = () => {
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
                     <div className="max-w-5xl mx-auto">
                         {/* Premium Wide Card */}
-                        <div className="bg-white rounded-3xl p-6 md:p-10 shadow-xl border border-gray-100 relative overflow-hidden flex flex-col md:flex-row items-center gap-8 md:gap-12">
+                        <div className="bg-white rounded-3xl p-5 md:p-8 shadow-xl border border-gray-100 relative overflow-hidden flex flex-col md:flex-row items-center gap-5 md:gap-10">
 
                             {/* Decorative Ambience */}
                             <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-full translate-x-1/3 -translate-y-1/3 opacity-50 pointer-events-none"></div>
@@ -266,7 +266,7 @@ const TeamsPage = () => {
 
                             {/* Center: Info */}
                             <div className="flex-1 text-center md:text-left relative z-10">
-                                <h1 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight leading-tight mb-3">
+                                <h1 className="text-2xl md:text-4xl font-black text-gray-900 tracking-tight leading-tight mb-3">
                                     {selectedTeam.name}
                                 </h1>
 
@@ -285,35 +285,35 @@ const TeamsPage = () => {
                             </div>
 
                             {/* Right: Stats Grid */}
-                            <div className="grid grid-cols-2 gap-4 w-full md:w-auto relative z-10">
+                            <div className="grid grid-cols-2 gap-3 w-full md:w-auto relative z-10">
                                 {/* Purse */}
-                                <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100 min-w-[140px]">
+                                <div className="bg-gray-50 rounded-2xl p-3 border border-gray-100">
                                     <div className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">Purse Left</div>
-                                    <div className="text-2xl font-black text-gray-900">
+                                    <div className="text-xl font-black text-gray-900">
                                         {formatCurrency(selectedTeam.budget)}
                                     </div>
                                 </div>
 
                                 {/* Squad */}
-                                <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100 min-w-[140px]">
+                                <div className="bg-gray-50 rounded-2xl p-3 border border-gray-100">
                                     <div className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">Squad Size</div>
-                                    <div className="text-2xl font-black text-gray-900">
+                                    <div className="text-xl font-black text-gray-900">
                                         {selectedTeam.squadSize}<span className="text-sm font-bold text-gray-300">/25</span>
                                     </div>
                                 </div>
 
                                 {/* Overseas */}
-                                <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100 min-w-[140px]">
+                                <div className="bg-gray-50 rounded-2xl p-3 border border-gray-100">
                                     <div className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">Overseas</div>
-                                    <div className="text-2xl font-black text-gray-900">
+                                    <div className="text-xl font-black text-gray-900">
                                         {selectedTeam.overseasCount}<span className="text-sm font-bold text-gray-300">/8</span>
                                     </div>
                                 </div>
 
                                 {/* Spent */}
-                                <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100 min-w-[140px]">
+                                <div className="bg-gray-50 rounded-2xl p-3 border border-gray-100">
                                     <div className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">Spent</div>
-                                    <div className="text-2xl font-black text-gray-900">
+                                    <div className="text-xl font-black text-gray-900">
                                         {formatCurrency(selectedTeam.totalSpent)}
                                     </div>
                                 </div>

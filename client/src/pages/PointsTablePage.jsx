@@ -43,12 +43,12 @@ const PointsTablePage = () => {
 
     return (
         <div className="max-w-7xl mx-auto p-4 md:p-8">
-            <header className="mb-8">
-                <h1 className="text-3xl font-black text-gray-900 flex items-center gap-3">
-                    <Trophy className="text-yellow-500" size={32} />
+            <header className="mb-6">
+                <h1 className="text-2xl md:text-3xl font-black text-gray-900 flex items-center gap-3">
+                    <Trophy className="text-yellow-500" size={28} />
                     Points Table
                 </h1>
-                <p className="text-gray-500">Standings based on Playing XI performance.</p>
+                <p className="text-sm text-gray-500 mt-1">Standings based on Playing XI performance.</p>
             </header>
 
             <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden animate-in fade-in slide-in-from-bottom-4">
@@ -56,36 +56,36 @@ const PointsTablePage = () => {
                     <table className="w-full text-left">
                         <thead>
                             <tr className="bg-gray-50 border-b border-gray-100 text-xs uppercase text-gray-400 font-bold tracking-wider">
-                                <th className="p-6">Pos</th>
-                                <th className="p-6">Team</th>
-                                <th className="p-6 text-center">Playing XI</th>
-                                <th className="p-6 text-right">Total Points</th>
+                                <th className="p-3 md:p-6">Pos</th>
+                                <th className="p-3 md:p-6">Team</th>
+                                <th className="p-3 md:p-6 text-center">Playing XI</th>
+                                <th className="p-3 md:p-6 text-right">Pts</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
                             {pointsTable.map((team, index) => (
                                 <tr key={team.id} className="hover:bg-blue-50/50 transition-colors group">
-                                    <td className="p-6 font-bold text-gray-400 group-hover:text-blue-600 transition-colors">
+                                    <td className="p-3 md:p-6 font-bold text-gray-400 group-hover:text-blue-600 transition-colors">
                                         #{index + 1}
                                     </td>
-                                    <td className="p-6">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-xl bg-gray-100 border border-gray-200 overflow-hidden p-1 shrink-0">
+                                    <td className="p-3 md:p-6">
+                                        <div className="flex items-center gap-2 md:gap-4">
+                                            <div className="w-9 h-9 md:w-12 md:h-12 rounded-xl bg-gray-100 border border-gray-200 overflow-hidden p-1 shrink-0">
                                                 {team.logo ? <img src={team.logo} className="w-full h-full object-contain rounded-lg" alt={team.id} /> : <div className="w-full h-full bg-gray-200" />}
                                             </div>
                                             <div>
-                                                <div className="font-bold text-gray-900 text-lg group-hover:text-blue-700 transition-colors">{team.name}</div>
+                                                <div className="font-bold text-gray-900 text-sm md:text-lg group-hover:text-blue-700 transition-colors">{team.name}</div>
                                                 <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">{team.id}</div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="p-6 text-center">
-                                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${team.playing11Count === 11 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                    <td className="p-3 md:p-6 text-center">
+                                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${team.playing11Count === 11 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                                             {team.playing11Count}/11
                                         </span>
                                     </td>
-                                    <td className="p-6 text-right">
-                                        <div className="text-3xl font-black text-gray-900 group-hover:scale-110 transition-transform origin-right">{team.totalPoints}</div>
+                                    <td className="p-3 md:p-6 text-right">
+                                        <div className="text-2xl md:text-3xl font-black text-gray-900 group-hover:scale-110 transition-transform origin-right">{team.totalPoints}</div>
                                         <div className="text-xs font-bold text-gray-400 uppercase">Pts</div>
                                     </td>
                                 </tr>
