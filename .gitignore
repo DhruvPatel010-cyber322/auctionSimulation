@@ -138,3 +138,7 @@ _dev_archive/
 
 server/scripts/
 *.csv
+
+# Schedule data
+extracted_schedule.json
+ipl_schedule.json
