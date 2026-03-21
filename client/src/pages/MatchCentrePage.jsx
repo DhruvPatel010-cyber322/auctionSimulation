@@ -29,7 +29,7 @@ const groupByDate = (matches) => {
 const StatusBadge = ({ status }) => {
     const styles = {
         Live: 'bg-red-100 text-red-700 border-red-200 animate-pulse',
-        UpComing: 'bg-blue-50 text-blue-600 border-blue-100',
+        UpComing: 'bg-cyan-50 text-cyan-600 border-cyan-100',
         Completed: 'bg-green-50 text-green-700 border-green-100',
     };
     const labels = {
@@ -61,9 +61,9 @@ const MatchDetailModal = ({ match, onClose }) => {
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Modal Header */}
-                <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-5 flex items-center justify-between">
+                <div className="bg-gradient-to-r from-emerald-600 to-teal-700 p-5 flex items-center justify-between">
                     <div>
-                        <p className="text-[10px] font-black text-blue-200 uppercase tracking-widest mb-1">IPL 2026</p>
+                        <p className="text-[10px] font-black text-emerald-200 uppercase tracking-widest mb-1">IPL 2026</p>
                         <StatusBadge status={match.MatchStatus} />
                     </div>
                     <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-full transition-colors text-white">
@@ -149,8 +149,8 @@ const MatchCard = ({ match, onClick }) => {
             className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 overflow-hidden cursor-pointer active:scale-95"
         >
             {/* Card Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-4 py-2 flex items-center justify-between">
-                <span className="text-[10px] font-black text-blue-100 uppercase tracking-widest">
+            <div className="bg-gradient-to-r from-emerald-600 to-teal-700 px-4 py-2 flex items-center justify-between">
+                <span className="text-[10px] font-black text-emerald-100 uppercase tracking-widest">
                     IPL 2026
                 </span>
                 <StatusBadge status={match.MatchStatus} />
@@ -238,7 +238,7 @@ const MatchCentrePage = () => {
                 <div className="flex items-center justify-between gap-4 flex-wrap">
                     <div>
                         <div className="flex items-center gap-3 mb-1">
-                            <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/30">
+                            <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-600/30">
                                 <Trophy size={18} className="text-white" strokeWidth={2.5} />
                             </div>
                             <h1 className="text-3xl font-black text-gray-900 tracking-tight">Match Centre</h1>
@@ -262,7 +262,7 @@ const MatchCentrePage = () => {
                     <select
                         value={teamFilter}
                         onChange={(e) => setTeamFilter(e.target.value)}
-                        className="w-full appearance-none bg-gray-50 border border-gray-200 pl-4 pr-10 py-2.5 rounded-xl font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-shadow hover:bg-gray-100 cursor-pointer"
+                        className="w-full appearance-none bg-gray-50 border border-gray-200 pl-4 pr-10 py-2.5 rounded-xl font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm transition-shadow hover:bg-gray-100 cursor-pointer"
                     >
                         <option value="All">All Teams</option>
                         {allTeams.map(team => (
@@ -277,7 +277,7 @@ const MatchCentrePage = () => {
                     <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="w-full appearance-none bg-gray-50 border border-gray-200 pl-4 pr-10 py-2.5 rounded-xl font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-shadow hover:bg-gray-100 cursor-pointer"
+                        className="w-full appearance-none bg-gray-50 border border-gray-200 pl-4 pr-10 py-2.5 rounded-xl font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm transition-shadow hover:bg-gray-100 cursor-pointer"
                     >
                         <option value="All">All Statuses</option>
                         <option value="UpComing">Upcoming</option>
@@ -292,7 +292,7 @@ const MatchCentrePage = () => {
                     <select
                         value={venueFilter}
                         onChange={(e) => setVenueFilter(e.target.value)}
-                        className="w-full appearance-none bg-gray-50 border border-gray-200 pl-4 pr-10 py-2.5 rounded-xl font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-shadow hover:bg-gray-100 cursor-pointer"
+                        className="w-full appearance-none bg-gray-50 border border-gray-200 pl-4 pr-10 py-2.5 rounded-xl font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm transition-shadow hover:bg-gray-100 cursor-pointer"
                     >
                         <option value="All">All Cities</option>
                         {allVenues.map(city => (
@@ -327,7 +327,7 @@ const MatchCentrePage = () => {
                             {/* Date Header */}
                             <div className="flex items-center gap-3 mb-4">
                                 <div className="flex items-center gap-2 bg-white border border-gray-100 rounded-xl px-3.5 py-2 shadow-sm">
-                                    <Calendar size={13} className="text-blue-600" />
+                                    <Calendar size={13} className="text-emerald-600" />
                                     <span className="text-sm font-black text-gray-700">
                                         {formatDate(date)}
                                     </span>
