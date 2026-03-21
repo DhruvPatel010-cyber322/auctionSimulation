@@ -214,30 +214,109 @@ const MainLayout = () => {
             </main>
 
             {/* Mobile Bottom Navigation */}
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-30 px-6 py-3 flex justify-between items-center border-t border-gray-100">
-                {navItems.filter(item => !item.hidden).map((item) => (
-                    <NavLink
-                        key={item.path}
-                        to={item.path}
-                        className={({ isActive }) =>
-                            cn(
-                                "flex flex-col items-center gap-1 p-2 rounded-lg transition-colors",
-                                isActive ? "text-auction-primary" : "text-gray-400 hover:text-gray-600"
-                            )
-                        }
-                    >
-                        {({ isActive }) => (
-                            <div className="relative flex flex-col items-center gap-1">
-                                <item.icon size={24} strokeWidth={isActive ? 2.5 : 2} />
-                                <span className="text-[10px] font-medium">{item.name}</span>
-                                {checkIsNew(item.name) && (
-                                    <span className="absolute -top-2 -right-3 bg-red-500 text-white text-[8px] font-black px-1 py-0.5 rounded-full shadow-sm animate-pulse uppercase tracking-wider">New</span>
+            {(() => {
+                const primaryPaths = ['/dashboard', '/auction', '/players', '/match-centre'];
+                const primaryItems = navItems.filter(item => !item.hidden && primaryPaths.includes(item.path));
+                const moreItems = navItems.filter(item => !item.hidden && !primaryPaths.includes(item.path));
+                return (
+                    <>
+                        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.07)] z-30 border-t border-gray-100 flex items-stretch"
+                            style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+                            {primaryItems.map((item) => (
+                                <NavLink
+                                    key={item.path}
+                                    to={item.path}
+                                    className={({ isActive }) =>
+                                        cn(
+                                            "flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 transition-colors relative",
+                                            isActive ? "text-auction-primary" : "text-gray-400"
+                                        )
+                                    }
+                                >
+                                    {({ isActive }) => (
+                                        <>
+                                            {isActive && (
+                                                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-auction-primary" />
+                                            )}
+                                            <item.icon size={22} strokeWidth={isActive ? 2.5 : 1.8} />
+                                            <span className="text-[10px] font-semibold tracking-tight">{item.name}</span>
+                                            {checkIsNew(item.name) && (
+                                                <span className="absolute top-1.5 right-1/4 bg-red-500 text-white text-[7px] font-black px-1 py-0.5 rounded-full shadow-sm animate-pulse uppercase">New</span>
+                                            )}
+                                        </>
+                                    )}
+                                </NavLink>
+                            ))}
+
+                            {/* More Button */}
+                            <button
+                                onClick={() => setIsMobileMenuOpen(prev => !prev)}
+                                className={cn(
+                                    "flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 transition-colors relative",
+                                    isMobileMenuOpen ? "text-auction-primary" : "text-gray-400"
                                 )}
-                            </div>
+                            >
+                                {isMobileMenuOpen && (
+                                    <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-auction-primary" />
+                                )}
+                                <div className="flex flex-col gap-[3px] items-center">
+                                    <span className={cn("block w-4 h-0.5 rounded-full transition-all", isMobileMenuOpen ? "bg-auction-primary" : "bg-gray-400")} />
+                                    <span className={cn("block w-4 h-0.5 rounded-full transition-all", isMobileMenuOpen ? "bg-auction-primary" : "bg-gray-400")} />
+                                    <span className={cn("block w-4 h-0.5 rounded-full transition-all", isMobileMenuOpen ? "bg-auction-primary" : "bg-gray-400")} />
+                                </div>
+                                <span className="text-[10px] font-semibold tracking-tight">More</span>
+                            </button>
+                        </nav>
+
+                        {/* More Drawer Backdrop */}
+                        {isMobileMenuOpen && (
+                            <div
+                                className="md:hidden fixed inset-0 bg-black/30 z-40"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            />
                         )}
-                    </NavLink>
-                ))}
-            </nav>
+
+                        {/* More Drawer */}
+                        <div className={cn(
+                            "md:hidden fixed left-0 right-0 bottom-[57px] bg-white z-50 rounded-t-3xl shadow-2xl border-t border-gray-100 transition-all duration-300",
+                            isMobileMenuOpen ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"
+                        )}>
+                            <div className="flex justify-center pt-3 pb-1">
+                                <div className="w-10 h-1 rounded-full bg-gray-200" />
+                            </div>
+                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-5 pb-2">Navigation</p>
+                            <div className="px-4 pb-4 grid grid-cols-2 gap-2">
+                                {moreItems.map((item) => (
+                                    <NavLink
+                                        key={item.path}
+                                        to={item.path}
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                        className={({ isActive }) =>
+                                            cn(
+                                                "flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-sm transition-all",
+                                                isActive
+                                                    ? "bg-auction-primary text-white shadow-md"
+                                                    : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                                            )
+                                        }
+                                    >
+                                        <item.icon size={18} strokeWidth={2} />
+                                        <span>{item.name}</span>
+                                    </NavLink>
+                                ))}
+                            </div>
+                            <div className="px-4 pb-5 border-t border-gray-50 pt-3">
+                                <button
+                                    onClick={() => { logout(); setIsMobileMenuOpen(false); }}
+                                    className="w-full py-3 px-4 rounded-xl border border-red-100 text-sm font-bold text-red-600 hover:bg-red-50 transition-colors flex items-center justify-center gap-2"
+                                >
+                                    <LogOut size={16} /> Logout
+                                </button>
+                            </div>
+                        </div>
+                    </>
+                );
+            })()}
         </div >
     );
 };
