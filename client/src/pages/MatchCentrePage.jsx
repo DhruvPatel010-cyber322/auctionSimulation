@@ -1,32 +1,172 @@
-import React from 'react';
-import { Activity, Clock } from 'lucide-react';
+import React, { useState } from 'react';
+import { Calendar, Clock, MapPin, Trophy } from 'lucide-react';
+import schedule from '../data/ipl_schedule.json';
 
-const MatchCentrePage = () => {
+// Helper to format date nicely: "28 Mar 2026"
+const formatDate = (dateStr) => {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+};
+
+// Helper to format time to 12-hour: "7:30 PM"
+const formatTime = (timeStr) => {
+    const [h, m] = timeStr.split(':').map(Number);
+    const period = h >= 12 ? 'PM' : 'AM';
+    const hour = h % 12 || 12;
+    return `${hour}:${m.toString().padStart(2, '0')} ${period}`;
+};
+
+// Group matches by date
+const groupByDate = (matches) => {
+    return matches.reduce((acc, match) => {
+        const key = match.MatchDate;
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(match);
+        return acc;
+    }, {});
+};
+
+const StatusBadge = ({ status }) => {
+    const styles = {
+        Live: 'bg-red-100 text-red-700 border-red-200 animate-pulse',
+        UpComing: 'bg-blue-50 text-blue-600 border-blue-100',
+        Completed: 'bg-green-50 text-green-700 border-green-100',
+    };
+    const labels = {
+        Live: '🔴 Live',
+        UpComing: 'Upcoming',
+        Completed: 'Completed',
+    };
     return (
-        <div className="flex flex-col items-center justify-center h-full p-6 text-center">
-            <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mb-8 shadow-inner relative overflow-hidden group">
-                {/* Ping animation behind */}
-                <div className="absolute inset-0 bg-blue-200 rounded-full animate-ping opacity-20"></div>
-                <Activity size={48} className="relative z-10 animate-pulse" strokeWidth={2.5} />
+        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${styles[status] || styles.UpComing}`}>
+            {labels[status] || status}
+        </span>
+    );
+};
+
+const MatchCard = ({ match }) => {
+    const [team1Error, setTeam1Error] = useState(false);
+    const [team2Error, setTeam2Error] = useState(false);
+
+    const TeamLogo = ({ src, code, onError, hasError }) => (
+        <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-gray-50 border-2 border-gray-100 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0">
+            {src && !hasError ? (
+                <img src={src} alt={code} className="w-full h-full object-contain p-1" onError={onError} />
+            ) : (
+                <span className="text-sm font-black text-gray-500">{code}</span>
+            )}
+        </div>
+    );
+
+    return (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 overflow-hidden">
+            {/* Card Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-4 py-2 flex items-center justify-between">
+                <span className="text-[10px] font-black text-blue-100 uppercase tracking-widest">
+                    #{match.MatchID} · IPL 2026
+                </span>
+                <StatusBadge status={match.MatchStatus} />
             </div>
-            
-            <h1 className="text-4xl font-black text-gray-900 mb-4 tracking-tight">Match Centre</h1>
-            
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 max-w-lg mb-8 relative">
-                <div className="absolute -top-3 -right-3">
-                    <span className="flex items-center gap-1.5 bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full border border-yellow-200 shadow-sm animate-bounce">
-                        <Clock size={12} /> Coming Soon
+
+            {/* Teams Row */}
+            <div className="px-4 py-5 flex items-center justify-between gap-3">
+                {/* Team 1 */}
+                <div className="flex flex-col items-center gap-2 flex-1">
+                    <TeamLogo
+                        src={match.Team1Logo}
+                        code={match.Team1Code}
+                        onError={() => setTeam1Error(true)}
+                        hasError={team1Error}
+                    />
+                    <span className="text-sm font-black text-gray-800 text-center leading-tight">
+                        {match.Team1Code}
                     </span>
                 </div>
-                <p className="text-gray-500 text-lg leading-relaxed">
-                    The live Match Centre is currently under construction. Once the tournament begins, this hub will feature live scores, detailed player statistics, and real-time point tracking based on actual match performances!
+
+                {/* VS */}
+                <div className="flex flex-col items-center gap-1 px-3">
+                    <span className="text-xs font-black text-gray-300 uppercase tracking-widest">vs</span>
+                </div>
+
+                {/* Team 2 */}
+                <div className="flex flex-col items-center gap-2 flex-1">
+                    <TeamLogo
+                        src={match.Team2Logo}
+                        code={match.Team2Code}
+                        onError={() => setTeam2Error(true)}
+                        hasError={team2Error}
+                    />
+                    <span className="text-sm font-black text-gray-800 text-center leading-tight">
+                        {match.Team2Code}
+                    </span>
+                </div>
+            </div>
+
+            {/* Match Info Footer */}
+            <div className="border-t border-gray-50 px-4 py-3 flex flex-wrap gap-x-4 gap-y-1.5 bg-gray-50/50">
+                <div className="flex items-center gap-1.5 text-gray-400">
+                    <Clock size={11} />
+                    <span className="text-[11px] font-bold">{formatTime(match.MatchTime)}</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-gray-400">
+                    <MapPin size={11} />
+                    <span className="text-[11px] font-bold truncate max-w-[160px]" title={match.Ground}>
+                        {match.Ground}
+                    </span>
+                </div>
+                <div className="flex items-center gap-1.5 text-gray-400">
+                    <span className="text-[11px] font-bold">{match.City}</span>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const MatchCentrePage = () => {
+    const grouped = groupByDate(schedule);
+    const sortedDates = Object.keys(grouped).sort();
+
+    return (
+        <div className="max-w-5xl mx-auto">
+            {/* Page Header */}
+            <div className="mb-8">
+                <div className="flex items-center gap-3 mb-1">
+                    <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/30">
+                        <Trophy size={18} className="text-white" strokeWidth={2.5} />
+                    </div>
+                    <h1 className="text-3xl font-black text-gray-900 tracking-tight">Match Centre</h1>
+                </div>
+                <p className="text-sm text-gray-400 font-medium ml-12">
+                    Tata IPL 2026 · {schedule.length} Matches
                 </p>
             </div>
-            
-            <div className="flex gap-4">
-                <div className="h-2 w-16 bg-gray-200 rounded-full"></div>
-                <div className="h-2 w-16 bg-blue-600 rounded-full"></div>
-                <div className="h-2 w-16 bg-gray-200 rounded-full"></div>
+
+            {/* Schedule */}
+            <div className="space-y-8">
+                {sortedDates.map((date) => (
+                    <div key={date}>
+                        {/* Date Header */}
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="flex items-center gap-2 bg-white border border-gray-100 rounded-xl px-3.5 py-2 shadow-sm">
+                                <Calendar size={13} className="text-blue-600" />
+                                <span className="text-sm font-black text-gray-700">
+                                    {formatDate(date)}
+                                </span>
+                            </div>
+                            <div className="flex-1 h-px bg-gray-100" />
+                            <span className="text-[11px] font-bold text-gray-300">
+                                {grouped[date].length} {grouped[date].length === 1 ? 'match' : 'matches'}
+                            </span>
+                        </div>
+
+                        {/* Match Cards for this date */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {grouped[date].map((match) => (
+                                <MatchCard key={match.MatchID} match={match} />
+                            ))}
+                        </div>
+                    </div>
+                ))}
             </div>
         </div>
     );
