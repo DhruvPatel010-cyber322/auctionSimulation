@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, Clock, MapPin, Trophy, X, Construction } from 'lucide-react';
+import { Calendar, Clock, MapPin, Trophy, X, Construction, Filter, ChevronDown } from 'lucide-react';
 import schedule from '../data/ipl_schedule.json';
 
 // Helper to format date nicely: "28 Mar 2026"
@@ -211,55 +211,146 @@ const MatchCard = ({ match, onClick }) => {
 };
 
 const MatchCentrePage = () => {
-    const grouped = groupByDate(schedule);
-    const sortedDates = Object.keys(grouped).sort();
     const [selectedMatch, setSelectedMatch] = useState(null);
+    const [teamFilter, setTeamFilter] = useState('All');
+    const [statusFilter, setStatusFilter] = useState('All');
+    const [venueFilter, setVenueFilter] = useState('All');
+
+    // Extract unique values for filters
+    const allTeams = [...new Set(schedule.flatMap(m => [m.Team1Code, m.Team2Code]))].sort();
+    const allVenues = [...new Set(schedule.map(m => m.City))].sort();
+
+    // Filter logic
+    const filteredSchedule = schedule.filter(match => {
+        const teamMatch = teamFilter === 'All' || match.Team1Code === teamFilter || match.Team2Code === teamFilter;
+        const statusMatch = statusFilter === 'All' || match.MatchStatus === statusFilter;
+        const venueMatch = venueFilter === 'All' || match.City === venueFilter;
+        return teamMatch && statusMatch && venueMatch;
+    });
+
+    const grouped = groupByDate(filteredSchedule);
+    const sortedDates = Object.keys(grouped).sort();
 
     return (
         <div className="max-w-5xl mx-auto">
             {/* Page Header */}
-            <div className="mb-8">
-                <div className="flex items-center gap-3 mb-1">
-                    <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/30">
-                        <Trophy size={18} className="text-white" strokeWidth={2.5} />
+            <div className="mb-6">
+                <div className="flex items-center justify-between gap-4 flex-wrap">
+                    <div>
+                        <div className="flex items-center gap-3 mb-1">
+                            <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/30">
+                                <Trophy size={18} className="text-white" strokeWidth={2.5} />
+                            </div>
+                            <h1 className="text-3xl font-black text-gray-900 tracking-tight">Match Centre</h1>
+                        </div>
+                        <p className="text-sm text-gray-400 font-medium ml-12">
+                            Tata IPL 2026 · {schedule.length} Matches
+                        </p>
                     </div>
-                    <h1 className="text-3xl font-black text-gray-900 tracking-tight">Match Centre</h1>
                 </div>
-                <p className="text-sm text-gray-400 font-medium ml-12">
-                    Tata IPL 2026 · {schedule.length} Matches
-                </p>
+            </div>
+
+            {/* Filters */}
+            <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-wrap gap-3 mb-8 items-center">
+                <div className="flex items-center gap-2 text-gray-400 mr-2 shrink-0">
+                    <Filter size={16} />
+                    <span className="text-sm font-bold uppercase tracking-wider">Filter</span>
+                </div>
+
+                {/* Team Filter */}
+                <div className="relative flex-1 min-w-[140px] max-w-[200px]">
+                    <select
+                        value={teamFilter}
+                        onChange={(e) => setTeamFilter(e.target.value)}
+                        className="w-full appearance-none bg-gray-50 border border-gray-200 pl-4 pr-10 py-2.5 rounded-xl font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-shadow hover:bg-gray-100 cursor-pointer"
+                    >
+                        <option value="All">All Teams</option>
+                        {allTeams.map(team => (
+                            <option key={team} value={team}>{team}</option>
+                        ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                </div>
+
+                {/* Status Filter */}
+                <div className="relative flex-1 min-w-[140px] max-w-[200px]">
+                    <select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="w-full appearance-none bg-gray-50 border border-gray-200 pl-4 pr-10 py-2.5 rounded-xl font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-shadow hover:bg-gray-100 cursor-pointer"
+                    >
+                        <option value="All">All Statuses</option>
+                        <option value="UpComing">Upcoming</option>
+                        <option value="Live">Live</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                </div>
+
+                {/* Venue/City Filter */}
+                <div className="relative flex-1 min-w-[140px] max-w-[200px]">
+                    <select
+                        value={venueFilter}
+                        onChange={(e) => setVenueFilter(e.target.value)}
+                        className="w-full appearance-none bg-gray-50 border border-gray-200 pl-4 pr-10 py-2.5 rounded-xl font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-shadow hover:bg-gray-100 cursor-pointer"
+                    >
+                        <option value="All">All Cities</option>
+                        {allVenues.map(city => (
+                            <option key={city} value={city}>{city}</option>
+                        ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                </div>
+
+                {/* Clear Filters */}
+                {(teamFilter !== 'All' || statusFilter !== 'All' || venueFilter !== 'All') && (
+                    <button
+                        onClick={() => { setTeamFilter('All'); setStatusFilter('All'); setVenueFilter('All'); }}
+                        className="text-xs font-bold text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-2 rounded-lg transition-colors ml-auto"
+                    >
+                        Clear Filters
+                    </button>
+                )}
             </div>
 
             {/* Schedule */}
             <div className="space-y-8">
-                {sortedDates.map((date) => (
-                    <div key={date}>
-                        {/* Date Header */}
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="flex items-center gap-2 bg-white border border-gray-100 rounded-xl px-3.5 py-2 shadow-sm">
-                                <Calendar size={13} className="text-blue-600" />
-                                <span className="text-sm font-black text-gray-700">
-                                    {formatDate(date)}
+                {sortedDates.length === 0 ? (
+                    <div className="text-center py-12 bg-white rounded-3xl border border-dashed border-gray-200">
+                        <Calendar size={48} className="mx-auto text-gray-300 mb-4" />
+                        <h3 className="text-xl font-bold text-gray-900">No Matches Found</h3>
+                        <p className="text-gray-500 mt-2">Adjust your filters to see more matches.</p>
+                    </div>
+                ) : (
+                    sortedDates.map((date) => (
+                        <div key={date}>
+                            {/* Date Header */}
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="flex items-center gap-2 bg-white border border-gray-100 rounded-xl px-3.5 py-2 shadow-sm">
+                                    <Calendar size={13} className="text-blue-600" />
+                                    <span className="text-sm font-black text-gray-700">
+                                        {formatDate(date)}
+                                    </span>
+                                </div>
+                                <div className="flex-1 h-px bg-gray-100" />
+                                <span className="text-[11px] font-bold text-gray-300">
+                                    {grouped[date].length} {grouped[date].length === 1 ? 'match' : 'matches'}
                                 </span>
                             </div>
-                            <div className="flex-1 h-px bg-gray-100" />
-                            <span className="text-[11px] font-bold text-gray-300">
-                                {grouped[date].length} {grouped[date].length === 1 ? 'match' : 'matches'}
-                            </span>
-                        </div>
 
-                        {/* Match Cards for this date */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {grouped[date].map((match) => (
-                                <MatchCard
-                                    key={match.MatchID}
-                                    match={match}
-                                    onClick={() => setSelectedMatch(match)}
-                                />
-                            ))}
+                            {/* Match Cards for this date */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {grouped[date].map((match) => (
+                                    <MatchCard
+                                        key={match.MatchID}
+                                        match={match}
+                                        onClick={() => setSelectedMatch(match)}
+                                    />
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    ))
+                )}
             </div>
 
             {/* Match Detail Modal */}
