@@ -87,7 +87,7 @@ const MainLayout = () => {
         { name: 'Auction', path: '/auction', icon: Gavel },
         { name: 'Players', path: '/players', icon: Users },
         { name: 'Teams', path: '/teams', icon: Users },
-        { name: 'Trade', path: '/trade', icon: ArrowLeftRight, hidden: true },
+        { name: 'Trade', path: '/trade', icon: ArrowLeftRight },
         { name: 'Match Centre', path: '/match-centre', icon: Trophy },
         { name: 'Rules', path: '/rules', icon: BookOpen },
         { name: 'Playing XI', path: '/select-playing-xi', icon: Check },
