@@ -10,14 +10,16 @@ const ProfilePage = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [hasPassword, setHasPassword] = useState(false);
+    const [profileEmail, setProfileEmail] = useState('');
+    const [profileUsername, setProfileUsername] = useState('');
     const [loading, setLoading] = useState(false);
     const [checkingStatus, setCheckingStatus] = useState(true);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
 
-    // On mount, check if user already has a password set
+    // On mount, fetch profile info (email, username, hasPassword) from DB
     useEffect(() => {
-        const checkPasswordStatus = async () => {
+        const fetchProfileStatus = async () => {
             if (!token) return;
             try {
                 const res = await fetch(`${API_BASE_URL}/api/v2/auth/profile-status`, {
@@ -26,14 +28,16 @@ const ProfilePage = () => {
                 if (res.ok) {
                     const data = await res.json();
                     setHasPassword(data.hasPassword);
+                    setProfileEmail(data.email || '');
+                    setProfileUsername(data.username || '');
                 }
             } catch (err) {
-                console.error('Failed to check password status', err);
+                console.error('Failed to fetch profile status', err);
             } finally {
                 setCheckingStatus(false);
             }
         };
-        checkPasswordStatus();
+        fetchProfileStatus();
     }, [token]);
 
     const handleSetPassword = async (e) => {
@@ -85,9 +89,9 @@ const ProfilePage = () => {
         }
     };
 
-    // Determine display email — prefer user.email (from Google), else fallback
-    const displayEmail = user?.email || 'Not available';
-    const displayUsername = user?.username || user?.code || null;
+    // Determine display values from DB (fetched via profile-status)
+    const displayEmail = profileEmail || 'Loading...';
+    const displayUsername = profileUsername || null;
 
     return (
         <div className="max-w-3xl mx-auto space-y-6">
