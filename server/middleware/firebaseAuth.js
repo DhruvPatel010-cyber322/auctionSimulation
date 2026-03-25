@@ -39,13 +39,13 @@ export const firebaseAuth = async (req, res, next) => {
         // Fallback: If Firebase fails, check if it's our Native Backend JWT
         try {
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-            // Reconstruct req.user from JWT payload seamlessly
-            req.user = {
-                _id: decoded.userId,
-                role: decoded.role,
-                teamCode: decoded.teamCode
-            };
+            // Fetch full user document from DB to ensure methods like .save() work
+            const dbUser = await User.findById(decoded.userId);
+            if (!dbUser) {
+                return res.status(401).json({ message: 'Invalid token' });
+            }
+            req.user = dbUser; // full Mongoose document
+            req.firebaseUser = null; // not a Firebase token
             return next();
         } catch (jwtErr) {
             console.error('Both Token Validations Failed:', error.message, '|', jwtErr.message);

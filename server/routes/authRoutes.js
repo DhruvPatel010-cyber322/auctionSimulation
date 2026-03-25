@@ -3,6 +3,16 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import User from '../models/User.js';
+import rateLimit from 'express-rate-limit';
+
+// Rate limiter: max 100 requests per 15 minutes per IP
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    message: { message: 'Too many requests, please try again later.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
 import Tournament from '../models/Tournament.js';
 import TournamentUser from '../models/TournamentUser.js';
 import Player from '../models/Player.js';
@@ -60,7 +70,7 @@ router.post('/set-username', firebaseAuth, async (req, res) => {
 });
 
 // 1.6 Set Password (also handles change password — verifies currentPassword if user already has one)
-router.post('/set-password', firebaseAuth, async (req, res) => {
+router.post('/set-password', authLimiter, firebaseAuth, async (req, res) => {
     const { password, currentPassword } = req.body;
     if (!password || password.length < 6) {
         return res.status(400).json({ message: 'Password must be at least 6 characters' });
@@ -115,6 +125,7 @@ router.get('/profile-status', firebaseAuth, async (req, res) => {
 router.post('/login-local', async (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) {
+        // Keep generic to avoid hinting which field is missing
         return res.status(400).json({ message: 'Username and password are required' });
     }
 
@@ -124,7 +135,8 @@ router.post('/login-local', async (req, res) => {
         }).select('+password');
 
         if (!user || !user.password) {
-            return res.status(401).json({ message: 'Invalid credentials or user has no password set' });
+            // Generic message to avoid revealing account state
+            return res.status(401).json({ message: 'Invalid credentials' });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
