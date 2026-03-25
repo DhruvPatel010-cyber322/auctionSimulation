@@ -44,8 +44,10 @@ export const firebaseAuth = async (req, res, next) => {
             if (!dbUser) {
                 return res.status(401).json({ message: 'Invalid token' });
             }
-            req.user = dbUser; // full Mongoose document
-            req.firebaseUser = null; // not a Firebase token
+            // Attach full Mongoose document BUT keep the token's specific payload (e.g., teamCode, sessionId)
+            req.user = dbUser;
+            req.user.tokenData = decoded; // CRITICAL: Preserves sessionId and tournament scope
+            req.firebaseUser = null;
             return next();
         } catch (jwtErr) {
             console.error('Both Token Validations Failed:', error.message, '|', jwtErr.message);

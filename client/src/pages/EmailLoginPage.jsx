@@ -15,7 +15,7 @@ const EmailLoginPage = () => {
     // Called after a successful Firebase Google popup
     const handleGoogleSuccess = async (user) => {
         const token = await user.getIdToken();
-        sessionStorage.setItem('firebase_token', token);
+        localStorage.setItem('firebase_token', token);
         navigate('/tournaments');
     };
 
