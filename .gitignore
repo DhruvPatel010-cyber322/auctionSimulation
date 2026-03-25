@@ -142,3 +142,11 @@ server/scripts/
 # Schedule data
 extracted_schedule.json
 ipl_schedule.json
+
+# Fantasy points data and scripts
+extract_points.js
+server/extract_points.js
+fantasy point system.txt
+match_1799_data.json
+fantasy_points.json
+extracted_data.json

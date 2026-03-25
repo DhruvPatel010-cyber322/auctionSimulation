@@ -24,6 +24,10 @@ const userSchema = new mongoose.Schema({
         trim: true,
         lowercase: true
     },
+    password: {
+        type: String,
+        select: false // Exclude from normal queries for security
+    },
     role: {
         type: String,
         enum: ['user', 'admin'],

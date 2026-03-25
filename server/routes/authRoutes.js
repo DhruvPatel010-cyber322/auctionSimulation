@@ -1,6 +1,7 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
 import User from '../models/User.js';
 import Tournament from '../models/Tournament.js';
 import TournamentUser from '../models/TournamentUser.js';
@@ -58,11 +59,93 @@ router.post('/set-username', firebaseAuth, async (req, res) => {
     }
 });
 
+// 1.6 Set Password
+router.post('/set-password', firebaseAuth, async (req, res) => {
+    const { password } = req.body;
+    if (!password || password.length < 6) {
+        return res.status(400).json({ message: 'Password must be at least 6 characters' });
+    }
+
+    try {
+        // Resolve user document properly (because firebaseAuth middleware might just return lightweight object for JWT users)
+        const userId = req.user._id;
+        const dbUser = await User.findById(userId);
+        if (!dbUser) return res.status(404).json({ message: 'User not found' });
+
+        const salt = await bcrypt.genSalt(10);
+        dbUser.password = await bcrypt.hash(password, salt);
+        await dbUser.save();
+        
+        res.json({ success: true, message: 'Password set successfully' });
+    } catch (err) {
+        console.error('Set Password Error:', err);
+        res.status(500).json({ message: 'Failed to set password' });
+    }
+});
+
+// 1.7 Local Login (Username/Password)
+router.post('/login-local', async (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password) {
+        return res.status(400).json({ message: 'Username and password are required' });
+    }
+
+    try {
+        const user = await User.findOne({ 
+            $or: [{ username: username.toLowerCase() }, { email: username.toLowerCase() }] 
+        }).select('+password');
+
+        if (!user || !user.password) {
+            return res.status(401).json({ message: 'Invalid credentials or user has no password set' });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
+
+        const token = jwt.sign({
+            userId: user._id,
+            role: user.role
+        }, process.env.JWT_SECRET, { expiresIn: '5d' });
+
+        res.json({
+            success: true,
+            user: {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                username: user.username,
+                role: user.role,
+                firebaseUid: user.firebaseUid
+            },
+            token
+        });
+    } catch (err) {
+        console.error('Local Login Error:', err);
+        res.status(500).json({ message: 'Server error during local login' });
+    }
+});
+
 // 2. List Tournaments
 router.get('/tournaments', firebaseAuth, async (req, res) => {
     try {
-        const tournaments = await Tournament.find({ status: { $in: ['OPEN', 'ACTIVE', 'RUNNING'] } });
-        res.json(tournaments);
+        const tournaments = await Tournament.find({ status: { $in: ['OPEN', 'ACTIVE', 'RUNNING'] } }).lean();
+        
+        // Find user assignments
+        const assignments = await TournamentUser.find({ user: req.user._id }).lean();
+        const assignedTournamentIds = new Map(assignments.map(a => [a.tournament.toString(), a.teamCode]));
+
+        const enrichedTournaments = tournaments.map(t => {
+            const teamCode = assignedTournamentIds.get(t._id.toString());
+            return {
+                ...t,
+                isJoined: assignedTournamentIds.has(t._id.toString()) && teamCode !== null && teamCode !== undefined,
+                assignedTeamCode: teamCode || null
+            };
+        });
+
+        res.json(enrichedTournaments);
     } catch (err) {
         res.status(500).json({ message: 'Error fetching tournaments' });
     }
@@ -160,29 +243,27 @@ router.post('/tournaments/:id/join', firebaseAuth, async (req, res) => {
         const tournament = await Tournament.findById(req.params.id);
         if (!tournament) return res.status(404).json({ message: 'Tournament not found' });
 
-        if (tournament.accessCode !== accessCode) {
-            return res.status(403).json({ message: 'Invalid Access Code' });
-        }
-
-        // Register user in tournament lobby (if not already there)
         const userId = req.user._id;
-        try {
+
+        // Check if user is ALREADY assigned to this tournament/team
+        const existingAssignment = await TournamentUser.findOne({
+            tournament: req.params.id,
+            user: userId
+        });
+
+        // Only enforce access code if the user hasn't joined before
+        if (!existingAssignment) {
+            if (tournament.accessCode !== accessCode) {
+                return res.status(403).json({ message: 'Invalid Access Code' });
+            }
+
+            // Register user in tournament lobby
             await TournamentUser.create({
                 tournament: req.params.id,
                 user: userId,
                 teamCode: null // Lobby
             });
-        } catch (e) {
-            // Ignore duplicate key error (already joined)
-            if (e.code !== 11000) throw e;
         }
-
-        // Check if user is ALREADY assigned to a team (Auto-Login)
-        const existingAssignment = await TournamentUser.findOne({
-            tournament: req.params.id,
-            user: userId,
-            teamCode: { $ne: null }
-        });
 
         if (existingAssignment && existingAssignment.teamCode) {
             // GENERATE TOKEN (Same as select-team logic)
@@ -208,7 +289,7 @@ router.post('/tournaments/:id/join', firebaseAuth, async (req, res) => {
                     tournamentId: tournament._id,
                     userId: userId,
                     sessionId: sessionId
-                }, process.env.JWT_SECRET, { expiresIn: '12h' });
+                }, process.env.JWT_SECRET, { expiresIn: '5d' });
 
                 const teamConfig = TEAMS.find(t => t.id === dbTeam.code.toLowerCase()) || {};
 
@@ -487,7 +568,7 @@ router.post('/tournaments/:id/select-team', firebaseAuth, async (req, res) => {
             tournamentId: tournament._id, // Scope token to tournament
             userId: userId,
             sessionId: sessionId // EMBED SESSION ID
-        }, process.env.JWT_SECRET, { expiresIn: '12h' });
+        }, process.env.JWT_SECRET, { expiresIn: '5d' });
 
         // 4. Return Data expected by Frontend
         // We find static config for colors etc.
@@ -585,7 +666,7 @@ router.post('/tournaments/:id/watch', firebaseAuth, async (req, res) => {
             tournamentId: tournament._id,
             userId: userId,
             sessionId: sessionId
-        }, process.env.JWT_SECRET, { expiresIn: '12h' });
+        }, process.env.JWT_SECRET, { expiresIn: '5d' });
 
         res.json({
             success: true,
@@ -620,7 +701,7 @@ router.post('/admin/login', firebaseAuth, async (req, res) => {
             role: 'admin',
             sessionId,
             userId: req.user._id
-        }, process.env.JWT_SECRET, { expiresIn: '12h' });
+        }, process.env.JWT_SECRET, { expiresIn: '5d' });
 
         res.json({
             success: true,

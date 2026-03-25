@@ -170,7 +170,7 @@ const TradePage = () => {
                         <p className="text-gray-500 text-sm mt-1">Swap players with other teams to balance your squad and purse.</p>
                     </div>
                     
-                    <div className="flex bg-gray-100 p-1 rounded-xl">
+                    <div className="flex bg-gray-100 p-1 rounded-xl overflow-x-auto whitespace-nowrap custom-scrollbar">
                         {['CREATE', 'RECEIVED', 'SENT', 'COMPLETED'].map(tab => (
                             <button
                                 key={tab}
@@ -220,7 +220,7 @@ const TradePage = () => {
                                     </div>
                                     <div className="text-sm font-bold text-gray-500">{offerPlayers.length} Selected</div>
                                 </div>
-                                <div className="space-y-3 max-h-[500px] overflow-y-auto custom-scrollbar pr-2">
+                                <div className="space-y-3 max-h-[300px] lg:max-h-[500px] overflow-y-auto custom-scrollbar pr-2">
                                     {myPlayers.length === 0 ? (
                                         <div className="text-center p-6 text-gray-400 font-medium">You don't have any players to trade.</div>
                                     ) : (
@@ -307,7 +307,7 @@ const TradePage = () => {
                                             </div>
                                             <div className="text-sm font-bold text-gray-500">{requestPlayers.length} Selected</div>
                                         </div>
-                                        <div className="space-y-3 max-h-[350px] overflow-y-auto custom-scrollbar pr-2">
+                                        <div className="space-y-3 max-h-[300px] lg:max-h-[350px] overflow-y-auto custom-scrollbar pr-2">
                                             {targetPlayers.length === 0 ? (
                                                 <div className="text-center p-6 text-gray-400 font-medium">This team has no players.</div>
                                             ) : (
@@ -343,12 +343,12 @@ const TradePage = () => {
                             </div>
                             
                             {/* Mobile confirmation button */}
-                            <div className="lg:hidden">
+                            <div className="lg:hidden sticky bottom-4 z-20">
                                 {(offerPlayers.length > 0 || requestPlayers.length > 0) && (
                                     <button 
                                         onClick={handleCreateTrade}
                                         disabled={submitting}
-                                        className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold shadow-lg flex items-center justify-center gap-2"
+                                        className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold shadow-2xl flex items-center justify-center gap-2 border-2 border-transparent focus:border-white/50"
                                     >
                                         Propose Trade <Send size={18} />
                                     </button>

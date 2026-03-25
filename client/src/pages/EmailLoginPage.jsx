@@ -4,6 +4,7 @@ import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 
 import { auth } from '../firebase';
 import { Mail, Lock, ArrowRight, Chrome } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../config';
 
 const EmailLoginPage = () => {
     const navigate = useNavigate();
@@ -38,7 +39,33 @@ const EmailLoginPage = () => {
                 setLoading(false);
                 return;
             }
+            
+            // First try local login directly over native mongo
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/v2/auth/login-local`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: email, password })
+                });
+                const data = await res.json();
+                
+                if (res.ok && data.success) {
+                    // Local login succeeded! Store token.
+                    localStorage.setItem('token', data.token);
+                    navigate('/tournaments');
+                    return;
+                }
+                
+                // If the user hasn't set up local password, the API usually returns 401
+                if (res.status !== 401) {
+                    throw new Error(data.message || 'Local login failed unexpectedly.');
+                }
+            } catch (localErr) {
+                // Keep trying via Firebase if local fails
+                console.log('Local login attempt failed, falling back to Firebase...', localErr.message);
+            }
 
+            // Fallback to Firebase
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             await handleSuccess(userCredential.user);
         } catch (err) {
@@ -91,7 +118,7 @@ const EmailLoginPage = () => {
 
                 <form onSubmit={handleEmailLogin} className="space-y-4">
                     <div className="space-y-1">
-                        <label className="text-xs font-bold text-gray-500 uppercase ml-1">Email Address / Admin ID</label>
+                        <label className="text-xs font-bold text-gray-500 uppercase ml-1">Username or Email Address</label>
                         <div className="relative">
                             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                             <input

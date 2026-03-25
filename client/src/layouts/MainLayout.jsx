@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet, NavLink } from 'react-router-dom';
+import { Outlet, NavLink, Link } from 'react-router-dom';
 import { LayoutDashboard, Gavel, Users, UserCircle, Menu, X, BookOpen, LogOut, Wallet, Shield, Trophy, Check, ArrowLeftRight } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
@@ -183,7 +183,7 @@ const MainLayout = () => {
                     <div className="flex items-center gap-4">
                         {team ? (
 
-                            <div className="flex items-center gap-3 pl-6 border-l border-gray-200">
+                            <Link to="/profile" className="flex items-center gap-3 pl-6 border-l border-gray-200 hover:opacity-80 transition-opacity cursor-pointer">
                                 <div className="text-right hidden sm:block">
                                     <p className="text-sm font-bold text-gray-900 leading-none">{teamDetails?.name || team.name}</p>
                                     <p className="text-[10px] uppercase font-bold text-gray-400 mt-1 tracking-wider">{teamDetails?.username || team.username || team.code || 'Team Account'}</p>
@@ -199,7 +199,7 @@ const MainLayout = () => {
                                         </div>
                                     )}
                                 </div>
-                            </div>
+                            </Link>
                         ) : (
                             <div className="flex items-center gap-2 text-gray-400">
                                 <span className="text-sm font-bold">Guest Mode</span>
@@ -215,7 +215,7 @@ const MainLayout = () => {
 
             {/* Mobile Bottom Navigation */}
             {(() => {
-                const primaryPaths = ['/dashboard', '/auction', '/players', '/match-centre'];
+                const primaryPaths = ['/dashboard', '/trade', '/auction', '/select-playing-xi'];
                 const primaryItems = navItems.filter(item => !item.hidden && primaryPaths.includes(item.path));
                 const moreItems = navItems.filter(item => !item.hidden && !primaryPaths.includes(item.path));
                 return (

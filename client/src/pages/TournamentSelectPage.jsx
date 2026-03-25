@@ -66,8 +66,8 @@ const TournamentSelectPage = () => {
         initValues();
     }, [navigate]);
 
-    const handleJoin = async (e) => {
-        e.preventDefault();
+    const handleJoin = async (e, bypassCode = false, targetTournament = null) => {
+        if (e) e.preventDefault();
         setError('');
 
         if (!username) {
@@ -75,15 +75,18 @@ const TournamentSelectPage = () => {
             return;
         }
 
+        const tourney = targetTournament || selectedTournament;
+        if (!tourney) return;
+
         const token = (sessionStorage.getItem('firebase_token') || localStorage.getItem('token'));
         try {
-            const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${selectedTournament._id}/join`, {
+            const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${tourney._id}/join`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ accessCode })
+                body: JSON.stringify({ accessCode: bypassCode ? '' : accessCode })
             });
             const data = await res.json();
 
@@ -95,13 +98,21 @@ const TournamentSelectPage = () => {
                     window.location.href = '/dashboard';
                 } else {
                     // Go to Team Selector
-                    navigate(`/tournaments/${selectedTournament._id}/teams`);
+                    navigate(`/tournaments/${tourney._id}/teams`);
                 }
             } else {
                 setError(data.message || 'Invalid Access Code');
             }
         } catch (err) {
             setError('Failed to join tournament');
+        }
+    };
+
+    const handleTournamentClick = (t) => {
+        if (t.isJoined) {
+            handleJoin(null, true, t);
+        } else {
+            setSelectedTournament(t);
         }
     };
 
@@ -216,7 +227,7 @@ const TournamentSelectPage = () => {
                         {loading ? <p className="text-center">Loading...</p> : tournaments.map(t => (
                             <div
                                 key={t._id}
-                                onClick={() => setSelectedTournament(t)}
+                                onClick={() => handleTournamentClick(t)}
                                 className="p-6 border border-gray-200 rounded-2xl hover:border-blue-500 hover:shadow-md cursor-pointer transition-all flex items-center justify-between group"
                             >
                                 <div className="flex items-center gap-4">

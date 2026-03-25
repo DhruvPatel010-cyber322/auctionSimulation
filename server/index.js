@@ -237,7 +237,7 @@ app.post('/api/auth/login', async (req, res) => {
       teamCode: dbTeam.code, // Ensure we use DB code (should be uppercase)
       role: 'team',
       sessionId
-    }, process.env.JWT_SECRET, { expiresIn: '12h' });
+    }, process.env.JWT_SECRET, { expiresIn: '5d' });
 
     res.json({
       success: true,
