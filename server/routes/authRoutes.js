@@ -59,27 +59,55 @@ router.post('/set-username', firebaseAuth, async (req, res) => {
     }
 });
 
-// 1.6 Set Password
+// 1.6 Set Password (also handles change password — verifies currentPassword if user already has one)
 router.post('/set-password', firebaseAuth, async (req, res) => {
-    const { password } = req.body;
+    const { password, currentPassword } = req.body;
     if (!password || password.length < 6) {
         return res.status(400).json({ message: 'Password must be at least 6 characters' });
     }
 
     try {
-        // Resolve user document properly (because firebaseAuth middleware might just return lightweight object for JWT users)
         const userId = req.user._id;
-        const dbUser = await User.findById(userId);
+        const dbUser = await User.findById(userId).select('+password');
         if (!dbUser) return res.status(404).json({ message: 'User not found' });
+
+        // If user already has a password, require currentPassword to verify identity
+        if (dbUser.password) {
+            if (!currentPassword) {
+                return res.status(400).json({ message: 'Current password is required to change your password.' });
+            }
+            const isValid = await bcrypt.compare(currentPassword, dbUser.password);
+            if (!isValid) {
+                return res.status(401).json({ message: 'Current password is incorrect.' });
+            }
+        }
 
         const salt = await bcrypt.genSalt(10);
         dbUser.password = await bcrypt.hash(password, salt);
         await dbUser.save();
         
-        res.json({ success: true, message: 'Password set successfully' });
+        res.json({ success: true, message: 'Password updated successfully' });
     } catch (err) {
         console.error('Set Password Error:', err);
         res.status(500).json({ message: 'Failed to set password' });
+    }
+});
+
+// 1.65 Profile Status — tells the client whether the user has a password set
+router.get('/profile-status', firebaseAuth, async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const dbUser = await User.findById(userId).select('+password');
+        if (!dbUser) return res.status(404).json({ message: 'User not found' });
+
+        res.json({
+            hasPassword: !!dbUser.password,
+            username: dbUser.username || null,
+            email: dbUser.email || null,
+            name: dbUser.name || null
+        });
+    } catch (err) {
+        res.status(500).json({ message: 'Failed to fetch profile status' });
     }
 });
 
