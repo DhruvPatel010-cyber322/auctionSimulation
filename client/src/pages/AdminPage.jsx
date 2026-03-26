@@ -48,7 +48,7 @@ const AdminPage = () => {
         if (!newTournamentName.trim()) return;
 
         setIsCreatingTournament(true);
-        const firebaseToken = (sessionStorage.getItem('firebase_token') || localStorage.getItem('token'));
+        const firebaseToken = (localStorage.getItem('firebase_token') || localStorage.getItem('token'));
         try {
             const res = await fetch(`${API_URL}/api/v2/auth/tournaments/create`, {
                 method: 'POST',
@@ -88,7 +88,7 @@ const AdminPage = () => {
 
     // Fetch Tournaments
     const fetchTournaments = async () => {
-        const firebaseToken = (sessionStorage.getItem('firebase_token') || localStorage.getItem('token'));
+        const firebaseToken = (localStorage.getItem('firebase_token') || localStorage.getItem('token'));
         if (!firebaseToken) return;
 
         try {
@@ -111,7 +111,7 @@ const AdminPage = () => {
         if (!selectedTournamentId) return;
 
         const fetchDetails = async () => {
-            const firebaseToken = (sessionStorage.getItem('firebase_token') || localStorage.getItem('token'));
+            const firebaseToken = (localStorage.getItem('firebase_token') || localStorage.getItem('token'));
             if (!firebaseToken) return;
 
             try {
@@ -216,7 +216,7 @@ const AdminPage = () => {
         if (!userToAssign || !selectedTeamForAssign) return;
         setAssignLoading(true);
 
-        const firebaseToken = (sessionStorage.getItem('firebase_token') || localStorage.getItem('token'));
+        const firebaseToken = (localStorage.getItem('firebase_token') || localStorage.getItem('token'));
         try {
             const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${selectedTournamentId}/assign-team`, {
                 method: 'POST',
@@ -245,7 +245,7 @@ const AdminPage = () => {
     const handleUnassignTeam = async (assignmentId, userId, username, teamCode) => {
         if (!window.confirm(`Are you sure you want to remove ${username} from Team ${teamCode}? This team will become available for others to claim.`)) return;
 
-        const firebaseToken = (sessionStorage.getItem('firebase_token') || localStorage.getItem('token'));
+        const firebaseToken = (localStorage.getItem('firebase_token') || localStorage.getItem('token'));
         try {
             const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${selectedTournamentId}/unassign-team`, {
                 method: 'POST',
@@ -275,7 +275,7 @@ const AdminPage = () => {
         const newLockState = !activeTourney.isPlayingXILocked;
         if (!window.confirm(`Are you sure you want to ${newLockState ? 'LOCK' : 'UNLOCK'} Playing XI selections for this tournament?`)) return;
 
-        const firebaseToken = (sessionStorage.getItem('firebase_token') || localStorage.getItem('token'));
+        const firebaseToken = (localStorage.getItem('firebase_token') || localStorage.getItem('token'));
         try {
             const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${selectedTournamentId}/lock-playing-xi`, {
                 method: 'PUT',
@@ -307,7 +307,7 @@ const AdminPage = () => {
         const newLockState = !activeTourney.isCaptaincyLocked;
         if (!window.confirm(`Are you sure you want to ${newLockState ? 'LOCK' : 'UNLOCK'} Captain & Vice-Captain selections for this tournament?`)) return;
 
-        const firebaseToken = (sessionStorage.getItem('firebase_token') || localStorage.getItem('token'));
+        const firebaseToken = (localStorage.getItem('firebase_token') || localStorage.getItem('token'));
         try {
             const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${selectedTournamentId}/lock-captaincy`, {
                 method: 'PUT',

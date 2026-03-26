@@ -15,7 +15,7 @@ const PointsTablePage = () => {
             try {
                 const payload = JSON.parse(atob(localToken.split('.')[1]));
                 const tournamentId = payload.tournamentId;
-                const fbToken = (sessionStorage.getItem('firebase_token') || localStorage.getItem('token'));
+                const fbToken = (localStorage.getItem('firebase_token') || localStorage.getItem('token'));
 
                 const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${tournamentId}/points-table`, {
                     headers: { 'Authorization': `Bearer ${fbToken}` }

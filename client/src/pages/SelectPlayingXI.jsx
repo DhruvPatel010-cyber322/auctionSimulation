@@ -93,7 +93,7 @@ const SelectPlayingXI = () => {
                     setLoading(false);
                     return;
                 }
-                const fbToken = sessionStorage.getItem('firebase_token');
+                const fbToken = localStorage.getItem('firebase_token');
 
                 // Get All Teams
                 const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${tournamentId}/teams`, {
@@ -138,7 +138,7 @@ const SelectPlayingXI = () => {
                 }
                 const tournamentId = payload.tournamentId;
                 if (!tournamentId) return;
-                const fbToken = sessionStorage.getItem('firebase_token');
+                const fbToken = localStorage.getItem('firebase_token');
 
                 // Use the Public Endpoint for consistency
                 const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${tournamentId}/teams/${selectedTeam}/squad`, {
@@ -320,7 +320,7 @@ const SelectPlayingXI = () => {
 
     const handleSaveFinalOverwrite = async (forcedC, forcedVC) => {
         setSaving(true);
-        const fbToken = sessionStorage.getItem('firebase_token') || localStorage.getItem('token');
+        const fbToken = localStorage.getItem('firebase_token') || localStorage.getItem('token');
         const localToken = localStorage.getItem('token');
         try {
             const payload = decodeJwtPayload(localToken);
@@ -376,7 +376,7 @@ const SelectPlayingXI = () => {
             return;
         }
         setSaving(true);
-        const fbToken = sessionStorage.getItem('firebase_token') || localStorage.getItem('token');
+        const fbToken = localStorage.getItem('firebase_token') || localStorage.getItem('token');
         const localToken = localStorage.getItem('token');
         try {
             const payload = decodeJwtPayload(localToken);
