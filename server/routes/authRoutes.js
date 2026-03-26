@@ -219,7 +219,10 @@ router.delete('/tournaments/:id', firebaseAuth, async (req, res) => {
                 status: 'AVAILABLE',
                 soldPrice: null,
                 soldToTeam: null,
-                points: 0 // Optional: Reset points too if part of new tournament
+                points: 0,
+                isInPlaying11: false,
+                isCaptain: false,
+                isViceCaptain: false
             }
         });
 
@@ -904,7 +907,34 @@ router.post('/tournaments/:id/playing11', firebaseAuth, async (req, res) => {
         team.viceCaptain = selectedViceCaptain || null;
         await team.save();
 
+        // ── Sync Player fields automatically ──────────────────────────────────
+        // Step A: Clear flags for all players in this team's squad first
+        await Player.updateMany(
+            { _id: { $in: team.playersBought } },
+            { $set: { isInPlaying11: false, isCaptain: false, isViceCaptain: false } }
+        );
+
+        // Step B: Mark Playing XI players
+        if (inputIds.length > 0) {
+            await Player.updateMany(
+                { _id: { $in: inputIds } },
+                { $set: { isInPlaying11: true } }
+            );
+        }
+
+        // Step C: Mark Captain
+        if (team.captain) {
+            await Player.findByIdAndUpdate(team.captain, { $set: { isCaptain: true } });
+        }
+
+        // Step D: Mark Vice-Captain
+        if (team.viceCaptain) {
+            await Player.findByIdAndUpdate(team.viceCaptain, { $set: { isViceCaptain: true } });
+        }
+        // ─────────────────────────────────────────────────────────────────────
+
         res.json({ success: true, message: 'Playing XI saved successfully', playing11: team.playing11, captain: team.captain, viceCaptain: team.viceCaptain });
+
 
     } catch (err) {
         console.error("Save Playing XI Error:", err);

@@ -67,6 +67,19 @@ const playerSchema = new mongoose.Schema({
     points: {
         type: Number,
         default: 0
+    },
+    // ── Fantasy Selection Status (auto-updated when team saves Playing XI) ──
+    isInPlaying11: {
+        type: Boolean,
+        default: false
+    },
+    isCaptain: {
+        type: Boolean,
+        default: false
+    },
+    isViceCaptain: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true

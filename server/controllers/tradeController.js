@@ -276,6 +276,18 @@ export const updateProposalStatus = async (req, res) => {
         await sender.save();
         await receiver.save();
         
+        // Clear Playing XI flags on all players involved in the trade (their XI was wiped above)
+        const allTradedIds = [...offerIds, ...requestIds];
+        // Also clear flags for all squad members of both teams since XI was nullified
+        const allAffectedPlayerIds = [
+            ...sender.playersBought.map(id => id.toString()),
+            ...receiver.playersBought.map(id => id.toString())
+        ];
+        await Player.updateMany(
+            { _id: { $in: [...new Set([...allAffectedPlayerIds, ...allTradedIds])] } },
+            { $set: { isInPlaying11: false, isCaptain: false, isViceCaptain: false } }
+        );
+        
         // 4. Mark status
         trade.status = 'ACCEPTED';
         await trade.save();
