@@ -114,16 +114,93 @@ const RulesPage = () => {
                 </div>
             </div>
 
-            {/* Points System Placeholder */}
-            <div className="p-8 border-2 border-dashed border-gray-200 rounded-3xl text-center bg-gray-50/50">
-                <div className="inline-flex items-center justify-center p-3 bg-blue-100 text-blue-600 rounded-2xl mb-4">
-                    <AlertCircle size={28} />
+            {/* Points System */}
+            <div className="space-y-6 pt-6 border-t border-gray-100">
+                <div className="flex items-center gap-4 mb-6">
+                    <div className="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600">
+                        <CheckCircle size={24} />
+                    </div>
+                    <div>
+                        <h2 className="text-3xl font-black text-gray-900">Fantasy Points System</h2>
+                        <p className="text-gray-500">Official scoring matrix for your Playing 11.</p>
+                    </div>
                 </div>
-                <h2 className="text-2xl font-black text-gray-900 mb-2">Points System</h2>
-                <span className="inline-block px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold uppercase tracking-wider rounded-lg border border-yellow-200 shadow-sm mb-4">Coming Soon</span>
-                <p className="text-gray-500 max-w-2xl mx-auto">
-                    The intricate scoring matrix that dictates how your playing 11 generates points on match days is currently under final review by the league committee. Check back soon for the official points distribution rules!
-                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {/* Batting */}
+                    <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                        <h3 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b border-gray-100">Batting</h3>
+                        <ul className="space-y-3 text-sm text-gray-600">
+                            <li className="flex justify-between"><span>Runs</span><span className="font-bold text-gray-900">+1</span></li>
+                            <li className="flex justify-between"><span>Four Bonus</span><span className="font-bold text-gray-900">+4</span></li>
+                            <li className="flex justify-between"><span>Six Bonus</span><span className="font-bold text-gray-900">+6</span></li>
+                            <li className="flex justify-between"><span>25 Runs Bonus</span><span className="font-bold text-gray-900">+4</span></li>
+                            <li className="flex justify-between"><span>50 Runs Bonus</span><span className="font-bold text-gray-900">+8</span></li>
+                            <li className="flex justify-between"><span>75 Runs Bonus</span><span className="font-bold text-gray-900">+12</span></li>
+                            <li className="flex justify-between"><span>100 Runs Bonus</span><span className="font-bold text-gray-900">+16</span></li>
+                            <li className="flex justify-between"><span>Dismissal for Duck <span className="text-xs text-gray-400 block">(excluding bowlers)</span></span><span className="font-bold text-red-500">-2</span></li>
+                        </ul>
+                    </div>
+
+                    {/* Bowling */}
+                    <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                        <h3 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b border-gray-100">Bowling</h3>
+                        <ul className="space-y-3 text-sm text-gray-600">
+                            <li className="flex justify-between"><span>Wicket <span className="text-xs text-gray-400 block">(except run-out)</span></span><span className="font-bold text-gray-900">+30</span></li>
+                            <li className="flex justify-between"><span>Dot Ball Bonus</span><span className="font-bold text-gray-900">+1</span></li>
+                            <li className="flex justify-between"><span>Maiden over Bonus</span><span className="font-bold text-gray-900">+12</span></li>
+                            <li className="flex justify-between"><span>LBW / Bowled Bonus</span><span className="font-bold text-gray-900">+8</span></li>
+                            <li className="flex justify-between"><span>3-wicket haul</span><span className="font-bold text-gray-900">+4</span></li>
+                            <li className="flex justify-between"><span>4-wicket haul</span><span className="font-bold text-gray-900">+8</span></li>
+                            <li className="flex justify-between"><span>5-wicket haul</span><span className="font-bold text-gray-900">+12</span></li>
+                        </ul>
+                    </div>
+
+                    {/* Fielding & Others */}
+                    <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                        <h3 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b border-gray-100">Fielding & Bonus</h3>
+                        <ul className="space-y-3 text-sm text-gray-600">
+                            <li className="flex justify-between"><span>Catch</span><span className="font-bold text-gray-900">+8</span></li>
+                            <li className="flex justify-between"><span>3 Catch Bonus</span><span className="font-bold text-gray-900">+4</span></li>
+                            <li className="flex justify-between"><span>Stumping</span><span className="font-bold text-gray-900">+12</span></li>
+                            <li className="flex justify-between"><span>Run-out (Direct)</span><span className="font-bold text-gray-900">+12</span></li>
+                            <li className="flex justify-between"><span>Run-out (Indirect)</span><span className="font-bold text-gray-900">+6</span></li>
+                            <li className="flex justify-between mt-4 border-t border-gray-50 pt-3"><span>Playing 11 Bonus</span><span className="font-bold text-blue-600">+4</span></li>
+                            <li className="flex justify-between"><span>Captain Bonus</span><span className="font-bold text-purple-600">2x</span></li>
+                            <li className="flex justify-between"><span>Vice-Captain Bonus</span><span className="font-bold text-purple-600">1.5x</span></li>
+                        </ul>
+                    </div>
+
+                    {/* Strike Rate */}
+                    <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 md:col-span-1 lg:col-span-1">
+                        <h3 className="text-lg font-bold text-gray-900 mb-1">Strike Rate</h3>
+                        <p className="text-xs text-gray-500 mb-4 pb-2 border-b border-gray-100">Min 20 runs OR 10 balls</p>
+                        <ul className="space-y-2 text-sm text-gray-600">
+                            <li className="flex justify-between"><span>170 and above</span><span className="font-bold text-green-600">+6</span></li>
+                            <li className="flex justify-between"><span>150 to 169.99</span><span className="font-bold text-green-600">+4</span></li>
+                            <li className="flex justify-between"><span>130 to 149.99</span><span className="font-bold text-green-600">+2</span></li>
+                            <li className="flex justify-between"><span>70 to 129.99</span><span className="font-bold text-gray-400">0</span></li>
+                            <li className="flex justify-between"><span>60 to 69.99</span><span className="font-bold text-red-500">-2</span></li>
+                            <li className="flex justify-between"><span>50 to 59.99</span><span className="font-bold text-red-500">-4</span></li>
+                            <li className="flex justify-between"><span>Less than 50</span><span className="font-bold text-red-500">-6</span></li>
+                        </ul>
+                    </div>
+
+                    {/* Economy Rate */}
+                    <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 md:col-span-2 lg:col-span-2">
+                        <h3 className="text-lg font-bold text-gray-900 mb-1">Economy Rate</h3>
+                        <p className="text-xs text-gray-500 mb-4 pb-2 border-b border-gray-100">Min 2 overs to be bowled</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-sm text-gray-600">
+                            <li className="flex justify-between"><span>Less than 5</span><span className="font-bold text-green-600">+6</span></li>
+                            <li className="flex justify-between"><span>5.00 to 5.99</span><span className="font-bold text-green-600">+4</span></li>
+                            <li className="flex justify-between"><span>6.00 to 6.99</span><span className="font-bold text-green-600">+2</span></li>
+                            <li className="flex justify-between"><span>7.00 to 9.99</span><span className="font-bold text-gray-400">0</span></li>
+                            <li className="flex justify-between"><span>10.00 to 10.99</span><span className="font-bold text-red-500">-2</span></li>
+                            <li className="flex justify-between"><span>11.00 to 11.99</span><span className="font-bold text-red-500">-4</span></li>
+                            <li className="flex justify-between sm:col-span-2"><span>12.00 and above</span><span className="font-bold text-red-500">-6</span></li>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* Auction Format */}
