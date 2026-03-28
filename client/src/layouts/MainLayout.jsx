@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, NavLink, Link } from 'react-router-dom';
-import { LayoutDashboard, Gavel, Users, UserCircle, Menu, X, BookOpen, LogOut, Wallet, Shield, Trophy, Check, ArrowLeftRight } from 'lucide-react';
+import { LayoutDashboard, Gavel, Users, UserCircle, Menu, X, BookOpen, LogOut, Wallet, Shield, Trophy, Check, ArrowLeftRight, Sparkles } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
@@ -89,6 +89,7 @@ const MainLayout = () => {
         { name: 'Teams', path: '/teams', icon: Users },
         { name: 'Trade', path: '/trade', icon: ArrowLeftRight, hidden: true },
         { name: 'Match Centre', path: '/match-centre', icon: Trophy },
+        { name: 'Fantasy', path: '/fantasy', icon: Sparkles },
         { name: 'Rules', path: '/rules', icon: BookOpen },
         { name: 'Playing XI', path: '/select-playing-xi', icon: Check },
         { name: 'Points Table', path: '/points-table', icon: Trophy },
@@ -96,7 +97,7 @@ const MainLayout = () => {
 
     // Logic for NEW badges - target expiration: 24hrs from 2026-03-14T21:06:03+05:30
     const checkIsNew = (itemName) => {
-        if (!['Rules', 'Players', 'Match Centre'].includes(itemName)) return false;
+        if (!['Rules', 'Players', 'Match Centre', 'Fantasy'].includes(itemName)) return false;
 
         const expirationDate = new Date('2026-03-15T21:06:03+05:30');
         const now = new Date();

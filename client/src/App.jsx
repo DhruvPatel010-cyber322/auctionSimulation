@@ -22,6 +22,12 @@ import ErrorBoundary from './components/ErrorBoundary';
 import RequireAuth from './components/RequireAuth';
 import RequireAdmin from './components/RequireAdmin';
 
+// Fantasy Module Imports
+import FantasyMatchesPage from './pages/FantasyMatchesPage';
+import TeamBuilderPage from './pages/TeamBuilderPage';
+import MyFantasyTeamsPage from './pages/MyFantasyTeamsPage';
+import LeaderboardPage from './pages/LeaderboardPage';
+
 function App() {
   return (
     <ErrorBoundary>
@@ -50,6 +56,12 @@ function App() {
                   <Route path="points-table" element={<PointsTablePage />} />
                   <Route path="match-centre" element={<MatchCentrePage />} />
                   <Route path="profile" element={<ProfilePage />} />
+                  
+                  {/* Fantasy Routes */}
+                  <Route path="fantasy" element={<FantasyMatchesPage />} />
+                  <Route path="fantasy/:matchId/team" element={<TeamBuilderPage />} />
+                  <Route path="fantasy/:matchId/my-teams" element={<MyFantasyTeamsPage />} />
+                  <Route path="fantasy/:matchId/leaderboard" element={<LeaderboardPage />} />
                 </Route>
               </Route>
 

@@ -40,11 +40,14 @@ import Tournament from './models/Tournament.js';
 import TournamentUser from './models/TournamentUser.js';
 import tradeRoutes from './routes/tradeRoutes.js';
 import scheduleRoutes from './routes/scheduleRoutes.js';
-
+import { connectDream11DB } from './config/dream11Db.js';
+import { bootstrapDream11Data } from './services/dream11Bootstrap.js';
+import fantasyRoutes from './routes/fantasyRoutes.js';
 dotenv.config();
 
 // Connect to Database
 connectDB();
+connectDream11DB().then(bootstrapDream11Data).catch(console.error);
 
 const app = express();
 const httpServer = createServer(app);
@@ -377,6 +380,9 @@ app.use('/api/v2/auth', authRoutes);
 app.use('/api/trades', protect, tradeRoutes);
 
 app.use('/api/schedule', scheduleRoutes);
+
+// --- FANTASY MODULE ---
+app.use('/api/fantasy', fantasyRoutes);
 
 // Basic Route
 app.get('/', (req, res) => {
