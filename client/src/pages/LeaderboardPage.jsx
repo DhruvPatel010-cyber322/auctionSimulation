@@ -135,65 +135,58 @@ const LeaderboardPage = () => {
             )}
 
             {topThree.length > 0 && (
-                <section className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+                <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
                     {topThree.map((entry) => (
                         <article
                             key={entry.team._id}
-                            className={`overflow-hidden rounded-[32px] border bg-white shadow-[0_18px_60px_rgba(15,23,42,0.07)] ${
-                                isCurrentUserEntry(entry) ? 'border-emerald-300 ring-2 ring-emerald-200' : 'border-rose-100'
+                            className={`overflow-hidden rounded-2xl border bg-white shadow-sm transition-shadow hover:shadow-md ${
+                                isCurrentUserEntry(entry) ? 'border-emerald-300 ring-1 ring-emerald-200' : 'border-rose-100'
                             }`}
                         >
-                            <div className={`bg-gradient-to-r px-6 py-5 ${rankStyles[entry.rank] || 'from-gray-200 to-gray-300 text-gray-950'} shadow-lg`}>
-                                <div className="flex items-center justify-between gap-3">
-                                    <div>
-                                        <p className="text-xs font-black uppercase tracking-[0.3em] opacity-80">Rank</p>
-                                        <p className="mt-1 text-4xl font-black">#{entry.rank}</p>
+                            <div className={`bg-gradient-to-r px-4 py-3 ${rankStyles[entry.rank] || 'from-gray-200 to-gray-300 text-gray-950'}`}>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <Trophy size={18} className="opacity-90" />
+                                        <span className="text-sm font-black uppercase tracking-widest">Rank {entry.rank}</span>
                                     </div>
-                                    <div className="rounded-2xl bg-white/20 px-4 py-3 text-right backdrop-blur-sm">
-                                        <p className="text-[11px] font-black uppercase tracking-[0.25em] opacity-80">Points</p>
-                                        <p className="mt-1 text-2xl font-black">{entry.team.totalPoints}</p>
+                                    <div className="text-right">
+                                        <span className="text-lg font-black">{entry.team.totalPoints} <span className="text-[10px] uppercase opacity-80 tracking-widest">pts</span></span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="space-y-5 px-6 py-6">
-                                <div>
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Contestant</p>
-                                    <h2 className="mt-1 text-2xl font-black text-gray-950 truncate" title={entry.user.username || entry.user.displayName}>
-                                        {entry.user.username ? `@${entry.user.username}` : entry.user.displayName}
-                                    </h2>
-                                    {isCurrentUserEntry(entry) && (
-                                        <span className="mt-2 inline-flex rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-emerald-700">
-                                            You
-                                        </span>
-                                    )}
-                                    <p className="mt-1 text-sm font-medium text-gray-500">
-                                        {entry.team.summary?.playerCount || 0} players | {entry.team.summary?.valueUsed || entry.team.summary?.creditsUsed || 0} total value
-                                    </p>
+                            <div className="p-4">
+                                <div className="mb-4">
+                                    <div className="flex items-center gap-2">
+                                        <h2 className="text-lg font-black text-gray-950 truncate" title={entry.user.username || entry.user.displayName}>
+                                            {entry.user.username ? `@${entry.user.username}` : entry.user.displayName}
+                                        </h2>
+                                        {isCurrentUserEntry(entry) && (
+                                            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-emerald-700">You</span>
+                                        )}
+                                    </div>
                                 </div>
 
-                                <div className="grid gap-3">
-                                    <div className="rounded-[24px] border border-amber-200 bg-amber-50 px-4 py-4">
-                                        <p className="text-[11px] font-black uppercase tracking-[0.25em] text-amber-700">Captain</p>
-                                        <p className="mt-2 flex items-center gap-2 text-sm font-black text-amber-900">
-                                            <Crown size={14} />
-                                            {entry.team.captain?.name || 'Not set'}
+                                <div className="grid grid-cols-2 gap-2 mb-4">
+                                    <div className="rounded-xl border border-amber-100 bg-amber-50/50 p-2.5">
+                                        <p className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-amber-600">
+                                            <Crown size={12} /> Captain
                                         </p>
+                                        <p className="mt-1 text-xs font-bold text-gray-900 truncate">{entry.team.captain?.name || 'Not set'}</p>
                                     </div>
-                                    <div className="rounded-[24px] border border-sky-200 bg-sky-50 px-4 py-4">
-                                        <p className="text-[11px] font-black uppercase tracking-[0.25em] text-sky-700">Vice-Captain</p>
-                                        <p className="mt-2 flex items-center gap-2 text-sm font-black text-sky-900">
-                                            <Star size={14} />
-                                            {entry.team.viceCaptain?.name || 'Not set'}
+                                    <div className="rounded-xl border border-sky-100 bg-sky-50/50 p-2.5">
+                                        <p className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-sky-600">
+                                            <Star size={12} /> Vice-Capt
                                         </p>
+                                        <p className="mt-1 text-xs font-bold text-gray-900 truncate">{entry.team.viceCaptain?.name || 'Not set'}</p>
                                     </div>
                                 </div>
 
                                 <div>
-                                    <p className="text-xs font-black uppercase tracking-[0.25em] text-gray-400">Squad Preview</p>
-                                    <div className="mt-3 flex flex-wrap gap-2">
-                                        {(entry.team.players || []).slice(0, 6).map((player) => (
-                                            <FantasyPlayerAvatar key={player._id} player={player} className="h-12 w-12" textClassName="text-xs" />
+                                    <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-2.5">Squad Preview</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {(entry.team.players || []).slice(0, 5).map((player) => (
+                                            <FantasyPlayerAvatar key={player._id} player={player} className="h-9 w-9" textClassName="text-[10px]" />
                                         ))}
                                     </div>
                                 </div>
@@ -204,48 +197,39 @@ const LeaderboardPage = () => {
             )}
 
             {remaining.length > 0 && (
-                <section className="space-y-4">
+                <section className="space-y-3">
                     {remaining.map((entry) => (
                         <article
                             key={entry.team._id}
-                            className={`rounded-[30px] border bg-white px-6 py-5 shadow-sm ${
-                                isCurrentUserEntry(entry) ? 'border-emerald-300 ring-2 ring-emerald-200' : 'border-rose-100'
+                            className={`rounded-2xl border bg-white px-4 py-3 shadow-sm transition-all hover:shadow-md ${
+                                isCurrentUserEntry(entry) ? 'border-emerald-300 bg-emerald-50/20 ring-1 ring-emerald-200' : 'border-rose-100'
                             }`}
                         >
-                            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                                <div className="flex items-center gap-4">
-                                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-gray-200 bg-gray-50 text-xl font-black text-gray-900">
-                                        #{entry.rank}
-                                    </div>
-                                    <div>
-                                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">Contestant</p>
-                                        <h2 className="mt-1 text-xl font-black text-gray-950 truncate" title={entry.user.username || entry.user.displayName}>
+                            <div className="flex items-center gap-3 sm:gap-4">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-50 border border-gray-100 text-sm font-black text-gray-900">
+                                    #{entry.rank}
+                                </div>
+
+                                <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-2">
+                                        <h2 className="text-sm font-black text-gray-950 truncate" title={entry.user.username || entry.user.displayName}>
                                             {entry.user.username ? `@${entry.user.username}` : entry.user.displayName}
                                         </h2>
                                         {isCurrentUserEntry(entry) && (
-                                            <span className="mt-2 inline-flex rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-emerald-700">
+                                            <span className="shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-emerald-700">
                                                 You
                                             </span>
                                         )}
-                                        <p className="mt-1 text-sm font-medium text-gray-500">
-                                            {entry.team.summary?.playerCount || 0} players | {entry.team.summary?.valueUsed || entry.team.summary?.creditsUsed || 0} total value
-                                        </p>
+                                    </div>
+                                    <div className="mt-1 flex items-center gap-3 text-[10px] sm:text-xs text-gray-500">
+                                        <span className="flex items-center gap-1.5"><Crown size={12} className="text-amber-500" /> <span className="truncate max-w-[80px] sm:max-w-[120px]">{entry.team.captain?.name || 'N/A'}</span></span>
+                                        <span className="flex items-center gap-1.5"><Star size={12} className="text-sky-500" /> <span className="truncate max-w-[80px] sm:max-w-[120px]">{entry.team.viceCaptain?.name || 'N/A'}</span></span>
                                     </div>
                                 </div>
 
-                                <div className="grid gap-3 sm:grid-cols-3">
-                                    <div className="rounded-2xl bg-emerald-50 px-4 py-3 text-emerald-800">
-                                        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-600">Points</p>
-                                        <p className="mt-1 text-2xl font-black">{entry.team.totalPoints}</p>
-                                    </div>
-                                    <div className="rounded-2xl bg-amber-50 px-4 py-3 text-amber-800">
-                                        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-amber-600">Captain</p>
-                                        <p className="mt-1 text-sm font-black">{entry.team.captain?.name || 'Not set'}</p>
-                                    </div>
-                                    <div className="rounded-2xl bg-sky-50 px-4 py-3 text-sky-800">
-                                        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-sky-600">Vice-Captain</p>
-                                        <p className="mt-1 text-sm font-black">{entry.team.viceCaptain?.name || 'Not set'}</p>
-                                    </div>
+                                <div className="shrink-0 text-right">
+                                    <p className="text-[9px] font-black uppercase tracking-widest text-emerald-600/80">Points</p>
+                                    <p className="text-lg sm:text-xl font-black text-emerald-700 leading-tight">{entry.team.totalPoints}</p>
                                 </div>
                             </div>
                         </article>
