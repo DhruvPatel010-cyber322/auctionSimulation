@@ -39,46 +39,41 @@ const FantasyMatchesPage = () => {
     }, []);
 
     return (
-        <div className="mx-auto max-w-7xl space-y-8 p-4 md:p-8">
-            <section className="overflow-hidden rounded-[32px] bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.24),_transparent_26%),linear-gradient(135deg,_#991B1B_0%,_#E53935_52%,_#FB923C_100%)] px-6 py-8 text-white shadow-xl shadow-red-500/10 md:px-8 md:py-10">
-                <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
+        <div className="mx-auto max-w-7xl space-y-5 p-3 md:p-5">
+            <section className="overflow-hidden rounded-2xl bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.24),_transparent_26%),linear-gradient(135deg,_#991B1B_0%,_#E53935_52%,_#FB923C_100%)] px-5 py-6 text-white shadow-lg shadow-red-500/10 md:px-6 md:py-7">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div>
-                        <p className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-red-100">Fantasy Cricket</p>
-                        <h1 className="mt-2 max-w-3xl text-3xl font-black tracking-tight sm:text-4xl md:text-5xl">
-                            Pick a match and build your Dream XI
+                        <p className="text-[10px] font-black uppercase tracking-widest text-red-100">Fantasy Cricket</p>
+                        <h1 className="mt-1 max-w-3xl text-2xl font-black tracking-tight sm:text-3xl">
+                            Pick a match, build your Dream XI
                         </h1>
 
-                        <div className="mt-6 flex flex-wrap gap-3">
-                            <div className="rounded-2xl border border-white/20 bg-black/10 px-4 py-3 backdrop-blur-sm">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-red-100/90">Matches Live</p>
-                                <p className="mt-1 text-2xl font-black">{matches.length}</p>
+                        <div className="mt-4 flex flex-wrap gap-2">
+                            <div className="rounded-xl border border-white/20 bg-black/10 px-3 py-2 backdrop-blur-sm">
+                                <p className="text-[9px] font-black uppercase tracking-widest text-red-100/90">Matches Live</p>
+                                <p className="mt-0.5 text-xl font-black">{matches.length}</p>
                             </div>
-                            <div className="rounded-2xl border border-white/20 bg-black/10 px-4 py-3 backdrop-blur-sm">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-red-100/90">Budget Cap</p>
-                                <p className="mt-1 text-2xl font-black">100</p>
+                            <div className="rounded-xl border border-white/20 bg-black/10 px-3 py-2 backdrop-blur-sm">
+                                <p className="text-[9px] font-black uppercase tracking-widest text-red-100/90">Budget Cap</p>
+                                <p className="mt-0.5 text-xl font-black">100</p>
                             </div>
-                            <div className="rounded-2xl border border-white/20 bg-black/10 px-4 py-3 backdrop-blur-sm">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-red-100/90">Squad Size</p>
-                                <p className="mt-1 text-2xl font-black">11</p>
+                            <div className="rounded-xl border border-white/20 bg-black/10 px-3 py-2 backdrop-blur-sm">
+                                <p className="text-[9px] font-black uppercase tracking-widest text-red-100/90">Squad Size</p>
+                                <p className="mt-0.5 text-xl font-black">11</p>
                             </div>
                         </div>
                     </div>
 
-                    <div className="grid gap-3 self-start sm:grid-cols-3 lg:grid-cols-1">
-                        <div className="rounded-[24px] border border-white/20 bg-black/15 p-5 backdrop-blur-sm">
-                            <Shield className="h-6 w-6 text-white" />
-                            <p className="mt-3 text-lg font-black leading-tight">Smart role balance</p>
-                            <p className="mt-1 text-sm font-medium text-red-50/90 leading-snug">Meet role rules, team cap limits, and the 100-value budget before saving.</p>
+                    <div className="flex gap-3 flex-wrap lg:flex-col lg:max-w-xs">
+                        <div className="rounded-2xl border border-white/20 bg-black/15 p-4 backdrop-blur-sm">
+                            <Shield className="h-5 w-5 text-white" />
+                            <p className="mt-2 text-sm font-black leading-tight">Smart role balance</p>
+                            <p className="mt-0.5 text-xs font-medium text-red-50/90 leading-snug">Meet role rules, team cap limits, and the 100-value budget.</p>
                         </div>
-                        <div className="rounded-[24px] border border-white/20 bg-black/15 p-5 backdrop-blur-sm">
-                            <Sparkles className="h-6 w-6 text-white" />
-                            <p className="mt-3 text-lg font-black leading-tight">Contest Live Status</p>
-                            <p className="mt-1 text-sm font-medium text-red-50/90 leading-snug">Team creation shuts down exactly when the first ball is bowled.</p>
-                        </div>
-                        <div className="rounded-[24px] border border-white/20 bg-black/15 p-5 backdrop-blur-sm">
-                            <Trophy className="h-6 w-6 text-white" />
-                            <p className="mt-3 text-lg font-black leading-tight">Match Leaderboards</p>
-                            <p className="mt-1 text-sm font-medium text-red-50/90 leading-snug">See how your fantasy points stack up against other users in the global leaderboard.</p>
+                        <div className="rounded-2xl border border-white/20 bg-black/15 p-4 backdrop-blur-sm">
+                            <Trophy className="h-5 w-5 text-white" />
+                            <p className="mt-2 text-sm font-black leading-tight">Match Leaderboards</p>
+                            <p className="mt-0.5 text-xs font-medium text-red-50/90 leading-snug">See how your points stack up globally.</p>
                         </div>
                     </div>
                 </div>
@@ -90,7 +85,7 @@ const FantasyMatchesPage = () => {
                 </div>
             )}
 
-            <section className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+            <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {loading && Array.from({ length: 4 }).map((_, index) => (
                     <FantasyMatchCardSkeleton key={index} />
                 ))}

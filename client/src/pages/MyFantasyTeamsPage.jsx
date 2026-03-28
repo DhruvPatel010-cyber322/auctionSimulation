@@ -55,35 +55,34 @@ const MyFantasyTeamsPage = () => {
     }
 
     return (
-        <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-8">
-            <section className="overflow-hidden rounded-[36px] bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.18),_transparent_30%),linear-gradient(135deg,_#991b1b_0%,_#e11d48_52%,_#fb923c_100%)] px-6 py-8 text-white shadow-[0_28px_90px_rgba(225,29,72,0.24)] md:px-8">
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                    <div>
-                        <Link to="/fantasy" className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.25em] text-white/90">
-                            <ArrowLeft size={14} />
-                            Back to Matches
+        <div className="mx-auto max-w-7xl space-y-5 p-3 md:p-5">
+            <section className="overflow-hidden rounded-2xl bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.18),_transparent_30%),linear-gradient(135deg,_#991b1b_0%,_#e11d48_52%,_#fb923c_100%)] px-4 py-5 text-white shadow-lg shadow-red-900/20">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-3 min-w-0">
+                        <Link to="/fantasy" className="flex-shrink-0 inline-flex items-center justify-center h-9 w-9 rounded-full border border-white/20 bg-white/10 hover:bg-white/20 transition-colors">
+                            <ArrowLeft size={16} />
                         </Link>
-                        <p className="mt-5 text-xs font-black uppercase tracking-[0.35em] text-rose-100">My Fantasy Squad</p>
-                        <h1 className="mt-3 text-3xl font-black tracking-tight md:text-5xl">{match?.team1} vs {match?.team2}</h1>
-                        <p className="mt-3 text-sm font-medium text-rose-50/90">
-                            {match ? formatMatchDate(match.date) : 'Selected fixture'}
-                        </p>
+                        <div className="min-w-0">
+                            <p className="text-[9px] font-black uppercase tracking-widest text-rose-100">My Fantasy Squad</p>
+                            <h1 className="text-base font-black tracking-tight truncate mt-0.5">{match?.team1} vs {match?.team2}</h1>
+                            <p className="text-[10px] font-medium text-rose-50/80 mt-0.5">{match ? formatMatchDate(match.date) : 'Selected fixture'}</p>
+                        </div>
                     </div>
 
-                    <div className="flex flex-wrap gap-3">
+                    <div className="flex gap-2 flex-shrink-0">
                         <Link
                             to={`/fantasy/${matchId}/team`}
-                            className="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-black text-rose-700 transition-colors hover:bg-rose-50"
+                            className="inline-flex items-center gap-1.5 rounded-xl bg-white px-3 py-2 text-xs font-black text-rose-700 transition-colors hover:bg-rose-50"
                         >
-                            <PencilLine size={18} />
+                            <PencilLine size={14} />
                             Edit Team
                         </Link>
                         <Link
                             to={`/fantasy/${matchId}/leaderboard`}
-                            className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-black/15 px-4 py-3 text-sm font-black text-white transition-colors hover:bg-black/25"
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-white/15 bg-black/15 px-3 py-2 text-xs font-black text-white transition-colors hover:bg-black/25"
                         >
-                            <Medal size={18} />
-                            View Leaderboard
+                            <Medal size={14} />
+                            Leaderboard
                         </Link>
                     </div>
                 </div>

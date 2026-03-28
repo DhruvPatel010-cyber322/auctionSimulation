@@ -245,34 +245,36 @@ const TeamBuilderPage = () => {
     }
 
     return (
-        <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-6 pb-28">
-            <section className="overflow-hidden rounded-[32px] bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.24),_transparent_28%),linear-gradient(135deg,_#991B1B_0%,_#E53935_52%,_#FB923C_100%)] text-white shadow-xl shadow-red-500/10">
-                <div className="grid gap-6 px-6 py-7 md:grid-cols-[1.15fr_0.85fr] md:px-8">
-                    <div>
+        <div className="mx-auto max-w-7xl space-y-4 p-3 md:p-5 pb-28">
+            <section className="overflow-hidden rounded-2xl bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.24),_transparent_28%),linear-gradient(135deg,_#991B1B_0%,_#E53935_52%,_#FB923C_100%)] text-white shadow-lg shadow-red-500/10">
+                <div className="flex items-center justify-between gap-4 px-4 py-4 md:px-5">
+                    <div className="flex items-center gap-3 min-w-0">
                         <Link
                             to="/fantasy"
-                            className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-widest text-white/90 transition-colors hover:bg-white/20"
+                            className="flex-shrink-0 inline-flex items-center justify-center h-9 w-9 rounded-full border border-white/20 bg-white/10 transition-colors hover:bg-white/20"
                         >
                             <ArrowLeft size={16} />
-                            Matches
                         </Link>
-
-                        <div className="mt-5 flex items-center gap-3">
-                            <FantasyTeamMark code={match?.team1} logoMap={teamLogoMap} className="h-16 w-16" labelClassName="text-sm" />
-                            <div className="rounded-full bg-white/10 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-white mx-2">VS</div>
-                            <FantasyTeamMark code={match?.team2} logoMap={teamLogoMap} className="h-16 w-16" labelClassName="text-sm" />
+                        <div className="flex items-center gap-2 min-w-0">
+                            <FantasyTeamMark code={match?.team1} logoMap={teamLogoMap} className="h-10 w-10 flex-shrink-0" labelClassName="text-xs" />
+                            <div className="min-w-0">
+                                <p className="text-[9px] font-black uppercase tracking-widest text-red-100 leading-none">Team Builder</p>
+                                <h1 className="text-sm sm:text-base font-black tracking-tight truncate mt-0.5">{match?.team1} vs {match?.team2}</h1>
+                                <p className="text-[10px] font-medium text-red-100/80 mt-0.5 truncate">{match?.ground || 'Venue TBD'}</p>
+                            </div>
+                            <FantasyTeamMark code={match?.team2} logoMap={teamLogoMap} className="h-10 w-10 flex-shrink-0" labelClassName="text-xs" />
                         </div>
-
-                        <p className="mt-6 text-[10px] sm:text-xs font-black uppercase tracking-widest text-red-100">Team Builder</p>
-                        <h1 className="mt-2 text-3xl font-black tracking-tight md:text-5xl">{match?.team1} vs {match?.team2}</h1>
-                        <p className="mt-3 text-sm font-semibold text-red-100/90">{formatMatchDate(match?.date)} • {match?.ground || 'Venue TBD'}</p>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3 self-start">
-                        <BuilderStat label="Selected" value={`${summary.selectedCount}/11`} />
-                        <BuilderStat label="Value Left" value={summary.valueLeft.toFixed(1)} />
-                        <BuilderStat label="Stage" value={stage === 'build' ? '1/2' : '2/2'} />
-                        <BuilderStat label="Max From One Team" value={Math.max(...Object.values(summary.teamCounts), 0)} />
+                    <div className="flex-shrink-0 grid grid-cols-2 gap-2">
+                        <div className="rounded-xl bg-white/10 border border-white/10 px-2.5 py-2 text-center backdrop-blur-sm">
+                            <p className="text-[9px] font-black uppercase tracking-widest text-red-100/80 leading-none">Picked</p>
+                            <p className="text-lg font-black leading-tight mt-0.5">{summary.selectedCount}/11</p>
+                        </div>
+                        <div className="rounded-xl bg-white/10 border border-white/10 px-2.5 py-2 text-center backdrop-blur-sm">
+                            <p className="text-[9px] font-black uppercase tracking-widest text-red-100/80 leading-none">Value</p>
+                            <p className="text-lg font-black leading-tight mt-0.5">{summary.valueLeft.toFixed(0)}</p>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -284,12 +286,12 @@ const TeamBuilderPage = () => {
                 </div>
             )}
 
-            <section className="sticky top-4 z-20 rounded-[28px] border border-red-100 bg-white/90 p-3 shadow-lg backdrop-blur-sm">
-                <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <section className="sticky top-4 z-20 rounded-2xl border border-red-100 bg-white/90 p-2.5 shadow-lg backdrop-blur-sm">
+                <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                     <div className="flex flex-wrap gap-2">
                         {[
-                            { key: 'build', label: '1. Create Team' },
-                            { key: 'captains', label: '2. Choose C / VC' }
+                            { key: 'build', label: '1. Build' },
+                            { key: 'captains', label: '2. C / VC' }
                         ].map((stepItem) => {
                             const isActive = stage === stepItem.key;
                             const disabled = stepItem.key === 'captains' && !canContinue && stage === 'build';
@@ -304,7 +306,7 @@ const TeamBuilderPage = () => {
                                         }
                                         setStage(stepItem.key);
                                     }}
-                                    className={`rounded-2xl px-4 py-3 text-sm font-black transition-all ${
+                                    className={`rounded-xl px-3 py-2 text-xs font-black transition-all ${
                                         isActive
                                             ? 'bg-[#E53935] text-white shadow-md'
                                             : disabled
@@ -318,7 +320,7 @@ const TeamBuilderPage = () => {
                         })}
                     </div>
 
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-1.5">
                         {ROLE_TABS.map((tab) => {
                             const isActive = activeTab === tab.key;
                             const count = summary.roleCounts[tab.key] || 0;
@@ -330,7 +332,7 @@ const TeamBuilderPage = () => {
                                         setStage('build');
                                         setActiveTab(tab.key);
                                     }}
-                                    className={`rounded-2xl border px-4 py-3 text-sm font-black transition-all ${
+                                    className={`rounded-xl border px-3 py-1.5 text-xs font-black transition-all ${
                                         isActive
                                             ? 'border-red-200 bg-red-50 text-red-700'
                                             : 'border-gray-200 bg-white text-gray-700 hover:border-red-100 hover:bg-red-50'
@@ -360,18 +362,18 @@ const TeamBuilderPage = () => {
             {stage === 'build' ? (
                 <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.05fr_0.95fr]">
                     <div className="space-y-5">
-                        <div className="rounded-[30px] border border-red-100 bg-white p-5 shadow-sm">
-                            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                        <div className="rounded-2xl border border-red-100 bg-white p-4 shadow-sm">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                                 <div>
-                                    <p className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-red-500">Player Pool</p>
-                                    <h2 className="mt-1 text-2xl font-black text-gray-950">{activeTab}</h2>
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-red-500">Player Pool</p>
+                                    <h2 className="text-xl font-black text-gray-950 mt-0.5">{activeTab}</h2>
                                 </div>
-                                <div className="rounded-full bg-red-50 px-4 py-2 text-sm font-black text-red-700">
+                                <div className="rounded-full bg-red-50 px-3 py-1.5 text-xs font-black text-red-700">
                                     Value used: {summary.valueUsed.toFixed(1)}/100
                                 </div>
                             </div>
 
-                            <div className="mt-5 space-y-4">
+                            <div className="mt-3 space-y-2.5">
                                 {(playersByRole[activeTab] || []).map((player) => {
                                     const selectionState = getPlayerSelectionState(player, selectedPlayers);
 
