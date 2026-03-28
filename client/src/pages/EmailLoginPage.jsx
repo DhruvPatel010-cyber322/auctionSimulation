@@ -14,9 +14,25 @@ const EmailLoginPage = () => {
 
     // Called after a successful Firebase Google popup
     const handleGoogleSuccess = async (user) => {
-        const token = await user.getIdToken();
-        localStorage.setItem('firebase_token', token);
-        navigate('/tournaments');
+        const firebaseToken = await user.getIdToken();
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/v2/auth/login`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${firebaseToken}` }
+            });
+            const data = await res.json();
+            
+            if (res.ok && data.success) {
+                // Unify session tokens: local and google both now securely rely on backend JWT token
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('firebase_token', data.token); // Keep for legacy component compatibility
+                navigate('/tournaments');
+            } else {
+                setError(data.message || 'Google Authentication failed on server.');
+            }
+        } catch (err) {
+            setError('Network error verifying Google login.');
+        }
     };
 
     // Local username/email + password login
@@ -34,7 +50,9 @@ const EmailLoginPage = () => {
             const data = await res.json();
 
             if (res.ok && data.success) {
+                // Ensure BOTH keys hold our native JWT token to prevent logout desyncs
                 localStorage.setItem('token', data.token);
+                localStorage.setItem('firebase_token', data.token);
                 // Store user in localStorage so AuthContext picks it up on next load
                 // (TournamentSelectPage.jsx can also work from the API token)
                 navigate('/tournaments');

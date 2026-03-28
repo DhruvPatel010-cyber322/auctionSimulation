@@ -80,6 +80,10 @@ const playerSchema = new mongoose.Schema({
     isViceCaptain: {
         type: Boolean,
         default: false
+    },
+    orgIPLTeam26: {
+        type: String,
+        default: null
     }
 }, {
     timestamps: true

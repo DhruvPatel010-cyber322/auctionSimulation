@@ -37,9 +37,23 @@ const adminOnly = (req, res, next) => {
 // Client sends Firebase Token in Header via middleware
 // Returns Mongo User details
 router.post('/login', firebaseAuth, (req, res) => {
+    // Generate token equivalent to /login-local so frontend has a unified token schema
+    const token = jwt.sign({
+        userId: req.user._id,
+        role: req.user.role
+    }, process.env.JWT_SECRET, { expiresIn: '5d' });
+
     res.json({
         success: true,
-        user: req.user
+        user: {
+            _id: req.user._id,
+            name: req.user.name,
+            email: req.user.email,
+            username: req.user.username,
+            role: req.user.role,
+            firebaseUid: req.user.firebaseUid
+        },
+        token
     });
 });
 

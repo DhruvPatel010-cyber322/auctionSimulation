@@ -1,5 +1,6 @@
 import express from 'express';
 import IplSchedule from '../models/IplSchedule.js';
+import Player from '../models/Player.js';
 
 const router = express.Router();
 
@@ -49,6 +50,27 @@ router.get('/', async (req, res) => {
     } catch (error) {
         console.error('Error fetching schedule:', error);
         res.status(500).json({ message: 'Failed to fetch schedule from DB' });
+    }
+});
+
+// GET /api/schedule/squads
+router.get('/squads', async (req, res) => {
+    try {
+        // Fetch players that have an orgIPLTeam26
+        const players = await Player.find({ orgIPLTeam26: { $ne: null } }).sort({ basePrice: -1 });
+        
+        // Group players by orgIPLTeam26
+        const grouped = players.reduce((acc, player) => {
+            const team = player.orgIPLTeam26;
+            if (!acc[team]) acc[team] = [];
+            acc[team].push(player);
+            return acc;
+        }, {});
+
+        res.json(grouped);
+    } catch (error) {
+        console.error('Error fetching real IPL squads:', error);
+        res.status(500).json({ message: 'Failed to fetch squads from DB' });
     }
 });
 

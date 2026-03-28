@@ -33,6 +33,7 @@ api.interceptors.response.use(
         // Check if server sent forceLogout flag (session invalid)
         if (error.response?.data?.forceLogout) {
             localStorage.removeItem('token');
+            localStorage.removeItem('firebase_token');
             localStorage.removeItem('user');
             window.location.href = '/email-login?reason=session_expired';
         }
@@ -150,5 +151,10 @@ export const respondTradeProposal = async (proposalId, status) => {
 // --- SCHEDULE API ---
 export const getSchedule = async () => {
     const response = await api.get('/api/schedule');
+    return response.data;
+};
+
+export const getSquads = async () => {
+    const response = await api.get('/api/schedule/squads');
     return response.data;
 };

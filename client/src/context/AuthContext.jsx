@@ -96,6 +96,7 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
         setToken(null);
         localStorage.removeItem('token');
+        localStorage.removeItem('firebase_token');
         localStorage.removeItem('user');
         // socket disconnect handled by SocketContext reacting to token change or unmounting
     };
