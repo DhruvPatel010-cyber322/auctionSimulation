@@ -20,6 +20,11 @@ export const getMyFantasyTeams = async (matchId) => {
     return response.data;
 };
 
+export const getAllMyFantasyTeams = async () => {
+    const response = await api.get('/api/fantasy/my-teams');
+    return response.data;
+};
+
 export const getFantasyLeaderboard = async (matchId) => {
     const response = await api.get(`/api/fantasy/leaderboard/${matchId}`);
     return response.data;

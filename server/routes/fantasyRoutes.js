@@ -5,6 +5,7 @@ import {
     getFantasyMatches,
     getFantasyPlayersForMatch,
     getMyFantasyTeams,
+    getAllUserFantasyTeams,
     recalculateFantasyPoints,
     saveFantasyTeam
 } from '../controllers/fantasyController.js';
@@ -22,6 +23,7 @@ const adminOnly = (req, res, next) => {
 router.get('/matches', fantasyAuth, getFantasyMatches);
 router.get('/players/:matchId', fantasyAuth, getFantasyPlayersForMatch);
 router.post('/team', fantasyAuth, saveFantasyTeam);
+router.get('/my-teams', fantasyAuth, getAllUserFantasyTeams);
 router.get('/my-teams/:matchId', fantasyAuth, getMyFantasyTeams);
 router.get('/leaderboard/:matchId', fantasyAuth, getFantasyLeaderboard);
 router.post('/admin/recalculate/:matchId', fantasyAuth, adminOnly, recalculateFantasyPoints);

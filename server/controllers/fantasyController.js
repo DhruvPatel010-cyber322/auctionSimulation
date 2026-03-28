@@ -213,6 +213,36 @@ export const getMyFantasyTeams = async (req, res) => {
     }
 };
 
+export const getAllUserFantasyTeams = async (req, res) => {
+    try {
+        const user = await ensureFantasyUser(req, res);
+        if (!user) return;
+
+        const FantasyTeam = await getFantasyTeamModel();
+        
+        const teams = await FantasyTeam.find({ userId: user._id })
+            .populate('matchId')
+            .populate('captain', 'name')
+            .populate('viceCaptain', 'name')
+            .sort({ createdAt: -1 });
+
+        const formattedTeams = teams.map((team) => {
+            const matchData = team.matchId ? normalizeFantasyMatch(team.matchId) : null;
+            return {
+                ...formatFantasyTeam(team),
+                match: matchData
+            };
+        });
+
+        res.json({
+            teams: formattedTeams
+        });
+    } catch (error) {
+        console.error('Fetch all user fantasy teams failed:', error);
+        res.status(500).json({ message: 'Failed to fetch all your fantasy teams.' });
+    }
+};
+
 export const getFantasyLeaderboard = async (req, res) => {
     try {
         const FantasyTeam = await getFantasyTeamModel();

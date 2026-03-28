@@ -157,8 +157,10 @@ const LeaderboardPage = () => {
 
                             <div className="space-y-5 px-6 py-6">
                                 <div>
-                                    <p className="text-xs font-black uppercase tracking-[0.25em] text-gray-400">Contestant</p>
-                                    <h2 className="mt-2 text-2xl font-black text-gray-950">{entry.user.displayName}</h2>
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Contestant</p>
+                                    <h2 className="mt-1 text-2xl font-black text-gray-950 truncate" title={entry.user.username || entry.user.displayName}>
+                                        {entry.user.username ? `@${entry.user.username}` : entry.user.displayName}
+                                    </h2>
                                     {isCurrentUserEntry(entry) && (
                                         <span className="mt-2 inline-flex rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-emerald-700">
                                             You
@@ -215,8 +217,10 @@ const LeaderboardPage = () => {
                                         #{entry.rank}
                                     </div>
                                     <div>
-                                        <p className="text-xs font-black uppercase tracking-[0.25em] text-gray-400">Contestant</p>
-                                        <h2 className="mt-1 text-2xl font-black text-gray-950">{entry.user.displayName}</h2>
+                                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">Contestant</p>
+                                        <h2 className="mt-1 text-xl font-black text-gray-950 truncate" title={entry.user.username || entry.user.displayName}>
+                                            {entry.user.username ? `@${entry.user.username}` : entry.user.displayName}
+                                        </h2>
                                         {isCurrentUserEntry(entry) && (
                                             <span className="mt-2 inline-flex rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-emerald-700">
                                                 You

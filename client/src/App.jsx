@@ -31,6 +31,7 @@ import FantasyMatchesPage from './pages/FantasyMatchesPage';
 import TeamBuilderPage from './pages/TeamBuilderPage';
 import MyFantasyTeamsPage from './pages/MyFantasyTeamsPage';
 import LeaderboardPage from './pages/LeaderboardPage';
+import AllMyFantasyTeamsPage from './pages/AllMyFantasyTeamsPage';
 
 function App() {
   return (
@@ -67,6 +68,7 @@ function App() {
                 <Route path="/fantasy" element={<FantasyLayout />}>
                   <Route index element={<FantasyMatchesPage />} />
                   <Route path="match-centre" element={<MatchCentrePage />} />
+                  <Route path="my-teams" element={<AllMyFantasyTeamsPage />} />
                   <Route path=":matchId/team" element={<TeamBuilderPage />} />
                   <Route path=":matchId/my-teams" element={<MyFantasyTeamsPage />} />
                   <Route path=":matchId/leaderboard" element={<LeaderboardPage />} />

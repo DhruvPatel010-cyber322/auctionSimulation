@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, NavLink, Link, useLocation } from 'react-router-dom';
-import { CalendarDays, Trophy, UserCircle, LogOut, ArrowLeft, Menu, Sparkles } from 'lucide-react';
+import { CalendarDays, Trophy, UserCircle, LogOut, ArrowLeft, Menu, Sparkles, Users } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 
@@ -12,9 +12,9 @@ const FantasyLayout = () => {
     // Hide bottom navigation on deep pages to maximize screen space
     const hideBottomNav = location.pathname.match(/\/fantasy\/.+\/(team|my-teams|leaderboard)/);
 
-    // Dynamic Navigation Items for Fantasy Mode
     const navItems = [
         { name: 'Matches', path: '/fantasy', icon: CalendarDays },
+        { name: 'My Teams', path: '/fantasy/my-teams', icon: Users },
         { name: 'Match Centre', path: '/fantasy/match-centre', icon: Trophy },
         { name: 'Main Menu', path: '/main-menu', icon: ArrowLeft },
     ];
