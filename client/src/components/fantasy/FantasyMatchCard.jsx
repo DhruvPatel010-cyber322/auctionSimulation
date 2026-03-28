@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { CalendarDays, MapPin, Medal, PlusCircle, Users } from 'lucide-react';
 import FantasyStatusBadge from './FantasyStatusBadge';
-import FantasyTeamMark from './FantasyTeamMark';
 import { getFantasyTeamBrand } from '../../utils/fantasyBranding';
 
 const formatMatchDate = (value) => {

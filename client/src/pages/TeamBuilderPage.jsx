@@ -238,7 +238,7 @@ const TeamBuilderPage = () => {
 
     if (loading) {
         return (
-            <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-8 pb-36">
+            <div className="h-full overflow-y-auto px-4 py-6 space-y-6 max-w-7xl mx-auto">
                 <div className="h-52 animate-pulse rounded-[36px] bg-gradient-to-r from-red-100 via-rose-50 to-orange-100" />
                 <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.1fr_0.9fr]">
                     <div className="space-y-4">
@@ -253,7 +253,9 @@ const TeamBuilderPage = () => {
     }
 
     return (
-        <div className="mx-auto max-w-7xl space-y-4 p-3 md:p-5 pb-28">
+        <div className="flex flex-col h-full overflow-hidden">
+            {/* ── TOP: match header + lock warning ── */}
+            <div className="shrink-0 px-3 md:px-5 pt-3 md:pt-4 space-y-3">
             <section className="overflow-hidden rounded-2xl bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.24),_transparent_28%),linear-gradient(135deg,_#991B1B_0%,_#E53935_52%,_#FB923C_100%)] text-white shadow-lg shadow-red-500/10">
                 <div className="flex items-center justify-between gap-4 px-4 py-4 md:px-5">
                     <div className="flex items-center gap-3 min-w-0">
@@ -293,8 +295,11 @@ const TeamBuilderPage = () => {
                     <span>Match has started. Team editing is now locked.</span>
                 </div>
             )}
+            </div>{/* /top-static */}
 
-            <section className="sticky top-4 z-20 rounded-2xl border border-red-100 bg-white/90 p-2.5 shadow-lg backdrop-blur-sm">
+            {/* ── TAB NAVIGATION ── sandwiched between top and content ── */}
+            <div className="shrink-0 px-3 md:px-5">
+            <section className="rounded-2xl border border-red-100 bg-white/90 p-2.5 shadow-lg backdrop-blur-sm">
                 <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                     <div className="flex flex-wrap gap-2">
                         {[
@@ -353,6 +358,11 @@ const TeamBuilderPage = () => {
                     </div>
                 </div>
             </section>
+            </div>{/* /tab-nav */}
+
+            {/* ── SCROLLABLE CONTENT: player pool / captain selector ── */}
+            <div className="flex-1 min-h-0 overflow-y-auto px-3 md:px-5">
+            <div className="py-4 space-y-4">
 
             {hasExistingTeam && (
                 <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 font-semibold text-amber-800">
@@ -402,7 +412,7 @@ const TeamBuilderPage = () => {
                         </div>
                     </div>
 
-                    <div className="space-y-5 xl:sticky xl:top-32">
+                    <div className="space-y-5 xl:sticky xl:top-4">
                         <FantasyPitchBoard
                             players={selectedPlayers}
                             captainId={captainId}
@@ -583,8 +593,12 @@ const TeamBuilderPage = () => {
                 </div>
             )}
 
-            <div className="fixed inset-x-0 bottom-0 z-30 pointer-events-none pb-3 md:pb-5 px-3 md:px-5 flex justify-center">
-                <div className="pointer-events-auto w-full max-w-7xl rounded-2xl border border-red-100 bg-white/95 px-4 py-4 shadow-[0_12px_40px_rgba(229,57,53,0.15)] backdrop-blur-sm flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            </div>{/* /py-4 space-y-4 */}
+            </div>{/* /scrollable-content */}
+
+            {/* ── FOOTER ACTION BAR ── always pinned at bottom ── */}
+            <div className="shrink-0 border-t border-red-100 bg-white/95 backdrop-blur-sm shadow-[0_-8px_32px_rgba(229,57,53,0.1)]">
+                <div className="px-4 py-3 max-w-7xl mx-auto flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div className="flex flex-wrap items-center gap-2">
                         <span className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-black text-gray-700">
                             {summary.selectedCount}/11 Selected
