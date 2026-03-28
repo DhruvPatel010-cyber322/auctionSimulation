@@ -51,20 +51,37 @@ export const fantasyAuth = async (req, res, next) => {
             }
 
             const authUserId = String(decoded.userId);
+
+            // Look up the real user from the main DB to get their actual name/username/email
+            let mainUser = null;
+            try {
+                const { default: User } = await import('../models/User.js');
+                mainUser = await User.findById(authUserId).lean();
+            } catch (_) { /* ignore if main DB is unavailable */ }
+
+            const realName = mainUser?.name || null;
+            const realUsername = mainUser?.username || null;
+            const realEmail = mainUser?.email || null;
+
             let user = await FantasyUser.findOne({ authUserId });
 
             if (!user) {
                 user = await FantasyUser.create({
                     authUserId,
                     firebaseUid: null,
-                    email: buildPlaceholderEmail(authUserId),
-                    name: 'User',
-                    username: null,
+                    email: realEmail || buildPlaceholderEmail(authUserId),
+                    name: realName || 'User',
+                    username: realUsername || null,
                     role: decoded.role === 'admin' ? 'admin' : 'user'
                 });
-            } else if (decoded.role === 'admin' && user.role !== 'admin') {
-                user.role = 'admin';
-                await user.save();
+            } else {
+                // Always sync name/username/email from the main DB
+                let changed = false;
+                if (realName && user.name !== realName) { user.name = realName; changed = true; }
+                if (realUsername && user.username !== realUsername) { user.username = realUsername; changed = true; }
+                if (realEmail && user.email !== realEmail) { user.email = realEmail; changed = true; }
+                if (decoded.role === 'admin' && user.role !== 'admin') { user.role = 'admin'; changed = true; }
+                if (changed) await user.save();
             }
 
             req.user = user;

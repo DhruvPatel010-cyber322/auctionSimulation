@@ -480,8 +480,8 @@ const TeamBuilderPage = () => {
                 </div>
             )}
 
-            <div className="fixed inset-x-0 bottom-0 z-30 border-t border-red-100 bg-white/95 px-4 py-4 shadow-[0_-12px_40px_rgba(15,23,42,0.08)] backdrop-blur-sm">
-                <div className="mx-auto flex max-w-7xl flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div className="fixed inset-x-0 bottom-0 z-30 pointer-events-none pb-3 md:pb-5 px-3 md:px-5 flex justify-center">
+                <div className="pointer-events-auto w-full max-w-7xl rounded-2xl border border-red-100 bg-white/95 px-4 py-4 shadow-[0_12px_40px_rgba(229,57,53,0.15)] backdrop-blur-sm flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div className="flex flex-wrap items-center gap-2">
                         <span className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-black text-gray-700">
                             {summary.selectedCount}/11 Selected
