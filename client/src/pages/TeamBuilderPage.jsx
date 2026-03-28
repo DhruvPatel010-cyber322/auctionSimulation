@@ -56,9 +56,17 @@ const buildSelectionIssues = (summary) => {
         issues.push('Pick at most 7 players from one team.');
     }
 
+    if (summary.overseasCount > 4) {
+        issues.push('At most 4 overseas players allowed.');
+    }
+
     ROLE_TABS.forEach((role) => {
-        if ((summary.roleCounts[role.key] || 0) < role.min) {
+        const count = summary.roleCounts[role.key] || 0;
+        if (count < role.min) {
             issues.push(`Add at least ${role.min} ${role.label}.`);
+        }
+        if (count > role.max) {
+            issues.push(`Too many ${role.label}s — max is ${role.max}.`);
         }
     });
 
@@ -404,38 +412,133 @@ const TeamBuilderPage = () => {
                             emptyText="Start selecting players to build your Dream XI."
                         />
 
-                        <div className="rounded-[30px] border border-red-100 bg-white p-5 shadow-sm">
-                            <div className="mb-4 flex items-center gap-2">
+                        <div className="rounded-[30px] border border-red-100 bg-white p-5 shadow-sm space-y-5">
+                            {/* Header */}
+                            <div className="flex items-center gap-2">
                                 <Sparkles size={18} className="text-red-500" />
                                 <h3 className="text-lg font-black text-gray-950">Selection Rules</h3>
                             </div>
 
+                            {/* Players + Overseas row */}
                             <div className="grid grid-cols-2 gap-3">
-                                {ROLE_TABS.map((role) => (
-                                    <div key={role.key} className="rounded-2xl bg-gray-50 p-4">
-                                        <p className="text-[11px] font-black uppercase tracking-[0.25em] text-gray-400">{role.label}</p>
-                                        <p className="mt-2 text-2xl font-black text-gray-950">{summary.roleCounts[role.key] || 0}</p>
-                                        <p className="text-sm font-semibold text-gray-500">Min {role.min}</p>
+                                {/* Total players */}
+                                <div className={`rounded-2xl p-4 flex flex-col gap-2 ${
+                                    summary.selectedCount === 11 ? 'bg-emerald-50 border border-emerald-200' : 'bg-gray-50 border border-gray-100'
+                                }`}>
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Players</p>
+                                        <span className={`text-xs font-black ${
+                                            summary.selectedCount === 11 ? 'text-emerald-600' : 'text-gray-400'
+                                        }`}>{summary.selectedCount}/11</span>
                                     </div>
-                                ))}
+                                    <div className="h-1.5 rounded-full bg-gray-200 overflow-hidden">
+                                        <div
+                                            className={`h-full rounded-full transition-all duration-500 ${
+                                                summary.selectedCount === 11 ? 'bg-emerald-500' : 'bg-blue-400'
+                                            }`}
+                                            style={{ width: `${(summary.selectedCount / 11) * 100}%` }}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Overseas */}
+                                <div className={`rounded-2xl p-4 flex flex-col gap-2 ${
+                                    summary.overseasCount > 4
+                                        ? 'bg-red-50 border border-red-300'
+                                        : summary.overseasCount === 4
+                                            ? 'bg-amber-50 border border-amber-200'
+                                            : 'bg-sky-50 border border-sky-100'
+                                }`}>
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">✈ Overseas</p>
+                                        <span className={`text-xs font-black ${
+                                            summary.overseasCount > 4 ? 'text-red-600' : summary.overseasCount === 4 ? 'text-amber-600' : 'text-sky-600'
+                                        }`}>{summary.overseasCount}/4</span>
+                                    </div>
+                                    <div className="h-1.5 rounded-full bg-gray-200 overflow-hidden">
+                                        <div
+                                            className={`h-full rounded-full transition-all duration-500 ${
+                                                summary.overseasCount > 4 ? 'bg-red-500' : summary.overseasCount === 4 ? 'bg-amber-400' : 'bg-sky-400'
+                                            }`}
+                                            style={{ width: `${Math.min((summary.overseasCount / 4) * 100, 100)}%` }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Role constraints */}
+                            <div className="space-y-3">
+                                {ROLE_TABS.map((role) => {
+                                    const count = summary.roleCounts[role.key] || 0;
+                                    const pct = Math.min(Math.max((count - role.min) / Math.max(role.max - role.min, 1), 0), 1);
+                                    const isTooFew = count < role.min;
+                                    const isTooMany = count > role.max;
+                                    const isOk = !isTooFew && !isTooMany;
+
+                                    const roleColors = {
+                                        'Wicket Keeper': { bar: 'bg-purple-500', bg: 'bg-purple-50', text: 'text-purple-600', border: 'border-purple-200', icon: '🧤' },
+                                        'Batsman':       { bar: 'bg-blue-500',   bg: 'bg-blue-50',   text: 'text-blue-600',   border: 'border-blue-200',   icon: '🏏' },
+                                        'All-Rounder':   { bar: 'bg-amber-500',  bg: 'bg-amber-50',  text: 'text-amber-600',  border: 'border-amber-200',  icon: '⭐' },
+                                        'Bowler':        { bar: 'bg-red-500',    bg: 'bg-red-50',    text: 'text-red-600',    border: 'border-red-200',    icon: '🏐' },
+                                    };
+                                    const colors = roleColors[role.key] || { bar: 'bg-gray-400', bg: 'bg-gray-50', text: 'text-gray-600', border: 'border-gray-200', icon: '' };
+
+                                    return (
+                                        <div key={role.key} className={`rounded-2xl border p-3.5 ${
+                                            isTooMany ? 'bg-red-50 border-red-300' : isTooFew ? 'bg-gray-50 border-gray-100' : `${colors.bg} ${colors.border}`
+                                        }`}>
+                                            <div className="flex items-center justify-between mb-2">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-base leading-none">{colors.icon}</span>
+                                                    <span className="text-xs font-black text-gray-800">{role.label}</span>
+                                                    <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wide">({role.min}–{role.max})</span>
+                                                </div>
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className={`text-sm font-black ${isTooMany ? 'text-red-600' : isTooFew ? 'text-gray-400' : colors.text}`}>{count}</span>
+                                                    {isOk && count > 0 && <span className="text-emerald-500 text-xs">✓</span>}
+                                                    {isTooMany && <span className="text-red-500 text-xs">✗</span>}
+                                                </div>
+                                            </div>
+
+                                            {/* Range bar — min to max, fill position based on count */}
+                                            <div className="relative h-2 rounded-full bg-gray-200 overflow-hidden">
+                                                {/* min threshold marker */}
+                                                <div
+                                                    className="absolute top-0 bottom-0 w-0.5 bg-gray-400/60 z-10"
+                                                    style={{ left: `${(role.min / role.max) * 100}%` }}
+                                                />
+                                                <div
+                                                    className={`h-full rounded-full transition-all duration-500 ${
+                                                        isTooMany ? 'bg-red-500' : isTooFew ? 'bg-gray-300' : colors.bar
+                                                    }`}
+                                                    style={{ width: `${Math.min((count / role.max) * 100, 100)}%` }}
+                                                />
+                                            </div>
+                                            <div className="flex justify-between mt-1">
+                                                <span className="text-[9px] text-gray-400 font-bold">Min {role.min}</span>
+                                                <span className="text-[9px] text-gray-400 font-bold">Max {role.max}</span>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
 
                             {selectionIssues.length > 0 && (
-                                <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4">
+                                <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4">
                                     <p className="mb-2 flex items-center gap-2 text-sm font-black text-amber-800">
                                         <AlertTriangle size={16} />
                                         Complete these before continuing
                                     </p>
                                     <div className="space-y-1 text-sm font-semibold text-amber-700">
                                         {selectionIssues.slice(0, 4).map((issue) => (
-                                            <p key={issue}>{issue}</p>
+                                            <p key={issue}>• {issue}</p>
                                         ))}
                                     </div>
                                 </div>
                             )}
 
                             {canContinue && (
-                                <div className="mt-4 flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-4 text-sm font-semibold text-emerald-700">
+                                <div className="flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-4 text-sm font-semibold text-emerald-700">
                                     <CheckCircle2 size={16} />
                                     Your XI is ready. Continue to captain selection.
                                 </div>

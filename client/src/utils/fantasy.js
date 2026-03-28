@@ -1,14 +1,15 @@
 export const FANTASY_LIMITS = {
     maxPlayers: 11,
     maxCredits: 100,
-    maxFromSingleTeam: 7
+    maxFromSingleTeam: 7,
+    maxOverseas: 4
 };
 
 export const ROLE_TABS = [
-    { key: 'Wicket Keeper', label: 'WK', min: 1 },
-    { key: 'Batsman', label: 'BAT', min: 3 },
-    { key: 'All-Rounder', label: 'AR', min: 1 },
-    { key: 'Bowler', label: 'BOWL', min: 3 }
+    { key: 'Wicket Keeper', label: 'WK', min: 1, max: 4 },
+    { key: 'Batsman',       label: 'BAT', min: 3, max: 6 },
+    { key: 'All-Rounder',  label: 'AR',  min: 1, max: 4 },
+    { key: 'Bowler',       label: 'BOWL', min: 3, max: 6 }
 ];
 
 const ROLE_ORDER = ROLE_TABS.map((role) => role.key);
@@ -32,6 +33,7 @@ export const buildFantasySummary = (players = []) => {
         valueLeft: FANTASY_LIMITS.maxCredits,
         creditsUsed: 0,
         creditsLeft: FANTASY_LIMITS.maxCredits,
+        overseasCount: 0,
         roleCounts: {
             'Wicket Keeper': 0,
             Batsman: 0,
@@ -45,6 +47,7 @@ export const buildFantasySummary = (players = []) => {
         summary.valueUsed += getPlayerValue(player);
         summary.roleCounts[player.role] = (summary.roleCounts[player.role] || 0) + 1;
         summary.teamCounts[player.orgIPLTeam26] = (summary.teamCounts[player.orgIPLTeam26] || 0) + 1;
+        if (player.isOverseas) summary.overseasCount += 1;
     });
 
     summary.valueUsed = Number(summary.valueUsed.toFixed(1));
@@ -62,6 +65,7 @@ export const getPlayerSelectionState = (player, selectedPlayers = []) => {
     }
 
     const summary = buildFantasySummary(selectedPlayers);
+
     if (summary.selectedCount >= FANTASY_LIMITS.maxPlayers) {
         return { allowed: false, reason: 'You can only select 11 players.' };
     }
@@ -72,6 +76,17 @@ export const getPlayerSelectionState = (player, selectedPlayers = []) => {
 
     if ((summary.teamCounts[player.orgIPLTeam26] || 0) >= FANTASY_LIMITS.maxFromSingleTeam) {
         return { allowed: false, reason: `You can pick only 7 players from ${player.orgIPLTeam26}.` };
+    }
+
+    // Overseas cap
+    if (player.isOverseas && summary.overseasCount >= FANTASY_LIMITS.maxOverseas) {
+        return { allowed: false, reason: 'You can pick at most 4 overseas players.' };
+    }
+
+    // Role max cap
+    const roleConfig = ROLE_TABS.find((r) => r.key === player.role);
+    if (roleConfig && (summary.roleCounts[player.role] || 0) >= roleConfig.max) {
+        return { allowed: false, reason: `You can pick at most ${roleConfig.max} ${roleConfig.label}s.` };
     }
 
     return { allowed: true, reason: '' };
@@ -94,9 +109,17 @@ export const validateFantasyTeam = (players = [], captainId, viceCaptainId) => {
         errors.push('You can select at most 7 players from one team.');
     }
 
+    if (summary.overseasCount > FANTASY_LIMITS.maxOverseas) {
+        errors.push(`You can pick at most ${FANTASY_LIMITS.maxOverseas} overseas players.`);
+    }
+
     ROLE_TABS.forEach((role) => {
-        if ((summary.roleCounts[role.key] || 0) < role.min) {
-            errors.push(`Pick at least ${role.min} ${role.key}${role.min > 1 ? 's' : ''}.`);
+        const count = summary.roleCounts[role.key] || 0;
+        if (count < role.min) {
+            errors.push(`Pick at least ${role.min} ${role.label}${role.min > 1 ? 's' : ''}.`);
+        }
+        if (count > role.max) {
+            errors.push(`Pick at most ${role.max} ${role.label}s.`);
         }
     });
 
