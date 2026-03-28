@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { Gavel, Clock, Trophy, User, Play, AlertCircle, Plane, RefreshCw, Users, ArrowRight } from 'lucide-react';
 import { useSocket } from '../context/SocketContext';
 import { useAuth } from '../context/AuthContext';
@@ -272,12 +273,16 @@ const AuctionPage = () => {
     if (!currentPlayer) {
         return (
             <div className="flex flex-col items-center justify-center h-[80vh] text-center space-y-6 animate-in fade-in zoom-in duration-500">
-                <div className="p-10 bg-white rounded-3xl shadow-xl border border-gray-100 max-w-lg w-full">
+                <div className="p-10 bg-white rounded-3xl shadow-xl border border-gray-100 max-w-lg w-full flex flex-col items-center">
                     <div className="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6 text-blue-600 animate-pulse">
-                        <Gavel size={40} strokeWidth={1.5} />
+                        <Trophy size={40} strokeWidth={1.5} />
                     </div>
-                    <h2 className="text-3xl font-black text-gray-900 mb-3">Waiting for Admin</h2>
-                    <p className="text-gray-500 text-lg">The auctioneer has not started the bidding yet.</p>
+                    <h2 className="text-3xl font-black text-gray-900 mb-3">Auction Completed</h2>
+                    <p className="text-gray-500 text-lg mb-8">It's time to assemble your Playing 11 for the tournament!</p>
+                    <Link to="/select-playing-xi" className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold rounded-2xl shadow-xl hover:shadow-blue-500/30 hover:scale-105 transition-all w-full sm:w-auto">
+                        <Users size={24} /> 
+                        <span className="text-lg">Make Playing 11</span>
+                    </Link>
                 </div>
             </div>
         );

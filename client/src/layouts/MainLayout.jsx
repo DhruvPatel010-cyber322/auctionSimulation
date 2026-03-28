@@ -215,8 +215,8 @@ const MainLayout = () => {
 
             {/* Mobile Bottom Navigation */}
             {(() => {
-                const primaryPaths = ['/dashboard', '/trade', '/auction', '/select-playing-xi'];
-                const primaryItems = navItems.filter(item => !item.hidden && primaryPaths.includes(item.path));
+                const primaryPaths = ['/dashboard', '/select-playing-xi', '/match-centre', '/points-table'];
+                const primaryItems = navItems.filter(item => !item.hidden && primaryPaths.includes(item.path)).sort((a,b) => primaryPaths.indexOf(a.path) - primaryPaths.indexOf(b.path));
                 const moreItems = navItems.filter(item => !item.hidden && !primaryPaths.includes(item.path));
                 return (
                     <>
