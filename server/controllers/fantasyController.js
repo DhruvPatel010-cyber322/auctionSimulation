@@ -111,6 +111,11 @@ export const saveFantasyTeam = async (req, res) => {
         if (!match) {
             return res.status(404).json({ message: 'Match not found.' });
         }
+        
+        const normalizedMatch = normalizeFantasyMatch(match);
+        if (normalizedMatch.status !== 'Upcoming') {
+            return res.status(403).json({ message: 'Team editing is locked. This match has already started.' });
+        }
 
         const uniquePlayerIds = [...new Set((players || []).map((playerId) => String(playerId)))];
         const selectedPlayers = await FantasyPlayer.find({ _id: { $in: uniquePlayerIds } });
@@ -119,7 +124,6 @@ export const saveFantasyTeam = async (req, res) => {
             return res.status(400).json({ message: 'One or more selected players are invalid.' });
         }
 
-        const normalizedMatch = normalizeFantasyMatch(match);
         const validation = validateFantasyTeamSelection({
             players: selectedPlayers,
             captain,

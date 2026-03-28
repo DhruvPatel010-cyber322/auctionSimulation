@@ -141,6 +141,11 @@ const TeamBuilderPage = () => {
     const canContinue = selectionIssues.length === 0;
 
     const togglePlayer = (player) => {
+        if (match?.status !== 'Upcoming') {
+            toast.error('Team editing is locked for this match.');
+            return;
+        }
+
         const isSelected = selectedIds.includes(player._id);
 
         if (isSelected) {
@@ -163,6 +168,7 @@ const TeamBuilderPage = () => {
     };
 
     const assignCaptain = (playerId) => {
+        if (match?.status !== 'Upcoming') return;
         setCaptainId(playerId);
         if (viceCaptainId === playerId) {
             setViceCaptainId('');
@@ -170,6 +176,7 @@ const TeamBuilderPage = () => {
     };
 
     const assignViceCaptain = (playerId) => {
+        if (match?.status !== 'Upcoming') return;
         setViceCaptainId(playerId);
         if (captainId === playerId) {
             setCaptainId('');
@@ -271,6 +278,13 @@ const TeamBuilderPage = () => {
                     </div>
                 </div>
             </section>
+
+            {match?.status !== 'Upcoming' && (
+                <div className="rounded-2xl border border-red-500 bg-red-50 px-5 py-4 font-black flex items-center gap-3 text-red-700 shadow-sm animate-pulse">
+                    <ShieldAlert size={20} className="text-red-500" />
+                    <span>Match has started. Team editing is now locked.</span>
+                </div>
+            )}
 
             <section className="sticky top-4 z-20 rounded-[28px] border border-red-100 bg-white/90 p-3 shadow-lg backdrop-blur-sm">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -502,10 +516,10 @@ const TeamBuilderPage = () => {
                         ) : (
                             <button
                                 onClick={handleSaveTeam}
-                                disabled={saving}
+                                disabled={saving || match?.status !== 'Upcoming'}
                                 className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#E53935] px-5 py-3 text-sm font-black text-white shadow-lg shadow-red-500/20 transition-all hover:scale-[1.01] disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 disabled:shadow-none"
                             >
-                                {saving ? 'Saving Team...' : hasExistingTeam ? 'Update Team' : 'Save Team'}
+                                {match?.status !== 'Upcoming' ? 'Locked' : saving ? 'Saving Team...' : hasExistingTeam ? 'Update Team' : 'Save Team'}
                             </button>
                         )}
                     </div>
