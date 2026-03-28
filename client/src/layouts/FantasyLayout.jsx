@@ -11,7 +11,7 @@ const FantasyLayout = () => {
     // Dynamic Navigation Items for Fantasy Mode
     const navItems = [
         { name: 'Matches', path: '/fantasy', icon: CalendarDays },
-        // Future global routes could be added here
+        { name: 'Match Centre', path: '/fantasy/match-centre', icon: Trophy },
         { name: 'Main Menu', path: '/main-menu', icon: ArrowLeft },
     ];
 
@@ -74,7 +74,7 @@ const FantasyLayout = () => {
                     {/* User Menu / Right Side */}
                     <div className="flex items-center gap-4">
                         {user ? (
-                            <Link to="/profile" className="flex items-center gap-3 pl-6 border-l border-gray-200 hover:opacity-80 transition-opacity cursor-pointer">
+                            <div className="flex items-center gap-3 pl-6 border-l border-gray-200">
                                 <div className="text-right hidden sm:block">
                                     <p className="text-sm font-bold text-gray-900 leading-none">{user.username || 'Fantasy Player'}</p>
                                     <p className="text-[10px] uppercase font-bold text-gray-400 mt-1 tracking-wider">{user.email || 'Pro User'}</p>
@@ -82,7 +82,7 @@ const FantasyLayout = () => {
                                 <div className="w-10 h-10 rounded-full bg-red-100 border border-red-200 flex items-center justify-center overflow-hidden">
                                     <UserCircle size={24} className="text-red-500" />
                                 </div>
-                            </Link>
+                            </div>
                         ) : (
                             <span className="text-sm font-bold text-gray-400">Guest Mode</span>
                         )}

@@ -66,6 +66,7 @@ function App() {
                 {/* Fantasy Routes */}
                 <Route path="/fantasy" element={<FantasyLayout />}>
                   <Route index element={<FantasyMatchesPage />} />
+                  <Route path="match-centre" element={<MatchCentrePage />} />
                   <Route path=":matchId/team" element={<TeamBuilderPage />} />
                   <Route path=":matchId/my-teams" element={<MyFantasyTeamsPage />} />
                   <Route path=":matchId/leaderboard" element={<LeaderboardPage />} />

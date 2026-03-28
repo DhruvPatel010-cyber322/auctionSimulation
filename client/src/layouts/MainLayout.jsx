@@ -183,8 +183,7 @@ const MainLayout = () => {
                     {/* User Menu / Right Side */}
                     <div className="flex items-center gap-4">
                         {team ? (
-
-                            <Link to="/profile" className="flex items-center gap-3 pl-6 border-l border-gray-200 hover:opacity-80 transition-opacity cursor-pointer">
+                            <div className="flex items-center gap-3 pl-6 border-l border-gray-200">
                                 <div className="text-right hidden sm:block">
                                     <p className="text-sm font-bold text-gray-900 leading-none">{teamDetails?.name || team.name}</p>
                                     <p className="text-[10px] uppercase font-bold text-gray-400 mt-1 tracking-wider">{teamDetails?.username || team.username || team.code || 'Team Account'}</p>
@@ -200,7 +199,7 @@ const MainLayout = () => {
                                         </div>
                                     )}
                                 </div>
-                            </Link>
+                            </div>
                         ) : (
                             <div className="flex items-center gap-2 text-gray-400">
                                 <span className="text-sm font-bold">Guest Mode</span>
