@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, MapPin, Trophy, X, Construction, Filter, ChevronDown, Loader2, Users, TableProperties, LineChart } from 'lucide-react';
 import { getSchedule, getSquads, getTeams } from '../services/api';
+import { getFantasyTeamBrand } from '../utils/fantasyBranding';
 
 // --- HELPERS ---
 const formatDate = (dateStr) => {
@@ -74,19 +75,27 @@ const MatchDetailPanel = ({ match, onClose, isModal = false, teamLogoMap = {} })
         return null; // modal hides completely if no match
     }
 
+    const brand1 = getFantasyTeamBrand(match.Team1Code);
+    const brand2 = getFantasyTeamBrand(match.Team2Code);
+
     const content = (
         <div className="bg-white rounded-3xl w-full lg:max-w-none max-w-md shadow-2xl lg:shadow-sm overflow-hidden animate-in fade-in zoom-in-95 duration-200 mx-auto border border-gray-100">
-            {/* Header */}
-            <div className="bg-gradient-to-r from-emerald-600 to-teal-700 p-5 flex items-center justify-between">
-                <div>
-                    <p className="text-[10px] font-black text-emerald-200 uppercase tracking-widest mb-1">IPL 2026</p>
-                    <StatusBadge status={match.MatchStatus} />
+            {/* Half-and-half header */}
+            <div className="relative overflow-hidden" style={{ minHeight: '70px' }}>
+                <div className="absolute inset-y-0 left-0 w-1/2" style={{ background: `linear-gradient(135deg, ${brand1.primary}f0, ${brand1.primary}cc)` }} />
+                <div className="absolute inset-y-0 right-0 w-1/2" style={{ background: `linear-gradient(225deg, ${brand2.primary}f0, ${brand2.primary}cc)` }} />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/5 to-black/20" />
+                <div className="relative z-10 p-5 flex items-center justify-between">
+                    <div>
+                        <p className="text-[10px] font-black text-white/80 uppercase tracking-widest mb-1">IPL 2026</p>
+                        <StatusBadge status={match.MatchStatus} />
+                    </div>
+                    {onClose && (
+                        <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-full transition-colors text-white">
+                            <X size={20} />
+                        </button>
+                    )}
                 </div>
-                {onClose && (
-                    <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-full transition-colors text-white">
-                        <X size={20} />
-                    </button>
-                )}
             </div>
 
             {/* Teams */}
@@ -148,6 +157,11 @@ const MatchCard = ({ match, isSelected, onClick, teamLogoMap = {} }) => {
     const [t1Err, setT1Err] = useState(false);
     const [t2Err, setT2Err] = useState(false);
 
+    const brand1 = getFantasyTeamBrand(match.Team1Code);
+    const brand2 = getFantasyTeamBrand(match.Team2Code);
+    const logo1 = match.Team1Logo || teamLogoMap[match.Team1Code];
+    const logo2 = match.Team2Logo || teamLogoMap[match.Team2Code];
+
     return (
         <div
             onClick={onClick}
@@ -157,26 +171,62 @@ const MatchCard = ({ match, isSelected, onClick, teamLogoMap = {} }) => {
                 : 'border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5'
             }`}
         >
-            <div className="bg-gradient-to-r from-emerald-600 to-teal-700 px-4 py-2 flex items-center justify-between">
-                <span className="text-[10px] font-black text-emerald-100 uppercase tracking-widest">IPL 2026</span>
-                <StatusBadge status={match.MatchStatus} />
+            {/* Half-and-half header */}
+            <div className="relative overflow-hidden" style={{ minHeight: '100px' }}>
+                {/* Left – Team 1 color */}
+                <div
+                    className="absolute inset-y-0 left-0 w-1/2"
+                    style={{ background: `linear-gradient(135deg, ${brand1.primary}f0, ${brand1.primary}cc)` }}
+                />
+                {/* Right – Team 2 color */}
+                <div
+                    className="absolute inset-y-0 right-0 w-1/2"
+                    style={{ background: `linear-gradient(225deg, ${brand2.primary}f0, ${brand2.primary}cc)` }}
+                />
+                {/* Dark bottom fade for legibility */}
+                <div className="absolute inset-0 bg-gradient-to-b from-black/5 to-black/25" />
+
+                {/* Content */}
+                <div className="relative z-10 flex flex-col h-full px-3 py-2">
+                    {/* Top: league label + status */}
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="text-[9px] font-black text-white/80 uppercase tracking-widest">IPL 2026</span>
+                        <StatusBadge status={match.MatchStatus} />
+                    </div>
+
+                    {/* Teams */}
+                    <div className="flex items-center justify-between gap-2">
+                        <div className="flex flex-1 flex-col items-center gap-1">
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center overflow-hidden shadow backdrop-blur-sm">
+                                {logo1 && !t1Err ? (
+                                    <img src={logo1} alt={match.Team1Code} className="w-full h-full object-contain p-1" onError={() => setT1Err(true)} />
+                                ) : (
+                                    <span className="text-[10px] font-black text-white">{match.Team1Code}</span>
+                                )}
+                            </div>
+                            <span className="text-xs font-black text-white drop-shadow-sm text-center leading-tight">{match.Team1Code}</span>
+                        </div>
+
+                        <div className="flex-shrink-0 rounded-full bg-white/20 border border-white/30 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-white backdrop-blur-sm">
+                            vs
+                        </div>
+
+                        <div className="flex flex-1 flex-col items-center gap-1">
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center overflow-hidden shadow backdrop-blur-sm">
+                                {logo2 && !t2Err ? (
+                                    <img src={logo2} alt={match.Team2Code} className="w-full h-full object-contain p-1" onError={() => setT2Err(true)} />
+                                ) : (
+                                    <span className="text-[10px] font-black text-white">{match.Team2Code}</span>
+                                )}
+                            </div>
+                            <span className="text-xs font-black text-white drop-shadow-sm text-center leading-tight">{match.Team2Code}</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div className="px-3 sm:px-4 py-4 sm:py-5 flex items-center justify-between gap-2 sm:gap-3 bg-white">
-                <div className="flex flex-col items-center gap-1.5 sm:gap-2 flex-1">
-                    <TeamLogo src={match.Team1Logo || teamLogoMap[match.Team1Code]} code={match.Team1Code} hasError={t1Err} onError={() => setT1Err(true)} />
-                    <span className="text-xs sm:text-sm font-black text-gray-800 text-center leading-tight">{match.Team1Code}</span>
-                </div>
-                <div className="flex flex-col items-center gap-1 px-1 sm:px-3">
-                    <span className="text-[10px] sm:text-xs font-black text-gray-300 uppercase tracking-widest">vs</span>
-                </div>
-                <div className="flex flex-col items-center gap-1.5 sm:gap-2 flex-1">
-                    <TeamLogo src={match.Team2Logo || teamLogoMap[match.Team2Code]} code={match.Team2Code} hasError={t2Err} onError={() => setT2Err(true)} />
-                    <span className="text-xs sm:text-sm font-black text-gray-800 text-center leading-tight">{match.Team2Code}</span>
-                </div>
-            </div>
-
-            <div className="border-t border-gray-50 px-4 py-3 flex flex-wrap gap-x-4 gap-y-1.5 bg-gray-50/50">
+            {/* Footer */}
+            <div className="border-t border-gray-100 px-4 py-2.5 flex flex-wrap gap-x-4 gap-y-1 bg-gray-50/60">
                 <div className="flex items-center gap-1.5 text-gray-400">
                     <Clock size={11} />
                     <span className="text-[11px] font-bold">{formatTime(match.MatchTime)}</span>

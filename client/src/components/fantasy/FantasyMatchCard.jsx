@@ -1,7 +1,8 @@
-import React from 'react';
-import { CalendarDays, ChevronRight, MapPin, Medal, PlusCircle, Users } from 'lucide-react';
+import React, { useState } from 'react';
+import { CalendarDays, MapPin, Medal, PlusCircle, Users } from 'lucide-react';
 import FantasyStatusBadge from './FantasyStatusBadge';
 import FantasyTeamMark from './FantasyTeamMark';
+import { getFantasyTeamBrand } from '../../utils/fantasyBranding';
 
 const formatMatchDate = (value) => {
     if (!value) return 'Date TBD';
@@ -25,28 +26,73 @@ const FantasyMatchCard = ({
     onOpenTeams,
     onOpenLeaderboard
 }) => {
+    const [t1Err, setT1Err] = useState(false);
+    const [t2Err, setT2Err] = useState(false);
+
+    const brand1 = getFantasyTeamBrand(match.team1);
+    const brand2 = getFantasyTeamBrand(match.team2);
+    const logo1 = teamLogoMap[String(match.team1).toUpperCase()];
+    const logo2 = teamLogoMap[String(match.team2).toUpperCase()];
+
     return (
-        <article className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-red-500/10">
-            <div className="bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.2),_transparent_28%),linear-gradient(135deg,_#991B1B_0%,_#E53935_55%,_#FB923C_100%)] px-4 py-4 text-white">
-                <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                        <p className="text-[9px] font-black uppercase tracking-widest text-red-100/90">Fantasy Contest</p>
-                        <h2 className="mt-1 text-base font-black tracking-tight leading-tight truncate">{match.matchName || `${match.team1} vs ${match.team2}`}</h2>
+        <article className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl">
+            {/* Half-and-half team color header */}
+            <div className="relative overflow-hidden" style={{ minHeight: '130px' }}>
+                {/* Left half – Team 1 */}
+                <div
+                    className="absolute inset-y-0 left-0 w-1/2"
+                    style={{ background: `linear-gradient(135deg, ${brand1.primary}ee, ${brand1.primary}bb)` }}
+                />
+                {/* Right half – Team 2 */}
+                <div
+                    className="absolute inset-y-0 right-0 w-1/2"
+                    style={{ background: `linear-gradient(225deg, ${brand2.primary}ee, ${brand2.primary}bb)` }}
+                />
+                {/* Diagonal blend seam */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/20 to-transparent" style={{ width: '4px', left: 'calc(50% - 2px)' }} />
+                {/* Dark overlay for text legibility */}
+                <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/30" />
+
+                {/* Content */}
+                <div className="relative z-10 flex flex-col h-full px-4 py-3">
+                    {/* Top row: label + status */}
+                    <div className="flex items-center justify-between mb-3">
+                        <p className="text-[9px] font-black uppercase tracking-widest text-white/80">Fantasy Contest</p>
+                        <FantasyStatusBadge status={match.status} />
                     </div>
-                    <FantasyStatusBadge status={match.status} />
-                </div>
 
-                <div className="mt-3 flex items-center justify-between gap-2 rounded-xl border border-white/15 bg-black/15 px-3 py-3 backdrop-blur-sm">
-                    <div className="flex min-w-0 items-center gap-2">
-                        <FantasyTeamMark code={match.team1} logoMap={teamLogoMap} className="h-9 w-9 flex-shrink-0" labelClassName="text-xs sm:hidden" />
-                        <p className="truncate text-sm font-black hidden sm:block">{match.team1}</p>
-                    </div>
+                    {/* Teams row */}
+                    <div className="flex items-center justify-between gap-2">
+                        {/* Team 1 */}
+                        <div className="flex flex-1 flex-col items-center gap-1.5">
+                            <div className="w-12 h-12 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center overflow-hidden shadow-lg backdrop-blur-sm">
+                                {logo1 && !t1Err ? (
+                                    <img src={logo1} alt={match.team1} className="w-full h-full object-contain p-1" onError={() => setT1Err(true)} />
+                                ) : (
+                                    <span className="text-xs font-black text-white">{match.team1}</span>
+                                )}
+                            </div>
+                            <span className="text-sm font-black text-white text-center drop-shadow-sm leading-tight">{match.team1}</span>
+                        </div>
 
-                    <div className="rounded-full bg-white/15 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-white flex-shrink-0">VS</div>
+                        {/* VS pill */}
+                        <div className="flex flex-col items-center gap-1 flex-shrink-0">
+                            <div className="rounded-full bg-white/20 border border-white/30 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-white backdrop-blur-sm shadow">
+                                VS
+                            </div>
+                        </div>
 
-                    <div className="flex min-w-0 items-center gap-2 justify-end">
-                        <p className="truncate text-sm font-black hidden sm:block">{match.team2}</p>
-                        <FantasyTeamMark code={match.team2} logoMap={teamLogoMap} className="h-9 w-9 flex-shrink-0" labelClassName="text-xs sm:hidden" />
+                        {/* Team 2 */}
+                        <div className="flex flex-1 flex-col items-center gap-1.5">
+                            <div className="w-12 h-12 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center overflow-hidden shadow-lg backdrop-blur-sm">
+                                {logo2 && !t2Err ? (
+                                    <img src={logo2} alt={match.team2} className="w-full h-full object-contain p-1" onError={() => setT2Err(true)} />
+                                ) : (
+                                    <span className="text-xs font-black text-white">{match.team2}</span>
+                                )}
+                            </div>
+                            <span className="text-sm font-black text-white text-center drop-shadow-sm leading-tight">{match.team2}</span>
+                        </div>
                     </div>
                 </div>
             </div>
