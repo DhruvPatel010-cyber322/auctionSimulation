@@ -7,7 +7,8 @@ import {
     groupFantasyPlayers,
     normalizeFantasyMatch,
     serializeFantasyPlayer,
-    validateFantasyTeamSelection
+    validateFantasyTeamSelection,
+    isMatchLocked
 } from '../utils/fantasyUtils.js';
 
 const getAuthenticatedUserId = (req) => req.user?._id || req.user?.id || null;
@@ -113,7 +114,7 @@ export const saveFantasyTeam = async (req, res) => {
         }
         
         const normalizedMatch = normalizeFantasyMatch(match);
-        if (normalizedMatch.status !== 'Upcoming') {
+        if (isMatchLocked(normalizedMatch)) {
             return res.status(403).json({ message: 'Team editing is locked. This match has already started.' });
         }
 

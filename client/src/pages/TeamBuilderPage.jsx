@@ -22,7 +22,8 @@ import {
     getPlayerSelectionState,
     getPlayerValue,
     sortFantasyPlayers,
-    validateFantasyTeam
+    validateFantasyTeam,
+    isMatchLocked
 } from '../utils/fantasy';
 import { buildFantasyTeamLogoMap } from '../utils/fantasyBranding';
 
@@ -141,8 +142,8 @@ const TeamBuilderPage = () => {
     const canContinue = selectionIssues.length === 0;
 
     const togglePlayer = (player) => {
-        if (match?.status !== 'Upcoming') {
-            toast.error('Team editing is locked for this match.');
+        if (isMatchLocked(match)) {
+            toast.error('Team editing is locked. This match has already started.');
             return;
         }
 
@@ -168,7 +169,7 @@ const TeamBuilderPage = () => {
     };
 
     const assignCaptain = (playerId) => {
-        if (match?.status !== 'Upcoming') return;
+        if (isMatchLocked(match)) return;
         setCaptainId(playerId);
         if (viceCaptainId === playerId) {
             setViceCaptainId('');
@@ -176,7 +177,7 @@ const TeamBuilderPage = () => {
     };
 
     const assignViceCaptain = (playerId) => {
-        if (match?.status !== 'Upcoming') return;
+        if (isMatchLocked(match)) return;
         setViceCaptainId(playerId);
         if (captainId === playerId) {
             setCaptainId('');
@@ -279,7 +280,7 @@ const TeamBuilderPage = () => {
                 </div>
             </section>
 
-            {match?.status !== 'Upcoming' && (
+            {isMatchLocked(match) && (
                 <div className="rounded-2xl border border-red-500 bg-red-50 px-5 py-4 font-black flex items-center gap-3 text-red-700 shadow-sm animate-pulse">
                     <ShieldAlert size={20} className="text-red-500" />
                     <span>Match has started. Team editing is now locked.</span>
@@ -516,10 +517,10 @@ const TeamBuilderPage = () => {
                         ) : (
                             <button
                                 onClick={handleSaveTeam}
-                                disabled={saving || match?.status !== 'Upcoming'}
+                                disabled={saving || isMatchLocked(match)}
                                 className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#E53935] px-5 py-3 text-sm font-black text-white shadow-lg shadow-red-500/20 transition-all hover:scale-[1.01] disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 disabled:shadow-none"
                             >
-                                {match?.status !== 'Upcoming' ? 'Locked' : saving ? 'Saving Team...' : hasExistingTeam ? 'Update Team' : 'Save Team'}
+                                {isMatchLocked(match) ? 'Locked' : saving ? 'Saving Team...' : hasExistingTeam ? 'Update Team' : 'Save Team'}
                             </button>
                         )}
                     </div>

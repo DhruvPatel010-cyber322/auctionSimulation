@@ -247,3 +247,22 @@ export const calculateFantasyTeamPoints = (fantasyTeam, playerMap) => {
 
     return Number(totalPoints.toFixed(2));
 };
+
+export const isMatchLocked = (match) => {
+    if (!match || !match.date || !match.time) {
+        return match?.status !== 'Upcoming'; 
+    }
+    try {
+        const matchDate = new Date(match.date);
+        const [hours, minutes] = match.time.split(':').map(Number);
+        
+        if (isNaN(hours) || isNaN(minutes)) {
+            return match?.status !== 'Upcoming';
+        }
+        
+        matchDate.setHours(hours, minutes, 0, 0);
+        return new Date() > matchDate;
+    } catch (err) {
+        return match?.status !== 'Upcoming';
+    }
+};
