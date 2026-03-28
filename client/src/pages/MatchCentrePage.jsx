@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, MapPin, Trophy, X, Construction, Filter, ChevronDown, Loader2, Users, TableProperties, LineChart } from 'lucide-react';
-import { getSchedule, getSquads } from '../services/api';
+import { getSchedule, getSquads, getTeams } from '../services/api';
 
 // --- HELPERS ---
 const formatDate = (dateStr) => {
@@ -54,7 +54,7 @@ const TeamLogo = ({ src, code, hasError, onError }) => (
     </div>
 );
 
-const MatchDetailPanel = ({ match, onClose, isModal = false }) => {
+const MatchDetailPanel = ({ match, onClose, isModal = false, teamLogoMap = {} }) => {
     const [t1Err, setT1Err] = useState(false);
     const [t2Err, setT2Err] = useState(false);
 
@@ -92,12 +92,12 @@ const MatchDetailPanel = ({ match, onClose, isModal = false }) => {
             {/* Teams */}
             <div className="px-6 py-6 flex items-center justify-between gap-4">
                 <div className="flex flex-col items-center gap-2 flex-1">
-                    <TeamLogo src={match.Team1Logo} code={match.Team1Code} hasError={t1Err} onError={() => setT1Err(true)} />
+                    <TeamLogo src={match.Team1Logo || teamLogoMap[match.Team1Code]} code={match.Team1Code} hasError={t1Err} onError={() => setT1Err(true)} />
                     <span className="font-black text-gray-900 text-center text-sm leading-snug">{match.Team1Code}</span>
                 </div>
                 <span className="text-2xl font-black text-gray-200">VS</span>
                 <div className="flex flex-col items-center gap-2 flex-1">
-                    <TeamLogo src={match.Team2Logo} code={match.Team2Code} hasError={t2Err} onError={() => setT2Err(true)} />
+                    <TeamLogo src={match.Team2Logo || teamLogoMap[match.Team2Code]} code={match.Team2Code} hasError={t2Err} onError={() => setT2Err(true)} />
                     <span className="font-black text-gray-900 text-center text-sm leading-snug">{match.Team2Code}</span>
                 </div>
             </div>
@@ -144,7 +144,7 @@ const MatchDetailPanel = ({ match, onClose, isModal = false }) => {
     return <div className="hidden lg:block sticky top-8 w-full h-full">{content}</div>;
 };
 
-const MatchCard = ({ match, isSelected, onClick }) => {
+const MatchCard = ({ match, isSelected, onClick, teamLogoMap = {} }) => {
     const [t1Err, setT1Err] = useState(false);
     const [t2Err, setT2Err] = useState(false);
 
@@ -164,14 +164,14 @@ const MatchCard = ({ match, isSelected, onClick }) => {
 
             <div className="px-3 sm:px-4 py-4 sm:py-5 flex items-center justify-between gap-2 sm:gap-3 bg-white">
                 <div className="flex flex-col items-center gap-1.5 sm:gap-2 flex-1">
-                    <TeamLogo src={match.Team1Logo} code={match.Team1Code} hasError={t1Err} onError={() => setT1Err(true)} />
+                    <TeamLogo src={match.Team1Logo || teamLogoMap[match.Team1Code]} code={match.Team1Code} hasError={t1Err} onError={() => setT1Err(true)} />
                     <span className="text-xs sm:text-sm font-black text-gray-800 text-center leading-tight">{match.Team1Code}</span>
                 </div>
                 <div className="flex flex-col items-center gap-1 px-1 sm:px-3">
                     <span className="text-[10px] sm:text-xs font-black text-gray-300 uppercase tracking-widest">vs</span>
                 </div>
                 <div className="flex flex-col items-center gap-1.5 sm:gap-2 flex-1">
-                    <TeamLogo src={match.Team2Logo} code={match.Team2Code} hasError={t2Err} onError={() => setT2Err(true)} />
+                    <TeamLogo src={match.Team2Logo || teamLogoMap[match.Team2Code]} code={match.Team2Code} hasError={t2Err} onError={() => setT2Err(true)} />
                     <span className="text-xs sm:text-sm font-black text-gray-800 text-center leading-tight">{match.Team2Code}</span>
                 </div>
             </div>
@@ -192,7 +192,7 @@ const MatchCard = ({ match, isSelected, onClick }) => {
 
 // --- VIEWS ---
 
-const ScheduleView = ({ schedule, allTeams, allVenues }) => {
+const ScheduleView = ({ schedule, allTeams, allVenues, teamLogoMap = {} }) => {
     const [selectedMatch, setSelectedMatch] = useState(null);
     const [teamFilter, setTeamFilter] = useState('All');
     const [statusFilter, setStatusFilter] = useState('All');
@@ -293,6 +293,7 @@ const ScheduleView = ({ schedule, allTeams, allVenues }) => {
                                             match={match}
                                             isSelected={selectedMatch?.MatchID === match.MatchID}
                                             onClick={() => setSelectedMatch(match)}
+                                            teamLogoMap={teamLogoMap}
                                         />
                                     ))}
                                 </div>
@@ -304,18 +305,18 @@ const ScheduleView = ({ schedule, allTeams, allVenues }) => {
 
             {/* RIGHT PANE (Desktop Scorecard) */}
             <div className="hidden lg:block lg:w-1/2 xl:w-[55%] flex-shrink-0 sticky top-8 self-start pt-2">
-                <MatchDetailPanel match={selectedMatch} />
+                <MatchDetailPanel match={selectedMatch} teamLogoMap={teamLogoMap} />
             </div>
 
             {/* MOBILE MODAL (Small Screens) */}
             {selectedMatch && (
-                <MatchDetailPanel match={selectedMatch} onClose={() => setSelectedMatch(null)} isModal={true} />
+                <MatchDetailPanel match={selectedMatch} onClose={() => setSelectedMatch(null)} isModal={true} teamLogoMap={teamLogoMap} />
             )}
         </div>
     );
 };
 
-const SquadsView = () => {
+const SquadsView = ({ teamLogoMap = {} }) => {
     const [squads, setSquads] = useState({});
     const [loading, setLoading] = useState(true);
     const [selectedTeam, setSelectedTeam] = useState('All');
@@ -379,8 +380,12 @@ const SquadsView = () => {
                 {teamKeys.filter(t => selectedTeam === 'All' || selectedTeam === t).map(teamCode => (
                     <div key={teamCode} className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 flex flex-col items-start">
                         <div className="flex items-center gap-4 mb-8">
-                            <div className="w-14 h-14 bg-gray-50 rounded-2xl border border-gray-200 flex items-center justify-center font-black text-gray-400 text-xl shadow-inner">
-                                {teamCode}
+                            <div className="w-14 h-14 bg-gray-50 rounded-2xl border border-gray-200 flex items-center justify-center font-black text-gray-400 text-xl shadow-inner overflow-hidden flex-shrink-0">
+                                {teamLogoMap[teamCode] ? (
+                                    <img src={teamLogoMap[teamCode]} alt={teamCode} className="w-full h-full object-contain p-2" />
+                                ) : (
+                                    teamCode
+                                )}
                             </div>
                             <div>
                                 <h3 className="text-2xl font-black text-gray-900 leading-tight">{teamCode} Squad</h3>
@@ -414,7 +419,7 @@ const SquadsView = () => {
     );
 };
 
-const PointsTableView = () => {
+const PointsTableView = ({ teamLogoMap = {} }) => {
     // Zero-data state as requested
     const teams = ['CSK', 'DC', 'GT', 'KKR', 'LSG', 'MI', 'PBKS', 'RCB', 'RR', 'SRH'];
     
@@ -449,7 +454,13 @@ const PointsTableView = () => {
                                 <tr key={team} className="hover:bg-gray-50/80 transition-colors">
                                     <td className="p-4 text-center font-bold text-gray-400">{index + 1}</td>
                                     <td className="p-4 font-black text-gray-800 flex items-center gap-3 text-base">
-                                        <div className="w-8 h-8 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-[10px] text-gray-500 shadow-sm">{team}</div>
+                                        <div className="w-8 h-8 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-[10px] text-gray-500 shadow-sm overflow-hidden flex-shrink-0">
+                                            {teamLogoMap[team] ? (
+                                                <img src={teamLogoMap[team]} alt={team} className="w-full h-full object-contain p-1" />
+                                            ) : (
+                                                team
+                                            )}
+                                        </div>
                                         {team}
                                     </td>
                                     <td className="p-4 text-center font-bold text-gray-600">0</td>
@@ -481,19 +492,32 @@ const MatchCentrePage = () => {
     const [schedule, setSchedule] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('schedule');
+    const [teamLogoMap, setTeamLogoMap] = useState({});
 
     useEffect(() => {
-        const fetchSchedule = async () => {
+        const fetchInitialData = async () => {
             try {
-                const data = await getSchedule();
-                setSchedule(data);
+                const [scheduleData, teamsData] = await Promise.all([
+                    getSchedule(),
+                    getTeams().catch(() => [])
+                ]);
+                
+                setSchedule(scheduleData);
+                
+                const logoMap = {};
+                if (teamsData && teamsData.length > 0) {
+                    teamsData.forEach(team => {
+                        if (team.logo) logoMap[team.code || team.id] = team.logo;
+                    });
+                }
+                setTeamLogoMap(logoMap);
             } catch (error) {
-                console.error("Failed to fetch schedule", error);
+                console.error("Failed to fetch match centre data", error);
             } finally {
                 setLoading(false);
             }
         };
-        fetchSchedule();
+        fetchInitialData();
     }, []);
 
     if (loading) {
@@ -551,9 +575,9 @@ const MatchCentrePage = () => {
 
             {/* Content Switch */}
             <div className="w-full">
-                {activeTab === 'schedule' && <ScheduleView schedule={schedule} allTeams={allTeams} allVenues={allVenues} />}
-                {activeTab === 'squads' && <SquadsView />}
-                {activeTab === 'table' && <PointsTableView />}
+                {activeTab === 'schedule' && <ScheduleView schedule={schedule} allTeams={allTeams} allVenues={allVenues} teamLogoMap={teamLogoMap} />}
+                {activeTab === 'squads' && <SquadsView teamLogoMap={teamLogoMap} />}
+                {activeTab === 'table' && <PointsTableView teamLogoMap={teamLogoMap} />}
             </div>
         </div>
     );
