@@ -40,48 +40,45 @@ const FantasyMatchesPage = () => {
 
     return (
         <div className="mx-auto max-w-7xl space-y-8 p-4 md:p-8">
-            <section className="overflow-hidden rounded-[36px] bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.24),_transparent_26%),linear-gradient(135deg,_#991B1B_0%,_#E53935_52%,_#FB923C_100%)] px-6 py-8 text-white shadow-[0_28px_90px_rgba(229,57,53,0.22)] md:px-8 md:py-10">
+            <section className="overflow-hidden rounded-[32px] bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.24),_transparent_26%),linear-gradient(135deg,_#991B1B_0%,_#E53935_52%,_#FB923C_100%)] px-6 py-8 text-white shadow-xl shadow-red-500/10 md:px-8 md:py-10">
                 <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
                     <div>
-                        <p className="text-xs font-black uppercase tracking-[0.42em] text-red-100">Fantasy cricket</p>
-                        <h1 className="mt-4 max-w-3xl text-4xl font-black tracking-tight md:text-5xl">
-                            Pick a match and build your Dream11-style winning XI
+                        <p className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-red-100">Fantasy Cricket</p>
+                        <h1 className="mt-2 max-w-3xl text-3xl font-black tracking-tight sm:text-4xl md:text-5xl">
+                            Pick a match and build your Dream XI
                         </h1>
-                        <p className="mt-4 max-w-2xl text-sm font-medium text-red-50/90 md:text-base">
-                            Clean contest cards, real IPL team branding, and a sharper flow into team creation so the feature feels like a real fantasy product.
-                        </p>
 
                         <div className="mt-6 flex flex-wrap gap-3">
-                            <div className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-sm">
-                                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-red-100/80">Matches live</p>
+                            <div className="rounded-2xl border border-white/20 bg-black/10 px-4 py-3 backdrop-blur-sm">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-red-100/90">Matches Live</p>
                                 <p className="mt-1 text-2xl font-black">{matches.length}</p>
                             </div>
-                            <div className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-sm">
-                                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-red-100/80">Budget cap</p>
+                            <div className="rounded-2xl border border-white/20 bg-black/10 px-4 py-3 backdrop-blur-sm">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-red-100/90">Budget Cap</p>
                                 <p className="mt-1 text-2xl font-black">100</p>
                             </div>
-                            <div className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-sm">
-                                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-red-100/80">Squad size</p>
+                            <div className="rounded-2xl border border-white/20 bg-black/10 px-4 py-3 backdrop-blur-sm">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-red-100/90">Squad Size</p>
                                 <p className="mt-1 text-2xl font-black">11</p>
                             </div>
                         </div>
                     </div>
 
                     <div className="grid gap-3 self-start sm:grid-cols-3 lg:grid-cols-1">
-                        <div className="rounded-[28px] border border-white/15 bg-black/15 p-5 backdrop-blur-sm">
+                        <div className="rounded-[24px] border border-white/20 bg-black/15 p-5 backdrop-blur-sm">
                             <Shield className="h-6 w-6 text-white" />
-                            <p className="mt-4 text-lg font-black">Smart role balance</p>
-                            <p className="mt-1 text-sm font-medium text-red-50/85">Meet role rules, team cap rules, and the 100-value limit before continuing.</p>
+                            <p className="mt-3 text-lg font-black leading-tight">Smart role balance</p>
+                            <p className="mt-1 text-sm font-medium text-red-50/90 leading-snug">Meet role rules, team cap limits, and the 100-value budget before saving.</p>
                         </div>
-                        <div className="rounded-[28px] border border-white/15 bg-black/15 p-5 backdrop-blur-sm">
+                        <div className="rounded-[24px] border border-white/20 bg-black/15 p-5 backdrop-blur-sm">
                             <Sparkles className="h-6 w-6 text-white" />
-                            <p className="mt-4 text-lg font-black">Premium match cards</p>
-                            <p className="mt-1 text-sm font-medium text-red-50/85">Real logos, strong hierarchy, and mobile-first card layouts like a fantasy app.</p>
+                            <p className="mt-3 text-lg font-black leading-tight">Contest Live Status</p>
+                            <p className="mt-1 text-sm font-medium text-red-50/90 leading-snug">Team creation shuts down exactly when the first ball is bowled.</p>
                         </div>
-                        <div className="rounded-[28px] border border-white/15 bg-black/15 p-5 backdrop-blur-sm">
+                        <div className="rounded-[24px] border border-white/20 bg-black/15 p-5 backdrop-blur-sm">
                             <Trophy className="h-6 w-6 text-white" />
-                            <p className="mt-4 text-lg font-black">Contest journey</p>
-                            <p className="mt-1 text-sm font-medium text-red-50/85">Enter team creation, set captain and vice-captain, then track rank on leaderboard.</p>
+                            <p className="mt-3 text-lg font-black leading-tight">Match Leaderboards</p>
+                            <p className="mt-1 text-sm font-medium text-red-50/90 leading-snug">See how your fantasy points stack up against other users in the global leaderboard.</p>
                         </div>
                     </div>
                 </div>

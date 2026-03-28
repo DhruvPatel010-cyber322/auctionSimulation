@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Outlet, NavLink, Link } from 'react-router-dom';
+import { Outlet, NavLink, Link, useLocation } from 'react-router-dom';
 import { CalendarDays, Trophy, UserCircle, LogOut, ArrowLeft, Menu, Sparkles } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
@@ -7,6 +7,10 @@ import { useAuth } from '../context/AuthContext';
 const FantasyLayout = () => {
     const { user, logout } = useAuth();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const location = useLocation();
+
+    // Hide bottom navigation on deep pages to maximize screen space
+    const hideBottomNav = location.pathname.match(/\/fantasy\/.+\/(team|my-teams|leaderboard)/);
 
     // Dynamic Navigation Items for Fantasy Mode
     const navItems = [
@@ -89,15 +93,15 @@ const FantasyLayout = () => {
                     </div>
                 </header>
 
-                <div className="flex-1 overflow-y-auto p-4 md:p-8 pb-24">
+                <div className={cn("flex-1 overflow-y-auto w-full max-w-full overflow-x-hidden", !hideBottomNav ? "pb-24 md:pb-8" : "pb-0")}>
                     <Outlet />
                 </div>
             </main>
 
             {/* Mobile Bottom Navigation */}
-            {(() => {
+            {!hideBottomNav && (() => {
                 return (
-                    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.07)] z-30 border-t border-gray-100 flex items-stretch"
+                    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.07)] z-50 border-t border-gray-100 flex items-stretch"
                         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
                         {navItems.map((item) => (
                             <NavLink
