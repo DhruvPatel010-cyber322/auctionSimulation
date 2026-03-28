@@ -45,11 +45,11 @@ const StatusBadge = ({ status }) => {
 };
 
 const TeamLogo = ({ src, code, hasError, onError }) => (
-    <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-gray-50 border-2 border-gray-100 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0">
+    <div className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-gray-50 border-2 border-gray-100 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0">
         {src && !hasError ? (
             <img src={src} alt={code} className="w-full h-full object-contain p-1" onError={onError} />
         ) : (
-            <span className="text-sm font-black text-gray-500">{code}</span>
+            <span className="text-xs sm:text-sm font-black text-gray-500">{code}</span>
         )}
     </div>
 );
@@ -162,17 +162,17 @@ const MatchCard = ({ match, isSelected, onClick }) => {
                 <StatusBadge status={match.MatchStatus} />
             </div>
 
-            <div className="px-4 py-5 flex items-center justify-between gap-3 bg-white">
-                <div className="flex flex-col items-center gap-2 flex-1">
+            <div className="px-3 sm:px-4 py-4 sm:py-5 flex items-center justify-between gap-2 sm:gap-3 bg-white">
+                <div className="flex flex-col items-center gap-1.5 sm:gap-2 flex-1">
                     <TeamLogo src={match.Team1Logo} code={match.Team1Code} hasError={t1Err} onError={() => setT1Err(true)} />
-                    <span className="text-sm font-black text-gray-800 text-center leading-tight">{match.Team1Code}</span>
+                    <span className="text-xs sm:text-sm font-black text-gray-800 text-center leading-tight">{match.Team1Code}</span>
                 </div>
-                <div className="flex flex-col items-center gap-1 px-3">
-                    <span className="text-xs font-black text-gray-300 uppercase tracking-widest">vs</span>
+                <div className="flex flex-col items-center gap-1 px-1 sm:px-3">
+                    <span className="text-[10px] sm:text-xs font-black text-gray-300 uppercase tracking-widest">vs</span>
                 </div>
-                <div className="flex flex-col items-center gap-2 flex-1">
+                <div className="flex flex-col items-center gap-1.5 sm:gap-2 flex-1">
                     <TeamLogo src={match.Team2Logo} code={match.Team2Code} hasError={t2Err} onError={() => setT2Err(true)} />
-                    <span className="text-sm font-black text-gray-800 text-center leading-tight">{match.Team2Code}</span>
+                    <span className="text-xs sm:text-sm font-black text-gray-800 text-center leading-tight">{match.Team2Code}</span>
                 </div>
             </div>
 
@@ -214,11 +214,11 @@ const ScheduleView = ({ schedule, allTeams, allVenues }) => {
             <div className="w-full lg:w-1/2 xl:w-[45%] flex-shrink-0 flex flex-col gap-6">
                 
                 {/* Filters */}
-                <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col sm:flex-row flex-wrap gap-3 items-center">
+                <div className="bg-white p-3 sm:p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col sm:flex-row flex-wrap gap-2.5 sm:gap-3 items-center">
                     <div className="flex items-center justify-between w-full sm:w-auto">
-                        <div className="flex items-center gap-2 text-gray-400 mr-2 shrink-0">
-                            <Filter size={16} />
-                            <span className="text-sm font-bold uppercase tracking-wider">Filter</span>
+                        <div className="flex items-center gap-1.5 sm:gap-2 text-gray-400 mr-2 shrink-0">
+                            <Filter className="w-4 h-4 sm:w-4 sm:h-4" />
+                            <span className="text-xs sm:text-sm font-bold uppercase tracking-wider">Filter</span>
                         </div>
                         {/* Mobile Clear Button */}
                         {(teamFilter !== 'All' || statusFilter !== 'All' || venueFilter !== 'All') && (
@@ -235,7 +235,7 @@ const ScheduleView = ({ schedule, allTeams, allVenues }) => {
                         <select
                             value={teamFilter}
                             onChange={(e) => setTeamFilter(e.target.value)}
-                            className="w-full appearance-none bg-gray-50 border border-gray-200 pl-4 pr-8 py-2.5 rounded-xl font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs transition-shadow hover:bg-gray-100 cursor-pointer"
+                            className="w-full appearance-none bg-gray-50 border border-gray-200 pl-3 sm:pl-4 pr-8 py-2 sm:py-2.5 rounded-xl font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-[11px] sm:text-xs transition-shadow hover:bg-gray-100 cursor-pointer"
                         >
                             <option value="All">All Teams</option>
                             {allTeams.map(team => <option key={team} value={team}>{team}</option>)}
@@ -247,7 +247,7 @@ const ScheduleView = ({ schedule, allTeams, allVenues }) => {
                         <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
-                            className="w-full appearance-none bg-gray-50 border border-gray-200 pl-4 pr-8 py-2.5 rounded-xl font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs transition-shadow hover:bg-gray-100 cursor-pointer"
+                            className="w-full appearance-none bg-gray-50 border border-gray-200 pl-3 sm:pl-4 pr-8 py-2 sm:py-2.5 rounded-xl font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-[11px] sm:text-xs transition-shadow hover:bg-gray-100 cursor-pointer"
                         >
                             <option value="All">All Statuses</option>
                             <option value="UpComing">Upcoming</option>
@@ -348,10 +348,10 @@ const SquadsView = () => {
     return (
         <div className="w-full">
             {/* Team Picker */}
-            <div className="flex overflow-x-auto gap-3 pb-4 mb-6 scrollbar-hide snap-x">
+            <div className="flex overflow-x-auto gap-2 sm:gap-3 pb-3 mb-4 sm:mb-6 scrollbar-hide snap-x">
                 <button
                     onClick={() => setSelectedTeam('All')}
-                    className={`px-5 py-2.5 rounded-full font-bold whitespace-nowrap transition-all border snap-start ${
+                    className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap transition-all border snap-start ${
                         selectedTeam === 'All' 
                         ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-500/20' 
                         : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'
@@ -363,7 +363,7 @@ const SquadsView = () => {
                     <button
                         key={t}
                         onClick={() => setSelectedTeam(t)}
-                        className={`px-5 py-2.5 rounded-full font-bold whitespace-nowrap transition-all border snap-start ${
+                        className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap transition-all border snap-start ${
                             selectedTeam === t 
                             ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-500/20' 
                             : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'
@@ -509,16 +509,16 @@ const MatchCentrePage = () => {
     const allVenues = [...new Set(schedule.map(m => m.City))].sort();
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-500 w-full min-h-screen">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-8 animate-in fade-in duration-500 w-full min-h-screen">
             {/* Header Area */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
-                <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-700 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                        <Trophy size={24} className="text-white" strokeWidth={2.5} />
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-5 sm:gap-6 mb-6 sm:mb-10">
+                <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-700 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                        <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-white" strokeWidth={2.5} />
                     </div>
                     <div>
-                        <h1 className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">Match Centre</h1>
-                        <p className="text-sm md:text-base text-emerald-600 font-bold tracking-wide uppercase mt-1">Tata IPL 2026 Portal</p>
+                        <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900 tracking-tight">Match Centre</h1>
+                        <p className="text-[10px] sm:text-sm md:text-base text-emerald-600 font-bold tracking-wide uppercase mt-0.5 sm:mt-1">Tata IPL 2026 Portal</p>
                     </div>
                 </div>
 
@@ -535,14 +535,14 @@ const MatchCentrePage = () => {
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`flex-1 md:w-32 flex items-center justify-center gap-2 py-3 md:py-2.5 rounded-xl font-bold text-sm transition-all duration-200 ${
+                                className={`flex-1 md:w-32 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 sm:py-2.5 rounded-xl font-bold text-[10px] sm:text-sm transition-all duration-200 ${
                                     isActive
                                     ? 'bg-emerald-50 text-emerald-700 shadow-sm border border-emerald-100/50'
                                     : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
                                 }`}
                             >
-                                <Icon size={16} className={`${isActive ? 'text-emerald-600' : 'text-gray-400'}`} />
-                                <span className="hidden sm:inline">{tab.label}</span>
+                                <Icon className={`w-4 h-4 sm:w-4 sm:h-4 ${isActive ? 'text-emerald-600' : 'text-gray-400'}`} />
+                                <span className="block sm:inline">{tab.label}</span>
                             </button>
                         );
                     })}
