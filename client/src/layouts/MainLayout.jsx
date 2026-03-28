@@ -83,7 +83,6 @@ const MainLayout = () => {
 
     // Navigation Items
     const navItems = [
-        { name: 'Main Menu', path: '/main-menu', icon: ArrowLeft },
         { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
         { name: 'Auction', path: '/auction', icon: Gavel },
         { name: 'Players', path: '/players', icon: Users },
@@ -93,6 +92,7 @@ const MainLayout = () => {
         { name: 'Rules', path: '/rules', icon: BookOpen },
         { name: 'Playing XI', path: '/select-playing-xi', icon: Check },
         { name: 'Points Table', path: '/points-table', icon: Trophy },
+        { name: 'Main Menu', path: '/main-menu', icon: ArrowLeft },
     ];
 
     // Logic for NEW badges - target expiration: 24hrs from 2026-03-14T21:06:03+05:30

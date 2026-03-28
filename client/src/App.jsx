@@ -1,7 +1,9 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { SocketProvider } from './context/SocketContext';
-import { AuthProvider } from './context/AuthContext'; import MainLayout from './layouts/MainLayout';
+import { AuthProvider } from './context/AuthContext'; 
+import MainLayout from './layouts/MainLayout';
+import FantasyLayout from './layouts/FantasyLayout';
 import EmailLoginPage from './pages/EmailLoginPage';
 import LoginPage from './pages/LoginPage';
 import TournamentSelectPage from './pages/TournamentSelectPage';
@@ -59,12 +61,14 @@ function App() {
                   <Route path="points-table" element={<PointsTablePage />} />
                   <Route path="match-centre" element={<MatchCentrePage />} />
                   <Route path="profile" element={<ProfilePage />} />
-                  
-                  {/* Fantasy Routes */}
-                  <Route path="fantasy" element={<FantasyMatchesPage />} />
-                  <Route path="fantasy/:matchId/team" element={<TeamBuilderPage />} />
-                  <Route path="fantasy/:matchId/my-teams" element={<MyFantasyTeamsPage />} />
-                  <Route path="fantasy/:matchId/leaderboard" element={<LeaderboardPage />} />
+                </Route>
+
+                {/* Fantasy Routes */}
+                <Route path="/fantasy" element={<FantasyLayout />}>
+                  <Route index element={<FantasyMatchesPage />} />
+                  <Route path=":matchId/team" element={<TeamBuilderPage />} />
+                  <Route path=":matchId/my-teams" element={<MyFantasyTeamsPage />} />
+                  <Route path=":matchId/leaderboard" element={<LeaderboardPage />} />
                 </Route>
               </Route>
 
