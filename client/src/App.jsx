@@ -21,6 +21,8 @@ import ErrorBoundary from './components/ErrorBoundary';
 // Revert to RequireAuth logic if changed previously
 import RequireAuth from './components/RequireAuth';
 import RequireAdmin from './components/RequireAdmin';
+// Main Menu
+import MainMenuPage from './pages/MainMenuPage';
 
 // Fantasy Module Imports
 import FantasyMatchesPage from './pages/FantasyMatchesPage';
@@ -36,6 +38,7 @@ function App() {
           <BrowserRouter>
             <Routes>
               <Route path="/email-login" element={<EmailLoginPage />} />
+              <Route path="/main-menu" element={<MainMenuPage />} />
               <Route path="/tournaments" element={<TournamentSelectPage />} />
               <Route path="/tournaments/:id/teams" element={<TournamentTeamSelector />} />
               <Route path="/login" element={<LoginPage />} />
@@ -45,7 +48,7 @@ function App() {
               {/* Protected Routes (Layout applied) */}
               <Route element={<RequireAuth />}>
                 <Route path="/" element={<MainLayout />}>
-                  <Route index element={<Navigate to="/dashboard" replace />} />
+                  <Route index element={<Navigate to="/main-menu" replace />} />
                   <Route path="dashboard" element={<DashboardPage />} />
                   <Route path="auction" element={<AuctionPage />} />
                   <Route path="players" element={<PlayerListPage />} />

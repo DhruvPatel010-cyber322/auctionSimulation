@@ -26,7 +26,7 @@ const EmailLoginPage = () => {
                 // Unify session tokens: local and google both now securely rely on backend JWT token
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('firebase_token', data.token); // Keep for legacy component compatibility
-                navigate('/tournaments');
+                navigate('/main-menu');
             } else {
                 setError(data.message || 'Google Authentication failed on server.');
             }
@@ -55,7 +55,7 @@ const EmailLoginPage = () => {
                 localStorage.setItem('firebase_token', data.token);
                 // Store user in localStorage so AuthContext picks it up on next load
                 // (TournamentSelectPage.jsx can also work from the API token)
-                navigate('/tournaments');
+                navigate('/main-menu');
             } else {
                 setError(data.message || 'Invalid username or password.');
             }
