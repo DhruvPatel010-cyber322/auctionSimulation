@@ -10,41 +10,63 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(localStorage.getItem('token'));
     const [loading, setLoading] = useState(true);
+    const [loadingMessage, setLoadingMessage] = useState('Loading Auth...');
 
     useEffect(() => {
+        let isMounted = true;
+
         const validateSession = async () => {
             const storedToken = localStorage.getItem('token');
             const storedUser = localStorage.getItem('user');
 
             if (storedToken && storedUser) {
-                try {
-                    // Probe a protected route to see if token is still valid
-                    // We can use a lightweight protected endpoint, e.g., /api/auction/status
-                    await api.getAuctionStatus(); // This uses the interceptor or we can manually check
+                let retryCount = 0;
+                let success = false;
 
-                    // If successful, restore user
-                    setUser(JSON.parse(storedUser));
-                } catch (error) {
-                    console.error("Session validation failed:", error);
-                    // If 401 or token invalid, clear everything
-                    if (error.response?.status === 401 || error.response?.status === 403) {
-                        // Clear local immediately
-                        localStorage.removeItem('token');
-                        localStorage.removeItem('user');
-                        setUser(null);
-                        setToken(null);
-                    } else {
-                        // For other errors (network), we might still want to restore 
-                        // but risks are high. Let's act safe and restore, 
-                        // assuming Socket will kill it if really bad.
-                        setUser(JSON.parse(storedUser));
+                while (!success && isMounted) {
+                    try {
+                        if (retryCount > 0) {
+                            setLoadingMessage('Waking up server... Connecting to Database');
+                        }
+
+                        // Probe a protected route to see if token is still valid
+                        await api.getAuctionStatus(); 
+
+                        // If successful, restore user
+                        success = true;
+                        if (isMounted) {
+                            setUser(JSON.parse(storedUser));
+                        }
+                    } catch (error) {
+                        // If 401 or token invalid, clear everything
+                        if (error.response?.status === 401 || error.response?.status === 403) {
+                            if (isMounted) {
+                                localStorage.removeItem('token');
+                                localStorage.removeItem('user');
+                                setUser(null);
+                                setToken(null);
+                            }
+                            break; // 401 is fatal, stop retrying
+                        } else {
+                            // For other errors (network, 502, 504), server might be asleep
+                            console.error(`Session validation network error. Retrying... (${retryCount + 1})`, error);
+                            retryCount++;
+                            // Wait 3 seconds before retrying to give server time to wake up
+                            await new Promise(res => setTimeout(res, 3000));
+                        }
                     }
                 }
             }
-            setLoading(false);
+            if (isMounted) {
+                setLoading(false);
+            }
         };
 
         validateSession();
+
+        return () => {
+            isMounted = false;
+        };
     }, []);
 
     const login = async (teamCode, password, firebaseToken) => {
@@ -89,7 +111,12 @@ export const AuthProvider = ({ children }) => {
 
     return (
         <AuthContext.Provider value={value}>
-            {!loading && children}
+            {loading ? (
+                <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center text-white">
+                    <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent flex items-center justify-center rounded-full animate-spin mb-4"></div>
+                    <div className="text-gray-400 font-medium animate-pulse">{loadingMessage}</div>
+                </div>
+            ) : children}
         </AuthContext.Provider>
     );
 };

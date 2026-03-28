@@ -39,6 +39,7 @@ import authRoutes from './routes/authRoutes.js';
 import Tournament from './models/Tournament.js';
 import TournamentUser from './models/TournamentUser.js';
 import tradeRoutes from './routes/tradeRoutes.js';
+import scheduleRoutes from './routes/scheduleRoutes.js';
 
 dotenv.config();
 
@@ -374,6 +375,8 @@ app.use('/api/v2/auth', authRoutes);
 
 // --- TRADE ROUTES ---
 app.use('/api/trades', protect, tradeRoutes);
+
+app.use('/api/schedule', scheduleRoutes);
 
 // Basic Route
 app.get('/', (req, res) => {

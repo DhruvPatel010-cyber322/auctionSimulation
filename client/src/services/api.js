@@ -146,3 +146,9 @@ export const respondTradeProposal = async (proposalId, status) => {
     const response = await api.put(`/api/trades/proposal/${proposalId}`, { status });
     return response.data;
 };
+
+// --- SCHEDULE API ---
+export const getSchedule = async () => {
+    const response = await api.get('/api/schedule');
+    return response.data;
+};

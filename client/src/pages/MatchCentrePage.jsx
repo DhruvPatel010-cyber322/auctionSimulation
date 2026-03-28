@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
-import { Calendar, Clock, MapPin, Trophy, X, Construction, Filter, ChevronDown } from 'lucide-react';
-import schedule from '../data/ipl_schedule.json';
-
+import React, { useState, useEffect } from 'react';
+import { Calendar, Clock, MapPin, Trophy, X, Construction, Filter, ChevronDown, Loader2 } from 'lucide-react';
+import { getSchedule } from '../services/api';
 // Helper to format date nicely: "28 Mar 2026"
 const formatDate = (dateStr) => {
     const d = new Date(dateStr);
@@ -211,10 +210,35 @@ const MatchCard = ({ match, onClick }) => {
 };
 
 const MatchCentrePage = () => {
+    const [schedule, setSchedule] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [selectedMatch, setSelectedMatch] = useState(null);
     const [teamFilter, setTeamFilter] = useState('All');
     const [statusFilter, setStatusFilter] = useState('All');
     const [venueFilter, setVenueFilter] = useState('All');
+
+    useEffect(() => {
+        const fetchSchedule = async () => {
+            try {
+                const data = await getSchedule();
+                setSchedule(data);
+            } catch (error) {
+                console.error("Failed to fetch schedule", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchSchedule();
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[60vh]">
+                <Loader2 className="w-12 h-12 text-emerald-600 animate-spin mb-4" />
+                <p className="text-gray-500 font-bold">Loading schedule...</p>
+            </div>
+        );
+    }
 
     // Extract unique values for filters
     const allTeams = [...new Set(schedule.flatMap(m => [m.Team1Code, m.Team2Code]))].sort();
