@@ -68,6 +68,18 @@ const playerSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    battingPoints: {
+        type: Number,
+        default: 0
+    },
+    bowlingPoints: {
+        type: Number,
+        default: 0
+    },
+    fieldingPoints: {
+        type: Number,
+        default: 0
+    },
     // ── Fantasy Selection Status (auto-updated when team saves Playing XI) ──
     isInPlaying11: {
         type: Boolean,

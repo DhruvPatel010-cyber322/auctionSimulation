@@ -1,8 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { API_BASE_URL as API_URL } from '../config';
-import { Shield, Check, AlertCircle, X, User, Plane, AlertTriangle, Lock, Edit2, ChevronDown, Users } from 'lucide-react';
+import { Shield, Check, AlertCircle, X, User, Plane, AlertTriangle, Lock, Edit2, ChevronDown, Users, Star } from 'lucide-react';
 import { cn } from '../lib/utils';
+
+const POINT_FILTERS = [
+    { key: 'total',    label: 'Total Points',    color: 'text-indigo-600',  bg: 'bg-indigo-50',  border: 'border-indigo-200' },
+    { key: 'batting',  label: 'Batting Points',  color: 'text-green-600',   bg: 'bg-green-50',   border: 'border-green-200'  },
+    { key: 'bowling',  label: 'Bowling Points',  color: 'text-orange-600',  bg: 'bg-orange-50',  border: 'border-orange-200' },
+    { key: 'fielding', label: 'Fielding Points', color: 'text-purple-600',  bg: 'bg-purple-50',  border: 'border-purple-200' },
+];
+
+const getPlayerPoints = (player, filterKey) => {
+    if (!player) return 0;
+    switch (filterKey) {
+        case 'batting':  return player.battingPoints  ?? 0;
+        case 'bowling':  return player.bowlingPoints  ?? 0;
+        case 'fielding': return player.fieldingPoints ?? 0;
+        default:         return player.points         ?? 0;
+    }
+};
 
 const getBattingGroupLabel = (groups) => {
     if (!Array.isArray(groups)) return "Any";
@@ -48,6 +65,9 @@ const SelectPlayingXI = () => {
     const [myTeamCode, setMyTeamCode] = useState(null);
     const [selectedTeam, setSelectedTeam] = useState(null); // The team code we are viewing
     const [allTeams, setAllTeams] = useState([]); // For Dropdown
+    const [pointsFilter, setPointsFilter] = useState('total'); // 'total' | 'batting' | 'bowling' | 'fielding'
+    const [showPointsDropdown, setShowPointsDropdown] = useState(false);
+    const activeFilter = POINT_FILTERS.find(f => f.key === pointsFilter);
 
     // Data State
     const [squad, setSquad] = useState([]);
@@ -517,6 +537,33 @@ const SelectPlayingXI = () => {
             {/* --- VIEW MODE --- */}
             {!isEditMode && (
                 <div className="space-y-8 animate-in fade-in">
+
+                    {/* ── Team Points Summary Bar ── */}
+                    {squad.length > 0 && (
+                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-wrap gap-3 items-center">
+                            <span className="text-xs font-black uppercase tracking-widest text-gray-400 mr-1">Team Points</span>
+                            {POINT_FILTERS.map(f => {
+                                const val = squad.reduce((sum, p) => sum + (getPlayerPoints(p, f.key)), 0);
+                                const isActive = pointsFilter === f.key;
+                                return (
+                                    <button
+                                        key={f.key}
+                                        onClick={() => setPointsFilter(f.key)}
+                                        className={cn(
+                                            'flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-sm font-bold transition-all',
+                                            isActive
+                                                ? `${f.bg} ${f.border} ${f.color} shadow-sm scale-105`
+                                                : 'bg-gray-50 border-gray-100 text-gray-500 hover:bg-gray-100'
+                                        )}
+                                    >
+                                        <span>{val}</span>
+                                        <span className="text-xs font-semibold opacity-70">{f.label.replace(' Points', '')}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
+
                     {playing11.length === 0 ? (
                         <div className="text-center py-12 bg-gray-50 rounded-3xl border border-dashed border-gray-300">
                             <Shield size={48} className="mx-auto text-gray-300 mb-4" />
@@ -530,16 +577,54 @@ const SelectPlayingXI = () => {
                         </div>
                     ) : (
                         <div>
-                            {/* Playing XI Grid */}
-                            <div className="flex items-center gap-2 mb-4">
-                                <Shield className="text-green-600" />
-                                <h2 className="text-xl font-bold text-gray-800">Final 11</h2>
+                            {/* Playing XI Header with Points Dropdown */}
+                            <div className="flex items-center justify-between gap-2 mb-4">
+                                <div className="flex items-center gap-2">
+                                    <Shield className="text-green-600" />
+                                    <h2 className="text-xl font-bold text-gray-800">Final 11</h2>
+                                </div>
+
+                                {/* Points Filter Dropdown */}
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setShowPointsDropdown(v => !v)}
+                                        className={cn(
+                                            "flex items-center gap-2 px-3 py-1.5 rounded-xl border text-sm font-bold transition-colors",
+                                            activeFilter.bg, activeFilter.border, activeFilter.color
+                                        )}
+                                    >
+                                        <Star size={13} />
+                                        {activeFilter.label}
+                                        <ChevronDown size={13} className={cn("transition-transform", showPointsDropdown && "rotate-180")} />
+                                    </button>
+                                    {showPointsDropdown && (
+                                        <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-2xl shadow-xl z-30 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+                                            {POINT_FILTERS.map(f => (
+                                                <button
+                                                    key={f.key}
+                                                    onClick={() => { setPointsFilter(f.key); setShowPointsDropdown(false); }}
+                                                    className={cn(
+                                                        "w-full text-left px-4 py-2.5 text-sm font-semibold transition-colors",
+                                                        pointsFilter === f.key ? `${f.bg} ${f.color}` : "hover:bg-gray-50 text-gray-700"
+                                                    )}
+                                                >
+                                                    {f.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
+
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                                 {playing11.map((p, i) => (
                                     <div key={p._id} className="bg-white p-4 rounded-xl border border-blue-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
                                         <div className="absolute top-0 left-0 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-br-lg">
                                             #{i + 1}
+                                        </div>
+                                        {/* Points badge */}
+                                        <div className={cn("absolute top-0 right-0 text-xs font-black px-3 py-1 rounded-bl-lg", activeFilter.bg, activeFilter.color)}>
+                                            {getPlayerPoints(p, pointsFilter)} pts
                                         </div>
                                         <div className="flex items-center gap-4 mt-2">
                                             <div className="w-12 h-12 rounded-full bg-gray-100 border border-gray-200 overflow-hidden">
@@ -574,10 +659,13 @@ const SelectPlayingXI = () => {
                                         <div className="w-10 h-10 rounded-full bg-white border border-gray-200 overflow-hidden shrink-0">
                                             {p.image ? <img src={p.image} className="w-full h-full object-cover" /> : <User className="w-full h-full p-2 text-gray-300" />}
                                         </div>
-                                        <div>
-                                            <h4 className="font-bold text-sm text-gray-700">{p.name}</h4>
+                                        <div className="flex-1 min-w-0">
+                                            <h4 className="font-bold text-sm text-gray-700 truncate">{p.name}</h4>
                                             <p className="text-[10px] font-bold text-gray-400 uppercase">{p.role}</p>
                                         </div>
+                                        <span className={cn("text-xs font-black px-2 py-0.5 rounded-lg shrink-0", activeFilter.bg, activeFilter.color)}>
+                                            {getPlayerPoints(p, pointsFilter)} pts
+                                        </span>
                                     </div>
                                 ))}
                             </div>

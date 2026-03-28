@@ -166,8 +166,8 @@ const RulesPage = () => {
                             <li className="flex justify-between"><span>Run-out (Direct)</span><span className="font-bold text-gray-900">+12</span></li>
                             <li className="flex justify-between"><span>Run-out (Indirect)</span><span className="font-bold text-gray-900">+6</span></li>
                             <li className="flex justify-between mt-4 border-t border-gray-50 pt-3"><span>Playing 11 Bonus</span><span className="font-bold text-blue-600">+4</span></li>
-                            <li className="flex justify-between"><span>Captain Bonus</span><span className="font-bold text-purple-600">1.5x</span></li>
-                            <li className="flex justify-between"><span>Vice-Captain Bonus</span><span className="font-bold text-purple-600">1.25x</span></li>
+                            <li className="flex justify-between"><span>Captain Bonus</span><span className="font-bold text-purple-600">2x</span></li>
+                            <li className="flex justify-between"><span>Vice-Captain Bonus</span><span className="font-bold text-purple-600">1.5x</span></li>
                         </ul>
                     </div>
 

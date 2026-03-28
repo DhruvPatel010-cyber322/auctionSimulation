@@ -8,15 +8,19 @@ export const getPointsTable = async (req, res) => {
         const teams = await Team.find({}).populate('playing11');
 
         const pointsTable = teams.map(team => {
-            const totalPoints = team.playing11.reduce((sum, player) => {
-                return sum + (player.points || 0);
-            }, 0);
+            const totalPoints    = team.playing11.reduce((sum, p) => sum + (p.points         || 0), 0);
+            const battingPoints  = team.playing11.reduce((sum, p) => sum + (p.battingPoints  || 0), 0);
+            const bowlingPoints  = team.playing11.reduce((sum, p) => sum + (p.bowlingPoints  || 0), 0);
+            const fieldingPoints = team.playing11.reduce((sum, p) => sum + (p.fieldingPoints || 0), 0);
 
             return {
-                id: team.code, // Use code as ID for frontend consistency
+                id: team.code,
                 name: team.name,
                 logo: team.logo,
-                totalPoints: totalPoints,
+                totalPoints,
+                battingPoints,
+                bowlingPoints,
+                fieldingPoints,
                 playing11Count: team.playing11.length
             };
         });
