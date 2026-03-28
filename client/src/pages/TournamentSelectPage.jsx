@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trophy, Lock, ArrowRight, Activity, Plus, Trash2 } from 'lucide-react';
+import { Trophy, Lock, ArrowRight, Activity, Plus, Trash2, ArrowLeft } from 'lucide-react';
 
 import { API_BASE_URL as API_URL } from '../config';
 
@@ -14,10 +14,6 @@ const TournamentSelectPage = () => {
     const [accessCode, setAccessCode] = useState('');
     const [error, setError] = useState('');
     const [userRole, setUserRole] = useState(null);
-
-    const [username, setUsername] = useState(null);
-    const [showUsernameModal, setShowUsernameModal] = useState(false);
-    const [newUsername, setNewUsername] = useState('');
 
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [createName, setCreateName] = useState('');
@@ -51,9 +47,6 @@ const TournamentSelectPage = () => {
                     const userData = await userRes.json();
                     if (userData.user) {
                         setUserRole(userData.user.role || 'USER'); // Set role regardless of username
-                        if (userData.user.username) {
-                            setUsername(userData.user.username);
-                        }
                     }
                 }
 
@@ -69,11 +62,6 @@ const TournamentSelectPage = () => {
     const handleJoin = async (e, bypassCode = false, targetTournament = null) => {
         if (e) e.preventDefault();
         setError('');
-
-        if (!username) {
-            setShowUsernameModal(true);
-            return;
-        }
 
         const tourney = targetTournament || selectedTournament;
         if (!tourney) return;
@@ -195,6 +183,15 @@ const TournamentSelectPage = () => {
                         </div>
                     ) : (
                         <>
+                            <div className="flex items-center justify-between mb-2">
+                                <button 
+                                    onClick={() => navigate('/main-menu')}
+                                    className="flex items-center gap-1 text-xs font-bold text-gray-400 hover:text-gray-600 transition"
+                                >
+                                    <ArrowLeft size={14} /> Main Menu
+                                </button>
+                                <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded">Auction Mode</span>
+                            </div>
                             <h1 className="text-2xl font-black text-gray-900 mb-2">Active Tournaments</h1>
                             <p className="text-gray-500">Select a tournament to participate in.</p>
                         </>
@@ -268,67 +265,6 @@ const TournamentSelectPage = () => {
                     </div>
                 )}
             </div>
-            {
-                showUsernameModal && (
-                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                        <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl animate-in zoom-in-95">
-                            <h2 className="text-2xl font-black text-gray-900 mb-2">Create Username</h2>
-                            <p className="text-gray-500 mb-6">You need a unique username to join tournaments.</p>
-
-                            {error && <div className="p-3 mb-4 bg-red-50 text-red-600 font-bold text-sm rounded-lg">{error}</div>}
-
-                            <input
-                                type="text"
-                                value={newUsername}
-                                onChange={(e) => setNewUsername(e.target.value)}
-                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl mb-4 focus:ring-2 focus:ring-blue-500 outline-none font-bold text-black"
-                                placeholder="e.g. MasterStrategist"
-                                autoFocus
-                            />
-
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={() => setShowUsernameModal(false)}
-                                    className="flex-1 py-3 text-gray-500 font-bold hover:bg-gray-50 rounded-xl transition"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={async () => {
-                                        if (!newUsername.trim()) return;
-                                        const token = (localStorage.getItem('firebase_token') || localStorage.getItem('token'));
-                                        try {
-                                            const res = await fetch(`${API_URL}/api/v2/auth/set-username`, {
-                                                method: 'POST',
-                                                headers: {
-                                                    'Authorization': `Bearer ${token}`,
-                                                    'Content-Type': 'application/json'
-                                                },
-                                                body: JSON.stringify({ username: newUsername })
-                                            });
-
-                                            const data = await res.json();
-                                            if (res.ok) {
-                                                setUsername(data.username);
-                                                setShowUsernameModal(false);
-                                                // Optional: Auto-submit the join form? 
-                                                // User has to click "Verify & Enter" again, which is fine.
-                                            } else {
-                                                setError(data.message || 'Failed to set username');
-                                            }
-                                        } catch (err) {
-                                            setError('Network error');
-                                        }
-                                    }}
-                                    className="flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition"
-                                >
-                                    Save & Continue
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )
-            }
             {
                 showCreateModal && (
                     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">

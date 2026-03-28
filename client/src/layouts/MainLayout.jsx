@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, NavLink, Link } from 'react-router-dom';
-import { LayoutDashboard, Gavel, Users, UserCircle, Menu, X, BookOpen, LogOut, Wallet, Shield, Trophy, Check, ArrowLeftRight } from 'lucide-react';
+import { LayoutDashboard, Gavel, Users, UserCircle, Menu, X, BookOpen, LogOut, Wallet, Shield, Trophy, Check, ArrowLeftRight, ArrowLeft } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
@@ -83,6 +83,7 @@ const MainLayout = () => {
 
     // Navigation Items
     const navItems = [
+        { name: 'Main Menu', path: '/main-menu', icon: ArrowLeft },
         { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
         { name: 'Auction', path: '/auction', icon: Gavel },
         { name: 'Players', path: '/players', icon: Users },
