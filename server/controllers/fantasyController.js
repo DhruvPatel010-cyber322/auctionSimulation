@@ -275,15 +275,6 @@ export const getFantasyLeaderboard = async (req, res) => {
 
         const normalizedMatch = normalizeFantasyMatch(match);
 
-        // Block leaderboard access when match is still upcoming — teams are private until match starts
-        if (normalizedMatch.status === 'Upcoming') {
-            return res.status(403).json({
-                message: 'Leaderboard is locked until the match begins. Team details are private before the toss.',
-                status: 'Upcoming',
-                match: normalizedMatch
-            });
-        }
-
         // Fetch without sort first — we'll sort after live-recalculating
         const teams = await FantasyTeam.find({ matchId: match._id })
             .populate('players', 'name role orgIPLTeam26 basePrice value points image')
