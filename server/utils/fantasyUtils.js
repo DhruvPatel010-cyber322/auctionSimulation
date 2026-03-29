@@ -94,7 +94,9 @@ export const computeMatchStatus = (dateStr, timeStr) => {
 export const normalizeFantasyMatch = (match) => {
     const dateStr = match.date || normalizeMatchDateTime(match);
     const timeStr = match.time || match.MatchTime || null;
-    const status = computeMatchStatus(dateStr, timeStr);
+    
+    // Prefer the database status if it exists and is populated, otherwise fallback to local calculation
+    const status = match.status || match.MatchStatus || computeMatchStatus(dateStr, timeStr);
 
     return {
         _id: match._id.toString(),
