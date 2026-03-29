@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from '../firebase';
 import { Mail, Lock, ArrowRight, LogIn } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 
 const EmailLoginPage = () => {
-    const navigate = useNavigate();
     const [identifier, setIdentifier] = useState(''); // username or email
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -26,7 +24,10 @@ const EmailLoginPage = () => {
                 // Unify session tokens: local and google both now securely rely on backend JWT token
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('firebase_token', data.token); // Keep for legacy component compatibility
-                navigate('/main-menu');
+                localStorage.setItem('user', JSON.stringify(data.user)); // Store user for AuthContext
+                
+                // Hard redirect to force AuthContext to re-mount and pick up the new tokens and user
+                window.location.href = '/main-menu';
             } else {
                 setError(data.message || 'Google Authentication failed on server.');
             }
@@ -53,9 +54,10 @@ const EmailLoginPage = () => {
                 // Ensure BOTH keys hold our native JWT token to prevent logout desyncs
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('firebase_token', data.token);
-                // Store user in localStorage so AuthContext picks it up on next load
-                // (TournamentSelectPage.jsx can also work from the API token)
-                navigate('/main-menu');
+                localStorage.setItem('user', JSON.stringify(data.user)); // Store user for AuthContext
+                
+                // Hard redirect to force AuthContext to re-mount and pick up the new tokens and user
+                window.location.href = '/main-menu';
             } else {
                 setError(data.message || 'Invalid username or password.');
             }
