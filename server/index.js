@@ -43,11 +43,15 @@ import scheduleRoutes from './routes/scheduleRoutes.js';
 import { connectDream11DB } from './config/dream11Db.js';
 import { bootstrapDream11Data } from './services/dream11Bootstrap.js';
 import fantasyRoutes from './routes/fantasyRoutes.js';
+import { startLivePointsSync } from './services/livePointsSync.js';
 dotenv.config();
 
 // Connect to Database
 connectDB();
 connectDream11DB().then(bootstrapDream11Data).catch(console.error);
+
+// Start live fantasy points sync (polls external API every 5 min during today's match)
+startLivePointsSync().catch(err => console.error('[LiveSync] Startup error:', err.message));
 
 const app = express();
 const httpServer = createServer(app);

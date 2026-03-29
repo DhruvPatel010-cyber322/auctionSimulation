@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Shield, Sparkles, Trophy } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Activity, Shield, Sparkles, Trophy } from 'lucide-react';
 import toast from 'react-hot-toast';
 import FantasyMatchCard from '../components/fantasy/FantasyMatchCard';
 import { FantasyMatchCardSkeleton } from '../components/fantasy/FantasySkeletons';
@@ -65,6 +65,16 @@ const FantasyMatchesPage = () => {
                     </div>
 
                     <div className="flex gap-3 flex-wrap lg:flex-col lg:max-w-xs">
+                        <Link
+                            to="/fantasy/live-points"
+                            className="flex items-center gap-2 rounded-2xl border border-white/30 bg-white/15 p-4 backdrop-blur-sm hover:bg-white/25 transition-colors"
+                        >
+                            <Activity className="h-5 w-5 text-white" />
+                            <div>
+                                <p className="text-sm font-black leading-tight">Live Points</p>
+                                <p className="mt-0.5 text-xs font-medium text-red-50/90 leading-snug">Today's match — real-time leaderboard</p>
+                            </div>
+                        </Link>
                         <div className="rounded-2xl border border-white/20 bg-black/15 p-4 backdrop-blur-sm">
                             <Shield className="h-5 w-5 text-white" />
                             <p className="mt-2 text-sm font-black leading-tight">Smart role balance</p>

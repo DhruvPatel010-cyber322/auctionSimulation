@@ -7,7 +7,8 @@ import {
     getMyFantasyTeams,
     getAllUserFantasyTeams,
     recalculateFantasyPoints,
-    saveFantasyTeam
+    saveFantasyTeam,
+    getLiveMatchStatus
 } from '../controllers/fantasyController.js';
 
 const router = express.Router();
@@ -21,6 +22,7 @@ const adminOnly = (req, res, next) => {
 };
 
 router.get('/matches', fantasyAuth, getFantasyMatches);
+router.get('/live-status', getLiveMatchStatus);  // public — no auth needed
 router.get('/players/:matchId', fantasyAuth, getFantasyPlayersForMatch);
 router.post('/team', fantasyAuth, saveFantasyTeam);
 router.get('/my-teams', fantasyAuth, getAllUserFantasyTeams);

@@ -1,6 +1,7 @@
 import getFantasyMatchModel from '../models/FantasyMatch.js';
 import getFantasyPlayerModel from '../models/FantasyPlayer.js';
 import getFantasyTeamModel from '../models/FantasyTeam.js';
+import { getSyncState } from '../services/livePointsSync.js';
 import {
     calculateFantasyTeamPoints,
     findFantasyMatchByIdentifier,
@@ -375,5 +376,21 @@ export const recalculateFantasyPoints = async (req, res) => {
     } catch (error) {
         console.error('Fantasy points recalculation failed:', error);
         res.status(500).json({ message: 'Failed to recalculate fantasy points.' });
+    }
+};
+
+/**
+ * GET /api/fantasy/live-status
+ * Returns whether the external points sync is currently active,
+ * along with today's match info. Used by the frontend to decide
+ * whether to display a LIVE badge and how frequently to refresh.
+ */
+export const getLiveMatchStatus = (req, res) => {
+    try {
+        const syncState = getSyncState();
+        res.json(syncState);
+    } catch (error) {
+        console.error('Live status fetch failed:', error);
+        res.status(500).json({ message: 'Failed to fetch live status.' });
     }
 };

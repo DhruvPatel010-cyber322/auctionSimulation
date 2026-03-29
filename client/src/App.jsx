@@ -32,6 +32,7 @@ import TeamBuilderPage from './pages/TeamBuilderPage';
 import MyFantasyTeamsPage from './pages/MyFantasyTeamsPage';
 import LeaderboardPage from './pages/LeaderboardPage';
 import AllMyFantasyTeamsPage from './pages/AllMyFantasyTeamsPage';
+import LivePointsPage from './pages/LivePointsPage';
 
 function App() {
   return (
@@ -69,6 +70,7 @@ function App() {
                   <Route index element={<FantasyMatchesPage />} />
                   <Route path="match-centre" element={<MatchCentrePage />} />
                   <Route path="my-teams" element={<AllMyFantasyTeamsPage />} />
+                  <Route path="live-points" element={<LivePointsPage />} />
                   <Route path=":matchId/team" element={<TeamBuilderPage />} />
                   <Route path=":matchId/my-teams" element={<MyFantasyTeamsPage />} />
                   <Route path=":matchId/leaderboard" element={<LeaderboardPage />} />
