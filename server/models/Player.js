@@ -11,6 +11,13 @@ const playerSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    playerId: {
+        type: String,
+        default: null,
+        unique: true,
+        index: true,
+        sparse: true
+    },
     country: {
         type: String,
         required: true
