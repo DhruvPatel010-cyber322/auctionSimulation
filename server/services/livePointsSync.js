@@ -18,7 +18,7 @@
 import Player from '../models/Player.js';
 
 const EXTERNAL_API_BASE = 'https://a-bhavy-bot-bbheroku-5f1b58e25c41.herokuapp.com';
-const POLL_INTERVAL_MS  = 5 * 60 * 1000; // 5 minutes
+const POLL_INTERVAL_MS  = 2 * 60 * 1000; // 2 minutes
 const MATCH_DURATION_MS = (4 * 60 + 30) * 60 * 1000; // 4h 30min
 
 // ── In-memory state (exported for /live-status endpoint) ─────────────────────

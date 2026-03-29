@@ -37,20 +37,18 @@ export const recalculateFantasyPoints = async (matchId) => {
     return response.data;
 };
 
-// ── Live Points (direct to external API — no auth needed) ─────────────────────
+// ── Live Points (proxied via backend to avoid CORS) ─────────────────────────
 
-/** Fetch today's match info from external fantasy API */
+/** Fetch today's match info from external fantasy API proxy */
 export const fetchLiveMatch = async () => {
-    const res = await fetch(`${EXTERNAL_API}/match`);
-    if (!res.ok) throw new Error(`/match responded ${res.status}`);
-    return res.json();
+    const response = await api.get('/api/fantasy/external/match');
+    return response.data;
 };
 
-/** Fetch the live points leaderboard for a specific match_id */
+/** Fetch the live points leaderboard for a specific match_id via proxy */
 export const fetchLivePoints = async (matchId) => {
-    const res = await fetch(`${EXTERNAL_API}/points?match_id=${matchId}`);
-    if (!res.ok) throw new Error(`/points responded ${res.status}`);
-    return res.json();
+    const response = await api.get(`/api/fantasy/external/points/${matchId}`);
+    return response.data;
 };
 
 /** Ask our own backend if a live sync is running right now */

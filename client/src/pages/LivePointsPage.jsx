@@ -15,7 +15,7 @@ import {
 import { fetchLiveMatch, fetchLivePoints } from '../services/fantasyApi';
 
 const EXTERNAL_API = 'https://a-bhavy-bot-bbheroku-5f1b58e25c41.herokuapp.com';
-const POLL_MS = 5 * 60 * 1000; // 5 minutes (matches backend)
+const POLL_MS = 2 * 60 * 1000; // 2 minutes (matches backend)
 const MATCH_DURATION_MS = (4 * 60 + 30) * 60 * 1000;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -412,7 +412,7 @@ const LivePointsPage = () => {
                     {/* Auto-refresh note */}
                     {phase === 'live' && (
                         <p className="pb-2 text-center text-xs font-medium text-gray-400">
-                            ↻ Auto-refreshes every 5 minutes during the match
+                            ↻ Auto-refreshes every 2 minutes during the match
                         </p>
                     )}
                 </>

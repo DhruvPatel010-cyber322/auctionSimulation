@@ -394,3 +394,34 @@ export const getLiveMatchStatus = (req, res) => {
         res.status(500).json({ message: 'Failed to fetch live status.' });
     }
 };
+
+const EXTERNAL_API_BASE = 'https://a-bhavy-bot-bbheroku-5f1b58e25c41.herokuapp.com';
+
+export const getExternalLiveMatch = async (req, res) => {
+    try {
+        const response = await fetch(`${EXTERNAL_API_BASE}/match`);
+        if (!response.ok) {
+            return res.status(response.status).json({ message: `External API responded with ${response.status}` });
+        }
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        console.error('Proxy live match failed:', error);
+        res.status(500).json({ message: 'Failed to fetch external live match data.' });
+    }
+};
+
+export const getExternalLivePoints = async (req, res) => {
+    try {
+        const matchId = req.params.matchId;
+        const response = await fetch(`${EXTERNAL_API_BASE}/points?match_id=${matchId}`);
+        if (!response.ok) {
+            return res.status(response.status).json({ message: `External API responded with ${response.status}` });
+        }
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        console.error('Proxy live points failed:', error);
+        res.status(500).json({ message: 'Failed to fetch external live points data.' });
+    }
+};
