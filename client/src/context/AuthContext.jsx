@@ -13,61 +13,40 @@ export const AuthProvider = ({ children }) => {
     const [loadingMessage, setLoadingMessage] = useState('Loading Auth...');
 
     useEffect(() => {
-        let isMounted = true;
-
-        const validateSession = async () => {
+        const validateSession = () => {
             const storedToken = localStorage.getItem('token');
             const storedUser = localStorage.getItem('user');
 
             if (storedToken && storedUser) {
-                let retryCount = 0;
-                let success = false;
+                try {
+                    // Decode the JWT client-side to check expiry — NO server round-trip needed.
+                    // The Axios global interceptor already handles server-side 401s (forceLogout).
+                    const payload = JSON.parse(atob(storedToken.split('.')[1]));
+                    const isExpired = payload.exp && Date.now() / 1000 > payload.exp;
 
-                while (!success && isMounted) {
-                    try {
-                        if (retryCount > 0) {
-                            setLoadingMessage('Waking up server... Connecting to Database');
-                        }
-
-                        // Probe a protected route to see if token is still valid (doesn't require a team code)
-                        await api.getProfileStatus(); 
-
-                        // If successful, restore user
-                        success = true;
-                        if (isMounted) {
-                            setUser(JSON.parse(storedUser));
-                        }
-                    } catch (error) {
-                        // If 401 or token invalid, clear everything
-                        if (error.response?.status === 401 || error.response?.status === 403) {
-                            if (isMounted) {
-                                localStorage.removeItem('token');
-                                localStorage.removeItem('user');
-                                setUser(null);
-                                setToken(null);
-                            }
-                            break; // 401 is fatal, stop retrying
-                        } else {
-                            // For other errors (network, 502, 504), server might be asleep
-                            console.error(`Session validation network error. Retrying... (${retryCount + 1})`, error);
-                            retryCount++;
-                            // Wait 3 seconds before retrying to give server time to wake up
-                            await new Promise(res => setTimeout(res, 3000));
-                        }
+                    if (isExpired) {
+                        // Token is expired — clear session and let user log in again
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('firebase_token');
+                        localStorage.removeItem('user');
+                    } else {
+                        // Token is valid — restore user immediately, no server call needed
+                        setUser(JSON.parse(storedUser));
                     }
+                } catch (e) {
+                    // Malformed token — clear it
+                    console.error('Failed to parse token:', e);
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('firebase_token');
+                    localStorage.removeItem('user');
                 }
             }
-            if (isMounted) {
-                setLoading(false);
-            }
+            setLoading(false);
         };
 
         validateSession();
-
-        return () => {
-            isMounted = false;
-        };
     }, []);
+
 
     const login = async (teamCode, password, firebaseToken) => {
         try {

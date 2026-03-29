@@ -41,7 +41,7 @@ router.post('/login', firebaseAuth, (req, res) => {
     const token = jwt.sign({
         userId: req.user._id,
         role: req.user.role
-    }, process.env.JWT_SECRET, { expiresIn: '5d' });
+    }, process.env.JWT_SECRET, { expiresIn: '24h' });
 
     res.json({
         success: true,
@@ -161,7 +161,7 @@ router.post('/login-local', async (req, res) => {
         const token = jwt.sign({
             userId: user._id,
             role: user.role
-        }, process.env.JWT_SECRET, { expiresIn: '5d' });
+        }, process.env.JWT_SECRET, { expiresIn: '24h' });
 
         res.json({
             success: true,
@@ -346,7 +346,7 @@ router.post('/tournaments/:id/join', firebaseAuth, async (req, res) => {
                     tournamentId: tournament._id,
                     userId: userId,
                     sessionId: sessionId
-                }, process.env.JWT_SECRET, { expiresIn: '5d' });
+                }, process.env.JWT_SECRET, { expiresIn: '24h' });
 
                 const teamConfig = TEAMS.find(t => t.id === dbTeam.code.toLowerCase()) || {};
 
@@ -625,7 +625,7 @@ router.post('/tournaments/:id/select-team', firebaseAuth, async (req, res) => {
             tournamentId: tournament._id, // Scope token to tournament
             userId: userId,
             sessionId: sessionId // EMBED SESSION ID
-        }, process.env.JWT_SECRET, { expiresIn: '5d' });
+        }, process.env.JWT_SECRET, { expiresIn: '24h' });
 
         // 4. Return Data expected by Frontend
         // We find static config for colors etc.
@@ -723,7 +723,7 @@ router.post('/tournaments/:id/watch', firebaseAuth, async (req, res) => {
             tournamentId: tournament._id,
             userId: userId,
             sessionId: sessionId
-        }, process.env.JWT_SECRET, { expiresIn: '5d' });
+        }, process.env.JWT_SECRET, { expiresIn: '24h' });
 
         res.json({
             success: true,
@@ -758,7 +758,7 @@ router.post('/admin/login', firebaseAuth, async (req, res) => {
             role: 'admin',
             sessionId,
             userId: req.user._id
-        }, process.env.JWT_SECRET, { expiresIn: '5d' });
+        }, process.env.JWT_SECRET, { expiresIn: '24h' });
 
         res.json({
             success: true,
