@@ -29,8 +29,8 @@ export const AuthProvider = ({ children }) => {
                             setLoadingMessage('Waking up server... Connecting to Database');
                         }
 
-                        // Probe a protected route to see if token is still valid
-                        await api.getAuctionStatus(); 
+                        // Probe a protected route to see if token is still valid (doesn't require a team code)
+                        await api.getProfileStatus(); 
 
                         // If successful, restore user
                         success = true;

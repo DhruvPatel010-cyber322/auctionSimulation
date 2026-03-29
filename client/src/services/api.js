@@ -148,6 +148,11 @@ export const respondTradeProposal = async (proposalId, status) => {
     return response.data;
 };
 
+export const getProfileStatus = async () => {
+    const response = await api.get('/api/v2/auth/profile-status');
+    return response.data;
+};
+
 // --- SCHEDULE API ---
 export const getSchedule = async () => {
     const response = await api.get('/api/schedule');
