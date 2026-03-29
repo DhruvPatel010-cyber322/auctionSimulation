@@ -42,7 +42,13 @@ const LeaderboardPage = () => {
                 setLeaderboard(data.leaderboard || []);
             } catch (err) {
                 console.error('Failed to load fantasy leaderboard:', err);
-                setError(err.response?.data?.message || 'Failed to load the fantasy leaderboard.');
+                // 403 = match is upcoming, leaderboard is intentionally locked
+                if (err.response?.status === 403) {
+                    setMatch(err.response.data?.match || null);
+                    setError('__upcoming_locked__');
+                } else {
+                    setError(err.response?.data?.message || 'Failed to load the fantasy leaderboard.');
+                }
             } finally {
                 setLoading(false);
             }
@@ -121,13 +127,30 @@ const LeaderboardPage = () => {
                 </div>
             </section>
 
-            {error && (
+            {error === '__upcoming_locked__' && (
+                <div className="rounded-2xl border-2 border-dashed border-amber-300 bg-amber-50 px-6 py-12 text-center">
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                    </div>
+                    <h2 className="text-xl font-black text-amber-800">Leaderboard Locked</h2>
+                    <p className="mt-2 font-medium text-amber-700">
+                        Team details are private until the match begins.
+                    </p>
+                    <p className="mt-1 text-sm text-amber-600">
+                        Once the match goes <strong>Live</strong>, all team selections will be revealed here.
+                    </p>
+                </div>
+            )}
+
+            {error && error !== '__upcoming_locked__' && (
                 <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 font-semibold text-red-700">
                     {error}
                 </div>
             )}
 
-            {!loading && leaderboard.length === 0 && !error && (
+            {!loading && !error && leaderboard.length === 0 && (
                 <div className="rounded-[32px] border border-dashed border-rose-200 bg-white px-8 py-16 text-center">
                     <h2 className="text-2xl font-black text-gray-900">No fantasy entries yet</h2>
                     <p className="mt-2 text-gray-500">Once users save teams for this match, rankings will appear here.</p>

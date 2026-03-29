@@ -209,14 +209,8 @@ export const getMyFantasyTeams = async (req, res) => {
             const playerMap = new Map(
                 (team.players || []).map((p) => [p._id.toString(), p])
             );
-            const freshPoints = calculateFantasyTeamPoints(
-                {
-                    players: (team.players || []).map((p) => p._id),
-                    captain: team.captain?._id,
-                    viceCaptain: team.viceCaptain?._id
-                },
-                playerMap
-            );
+            // Pass team directly — calculateFantasyTeamPoints handles populated objects via extractId
+            const freshPoints = calculateFantasyTeamPoints(team, playerMap);
             if (freshPoints !== team.totalPoints) {
                 team.totalPoints = freshPoints;
                 bulkUpdates.push({
@@ -279,6 +273,17 @@ export const getFantasyLeaderboard = async (req, res) => {
             return res.status(404).json({ message: 'Match not found.' });
         }
 
+        const normalizedMatch = normalizeFantasyMatch(match);
+
+        // Block leaderboard access when match is still upcoming — teams are private until match starts
+        if (normalizedMatch.status === 'Upcoming') {
+            return res.status(403).json({
+                message: 'Leaderboard is locked until the match begins. Team details are private before the toss.',
+                status: 'Upcoming',
+                match: normalizedMatch
+            });
+        }
+
         // Fetch without sort first — we'll sort after live-recalculating
         const teams = await FantasyTeam.find({ matchId: match._id })
             .populate('players', 'name role orgIPLTeam26 basePrice value points image')
@@ -292,14 +297,8 @@ export const getFantasyLeaderboard = async (req, res) => {
             const playerMap = new Map(
                 (team.players || []).map((p) => [p._id.toString(), p])
             );
-            const freshPoints = calculateFantasyTeamPoints(
-                {
-                    players: (team.players || []).map((p) => p._id),
-                    captain: team.captain?._id,
-                    viceCaptain: team.viceCaptain?._id
-                },
-                playerMap
-            );
+            // Pass team directly — calculateFantasyTeamPoints handles populated objects via extractId
+            const freshPoints = calculateFantasyTeamPoints(team, playerMap);
             if (freshPoints !== team.totalPoints) {
                 team.totalPoints = freshPoints;
                 bulkUpdates.push({
@@ -329,7 +328,7 @@ export const getFantasyLeaderboard = async (req, res) => {
         }));
 
         res.json({
-            match: normalizeFantasyMatch(match),
+            match: normalizedMatch,
             leaderboard
         });
     } catch (error) {

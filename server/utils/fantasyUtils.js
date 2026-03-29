@@ -56,18 +56,59 @@ export const normalizeMatchDateTime = (match) => {
     return match?.MatchDate || null;
 };
 
-export const normalizeFantasyMatch = (match) => ({
-    _id: match._id.toString(),
-    matchId: match.legacyMatchId || match.MatchID || match._id.toString(),
-    matchName: match.matchName || match.MatchName || `${normalizeTeamCode(match.HomeTeamName || match.team1)} vs ${normalizeTeamCode(match.AwayTeamName || match.team2)}`,
-    team1: normalizeTeamCode(match.HomeTeamName || match.team1),
-    team2: normalizeTeamCode(match.AwayTeamName || match.team2),
-    date: match.date || normalizeMatchDateTime(match),
-    time: match.time || match.MatchTime || null,
-    ground: match.ground || match.GroundName || null,
-    city: match.city || match.City || null,
-    status: match.status || match.MatchStatus || 'Upcoming'
-});
+/**
+ * Dynamically computes match status from match date+time vs current time.
+ * - Upcoming : before match start
+ * - Live     : match start → match start + 4h 30min
+ * - Completed: after match start + 4h 30min
+ */
+export const computeMatchStatus = (dateStr, timeStr) => {
+    if (!dateStr) return 'Upcoming';
+
+    try {
+        // Parse date. If the string already has a time component (ISO), use it directly.
+        // Otherwise combine dateStr + timeStr.
+        let matchStart;
+        if (timeStr) {
+            // dateStr may be 'YYYY-MM-DD' or a full ISO; normalise to date-only part.
+            const datePart = dateStr.split('T')[0];
+            matchStart = new Date(`${datePart}T${timeStr}`);
+        } else {
+            matchStart = new Date(dateStr);
+        }
+
+        if (isNaN(matchStart.getTime())) return 'Upcoming';
+
+        const now = new Date();
+        const LIVE_DURATION_MS = (4 * 60 + 30) * 60 * 1000; // 4h 30min
+        const matchEnd = new Date(matchStart.getTime() + LIVE_DURATION_MS);
+
+        if (now < matchStart) return 'Upcoming';
+        if (now <= matchEnd) return 'Live';
+        return 'Completed';
+    } catch {
+        return 'Upcoming';
+    }
+};
+
+export const normalizeFantasyMatch = (match) => {
+    const dateStr = match.date || normalizeMatchDateTime(match);
+    const timeStr = match.time || match.MatchTime || null;
+    const status = computeMatchStatus(dateStr, timeStr);
+
+    return {
+        _id: match._id.toString(),
+        matchId: match.legacyMatchId || match.MatchID || match._id.toString(),
+        matchName: match.matchName || match.MatchName || `${normalizeTeamCode(match.HomeTeamName || match.team1)} vs ${normalizeTeamCode(match.AwayTeamName || match.team2)}`,
+        team1: normalizeTeamCode(match.HomeTeamName || match.team1),
+        team2: normalizeTeamCode(match.AwayTeamName || match.team2),
+        date: dateStr,
+        time: timeStr,
+        ground: match.ground || match.GroundName || null,
+        city: match.city || match.City || null,
+        status
+    };
+};
 
 export const findFantasyMatchByIdentifier = async (matchIdentifier) => {
     const FantasyMatch = await getFantasyMatchModel();
@@ -222,23 +263,35 @@ export const validateFantasyTeamSelection = ({ players, captain, viceCaptain, te
     };
 };
 
+/**
+ * Safely extracts the string ID from either a raw ObjectId or a populated
+ * Mongoose document object { _id, name, ... }.
+ */
+const extractId = (ref) => {
+    if (!ref) return null;
+    // Populated object has _id property
+    if (typeof ref === 'object' && ref._id) return ref._id.toString();
+    return ref.toString();
+};
+
 export const calculateFantasyTeamPoints = (fantasyTeam, playerMap) => {
     let totalPoints = 0;
-    const captainId = fantasyTeam.captain?.toString();
-    const viceCaptainId = fantasyTeam.viceCaptain?.toString();
+    const captainId = extractId(fantasyTeam.captain);
+    const viceCaptainId = extractId(fantasyTeam.viceCaptain);
 
     fantasyTeam.players.forEach((playerId) => {
-        const key = playerId.toString();
+        // Each entry in team.players could also be a populated object after .populate()
+        const key = extractId(playerId);
         const player = playerMap.get(key);
         const basePoints = Number(player?.points || 0);
 
         if (key === captainId) {
-            totalPoints += basePoints * 2;
+            totalPoints += basePoints * 2;      // 2x for captain
             return;
         }
 
         if (key === viceCaptainId) {
-            totalPoints += basePoints * 1.5;
+            totalPoints += basePoints * 1.5;   // 1.5x for vice-captain
             return;
         }
 
