@@ -203,6 +203,34 @@ export const getMyFantasyTeams = async (req, res) => {
             .populate('viceCaptain', 'name')
             .sort({ createdAt: -1 });
 
+        // Live-recalculate totalPoints from current player.points (avoids stale stored value)
+        const bulkUpdates = [];
+        for (const team of teams) {
+            const playerMap = new Map(
+                (team.players || []).map((p) => [p._id.toString(), p])
+            );
+            const freshPoints = calculateFantasyTeamPoints(
+                {
+                    players: (team.players || []).map((p) => p._id),
+                    captain: team.captain?._id,
+                    viceCaptain: team.viceCaptain?._id
+                },
+                playerMap
+            );
+            if (freshPoints !== team.totalPoints) {
+                team.totalPoints = freshPoints;
+                bulkUpdates.push({
+                    updateOne: {
+                        filter: { _id: team._id },
+                        update: { $set: { totalPoints: freshPoints } }
+                    }
+                });
+            }
+        }
+        if (bulkUpdates.length > 0) {
+            await FantasyTeam.bulkWrite(bulkUpdates);
+        }
+
         res.json({
             match: normalizeFantasyMatch(match),
             teams: teams.map((team) => formatFantasyTeam(team))
@@ -251,12 +279,43 @@ export const getFantasyLeaderboard = async (req, res) => {
             return res.status(404).json({ message: 'Match not found.' });
         }
 
+        // Fetch without sort first — we'll sort after live-recalculating
         const teams = await FantasyTeam.find({ matchId: match._id })
             .populate('players', 'name role orgIPLTeam26 basePrice value points image')
             .populate('captain', 'name')
             .populate('viceCaptain', 'name')
-            .populate('userId', 'username name email')
-            .sort({ totalPoints: -1, updatedAt: 1 });
+            .populate('userId', 'username name email');
+
+        // Live-recalculate totalPoints from current player.points
+        const bulkUpdates = [];
+        for (const team of teams) {
+            const playerMap = new Map(
+                (team.players || []).map((p) => [p._id.toString(), p])
+            );
+            const freshPoints = calculateFantasyTeamPoints(
+                {
+                    players: (team.players || []).map((p) => p._id),
+                    captain: team.captain?._id,
+                    viceCaptain: team.viceCaptain?._id
+                },
+                playerMap
+            );
+            if (freshPoints !== team.totalPoints) {
+                team.totalPoints = freshPoints;
+                bulkUpdates.push({
+                    updateOne: {
+                        filter: { _id: team._id },
+                        update: { $set: { totalPoints: freshPoints } }
+                    }
+                });
+            }
+        }
+        if (bulkUpdates.length > 0) {
+            await FantasyTeam.bulkWrite(bulkUpdates);
+        }
+
+        // Sort by freshly-calculated totalPoints descending
+        teams.sort((a, b) => b.totalPoints - a.totalPoints || a.updatedAt - b.updatedAt);
 
         const leaderboard = teams.map((team, index) => ({
             rank: index + 1,
