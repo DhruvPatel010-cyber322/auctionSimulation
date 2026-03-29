@@ -16,6 +16,8 @@
  */
 
 import Player from '../models/Player.js';
+import getFantasyPlayerModel from '../models/FantasyPlayer.js';
+import getFantasyMatchModel from '../models/FantasyMatch.js';
 
 const EXTERNAL_API_BASE = 'https://a-bhavy-bot-bbheroku-5f1b58e25c41.herokuapp.com';
 const POLL_INTERVAL_MS  = 2 * 60 * 1000; // 2 minutes
@@ -86,8 +88,10 @@ async function pollAndUpdate() {
             return;
         }
 
-        // 2. Load all players from auction_v2 once per tick
+        // 2. Load all players from auction_v2 and dream11 once per tick
         const dbPlayers = await Player.find({}).lean();
+        const FantasyPlayer = await getFantasyPlayerModel();
+        const fantasyPlayers = await FantasyPlayer.find({}).lean();
 
         let updated  = 0;
         let skipped  = 0;
@@ -96,7 +100,17 @@ async function pollAndUpdate() {
         // 3. Process each API player
         for (const apiPlayer of apiPlayers) {
             const normalizedName = normalizeApiName(apiPlayer.player);
+            const basePoints = Number(apiPlayer.total) || 0;
 
+            // --- 1. Update FANTASY module (dream11 DB) ---
+            const dbFantasyPlayer = fantasyPlayers.find(p => fuzzyMatch(p.name, normalizedName));
+            if (dbFantasyPlayer) {
+                await FantasyPlayer.findByIdAndUpdate(dbFantasyPlayer._id, {
+                    $set: { points: basePoints }
+                });
+            }
+
+            // --- 2. Update AUCTION module (auction_v2 DB) ---
             // Find matching DB player (fuzzy)
             const dbPlayer = dbPlayers.find(p => fuzzyMatch(p.name, normalizedName));
 
@@ -112,7 +126,6 @@ async function pollAndUpdate() {
             }
 
             // Apply C/VC multiplier
-            const basePoints = Number(apiPlayer.total) || 0;
             let finalPoints  = basePoints;
 
             if (dbPlayer.isCaptain)     finalPoints = basePoints * 2;
@@ -139,9 +152,19 @@ async function pollAndUpdate() {
 
 // ── Scheduler ─────────────────────────────────────────────────────────────────
 
-function startPolling() {
+async function startPolling() {
     console.log(`[LiveSync] ▶ Polling started for match ${state.matchId} every ${POLL_INTERVAL_MS / 60000} min`);
     state.isLive = true;
+
+    try {
+        const FantasyMatch = await getFantasyMatchModel();
+        await FantasyMatch.findOneAndUpdate(
+            { legacyMatchId: String(state.matchId) },
+            { $set: { status: 'Live' } }
+        );
+    } catch (e) {
+        console.warn('[LiveSync] Failed to mark match as Live in DB', e.message);
+    }
 
     // Immediate first fetch
     pollAndUpdate();
@@ -156,10 +179,22 @@ function startPolling() {
     }, MATCH_DURATION_MS);
 }
 
-function stopPolling() {
+async function stopPolling() {
     state.isLive = false;
     if (state.pollTimer) { clearInterval(state.pollTimer); state.pollTimer = null; }
     if (state.stopTimer) { clearTimeout(state.stopTimer);  state.stopTimer = null; }
+
+    try {
+        if (state.matchId) {
+            const FantasyMatch = await getFantasyMatchModel();
+            await FantasyMatch.findOneAndUpdate(
+                { legacyMatchId: String(state.matchId) },
+                { $set: { status: 'Completed' } }
+            );
+        }
+    } catch (e) {
+        console.warn('[LiveSync] Failed to mark match as Completed in DB', e.message);
+    }
 }
 
 
