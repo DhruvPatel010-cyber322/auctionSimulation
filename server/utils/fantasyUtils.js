@@ -71,7 +71,7 @@ export const computeMatchStatus = (dateStr, timeStr) => {
         let matchStart;
         if (timeStr) {
             // dateStr may be 'YYYY-MM-DD' or a full ISO; normalise to date-only part.
-            const datePart = dateStr.split('T')[0];
+            const datePart = dateStr.split('T')[0].split(' ')[0];
             matchStart = new Date(`${datePart}T${timeStr}`);
         } else {
             matchStart = new Date(dateStr);
