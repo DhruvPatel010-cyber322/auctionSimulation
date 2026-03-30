@@ -59,8 +59,8 @@ function normalizeApiName(raw) {
  * exact → dbName contains apiName → apiName contains dbName
  */
 function fuzzyMatch(dbName, apiName) {
-    const db  = dbName.toLowerCase().trim();
-    const api = apiName.toLowerCase().trim();
+    const db  = dbName.toLowerCase().replace(/[\.\-']/g, ' ').replace(/\s+/g, ' ').trim();
+    const api = apiName.toLowerCase().replace(/[\.\-']/g, ' ').replace(/\s+/g, ' ').trim();
     if (db === api)             return true;
     if (db.includes(api))       return true;
     if (api.includes(db))       return true;
