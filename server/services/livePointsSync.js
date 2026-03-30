@@ -119,21 +119,48 @@ async function pollAndUpdate() {
                 continue;
             }
 
+            const updateData = {};
+            if (!dbPlayer.playerId && apiPlayer.player_id) {
+                updateData.playerId = apiPlayer.player_id;
+            }
+
             // Check isInPlaying11 — skip if not in XI
             if (!dbPlayer.isInPlaying11) {
+                if (Object.keys(updateData).length > 0) {
+                    await Player.findByIdAndUpdate(dbPlayer._id, { $set: updateData });
+                }
                 skipped++;
                 continue;
             }
 
-            // Apply C/VC multiplier
-            let finalPoints  = basePoints;
+            // Extract raw category points
+            let finalPoints   = basePoints;
+            let finalBatting  = Number(apiPlayer.bat) || 0;
+            let finalBowling  = Number(apiPlayer.bowl) || 0;
+            let finalFielding = Number(apiPlayer.field) || 0;
 
-            if (dbPlayer.isCaptain)     finalPoints = basePoints * 2;
-            else if (dbPlayer.isViceCaptain) finalPoints = basePoints * 1.5;
+            // Apply C/VC multiplier to all points
+            if (dbPlayer.isCaptain) {
+                finalPoints   *= 2;
+                finalBatting  *= 2;
+                finalBowling  *= 2;
+                finalFielding *= 2;
+            } else if (dbPlayer.isViceCaptain) {
+                finalPoints   *= 1.5;
+                finalBatting  *= 1.5;
+                finalBowling  *= 1.5;
+                finalFielding *= 1.5;
+            }
+
+            // Assign to update object
+            updateData.points         = Number(finalPoints.toFixed(2));
+            updateData.battingPoints  = Number(finalBatting.toFixed(2));
+            updateData.bowlingPoints  = Number(finalBowling.toFixed(2));
+            updateData.fieldingPoints = Number(finalFielding.toFixed(2));
 
             // Override points ($set — not accumulate)
             await Player.findByIdAndUpdate(dbPlayer._id, {
-                $set: { points: Number(finalPoints.toFixed(2)) }
+                $set: updateData
             });
 
             updated++;
