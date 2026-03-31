@@ -10,7 +10,8 @@ import {
     saveFantasyTeam,
     getLiveMatchStatus,
     getExternalLiveMatch,
-    getExternalLivePoints
+    getExternalLivePoints,
+    manualTriggerSyncHandler
 } from '../controllers/fantasyController.js';
 
 const router = express.Router();
@@ -33,5 +34,6 @@ router.get('/my-teams', fantasyAuth, getAllUserFantasyTeams);
 router.get('/my-teams/:matchId', fantasyAuth, getMyFantasyTeams);
 router.get('/leaderboard/:matchId', fantasyAuth, getFantasyLeaderboard);
 router.post('/admin/recalculate/:matchId', fantasyAuth, adminOnly, recalculateFantasyPoints);
+router.post('/admin/sync/manual', fantasyAuth, adminOnly, manualTriggerSyncHandler);
 
 export default router;

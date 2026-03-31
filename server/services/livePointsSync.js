@@ -15,13 +15,16 @@
  *   8. Auto-stop 4h 30min after start_time
  */
 
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import Player from '../models/Player.js';
 import getFantasyPlayerModel from '../models/FantasyPlayer.js';
 import getFantasyMatchModel from '../models/FantasyMatch.js';
 
 const EXTERNAL_API_BASE = 'https://a-bhavy-bot-bbheroku-5f1b58e25c41.herokuapp.com';
 const POLL_INTERVAL_MS  = 2 * 60 * 1000; // 2 minutes
-const MATCH_DURATION_MS = (4 * 60 + 30) * 60 * 1000; // 4h 30min
+const MATCH_DURATION_MS = (5 * 60) * 60 * 1000; // 5h (as requested)
 
 // ── In-memory state (exported for /live-status endpoint) ─────────────────────
 const state = {
@@ -227,79 +230,113 @@ async function stopPolling() {
 
 // ── Entry point ───────────────────────────────────────────────────────────────
 
+function getTodayISTDateString() {
+    const now = new Date();
+    const istOptions = { timeZone: 'Asia/Kolkata', year: 'numeric', month: 'short', day: 'numeric' };
+    const formatted = now.toLocaleDateString('en-GB', istOptions); // "31 Mar 2026"
+    
+    // Convert "31 Mar 2026" to "31 Mar 2026" (matches JSON format "31 Mar 2026" or "1 Apr 2026")
+    // Wait, let's just use a more robust comparison
+    return formatted;
+}
+
+function parseISTDate(dateStr, timeStr) {
+    // dateStr: "31 Mar 2026", timeStr: "19:30"
+    // We want to create a Date object in IST
+    const [day, monthStr, year] = dateStr.split(' ');
+    const months = {
+        'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
+        'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
+    };
+    const month = months[monthStr];
+    const [hours, minutes] = timeStr.split(':');
+
+    // Create date as UTC then adjust for IST offset (+5:30)
+    // Or more simply, construct an ISO string
+    const isoMonth = (month + 1).toString().padStart(2, '0');
+    const isoDay = day.padStart(2, '0');
+    const isoString = `${year}-${isoMonth}-${isoDay}T${hours}:${minutes}:00+05:30`;
+    return new Date(isoString);
+}
+
 export async function startLivePointsSync() {
     try {
-        console.log('[LiveSync] Initialising — fetching today\'s match from external API...');
+        console.log('[LiveSync] Checking local schedule (ipl_schedule_export.json)...');
 
-        const res = await fetch(`${EXTERNAL_API_BASE}/match`);
-        if (!res.ok) {
-            console.warn(`[LiveSync] /match responded ${res.status} — sync disabled`);
-            return;
-        }
-        const matchData = await res.json();
+        // Path: b:\auction_git\v5\auctionSimulation\ipl_schedule_export.json
+        // __dirname equivalent for ES modules
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = path.dirname(__filename);
+        const schedulePath = path.join(__dirname, '..', '..', 'ipl_schedule_export.json');
 
-        const { match_id, match_name, start_time, is_active } = matchData;
-        if (!match_id || !start_time) {
-            console.warn('[LiveSync] No match_id or start_time returned — sync disabled');
-            return;
-        }
-
-        // Parse start_time (IST ISO string e.g. "2026-03-29T19:30:00+05:30")
-        const matchStart = new Date(start_time);
-        const matchEnd   = new Date(matchStart.getTime() + MATCH_DURATION_MS);
-        const now        = new Date();
-
-        // Check if the match is today (IST date comparison)
-        const todayIST = new Date(
-            now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })
-        );
-        const matchDayIST = new Date(
-            matchStart.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })
-        );
-
-        const sameDay =
-            todayIST.getFullYear() === matchDayIST.getFullYear() &&
-            todayIST.getMonth()    === matchDayIST.getMonth()    &&
-            todayIST.getDate()     === matchDayIST.getDate();
-
-        if (!sameDay) {
-            console.log(
-                `[LiveSync] Today's match (${match_name}) is not today — sync will not run`
-            );
+        if (!fs.existsSync(schedulePath)) {
+            console.error(`[LiveSync] Schedule file not found at ${schedulePath}`);
             return;
         }
 
-        // Store match info in state
-        state.matchId   = String(match_id);
-        state.matchName = match_name;
-        state.startTime = start_time;
+        const schedule = JSON.parse(fs.readFileSync(schedulePath, 'utf8'));
+        const now = new Date();
+        const todayIST = getTodayISTDateString();
 
-        console.log(`[LiveSync] Today's match: ${match_name} (id=${match_id})`);
-        console.log(`[LiveSync] Start time: ${matchStart.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST`);
+        // 1. Find matches for today
+        const todaysMatches = schedule.filter(m => m.MatchDate === todayIST);
 
-        // If already past start time but still within match window, start immediately
-        if (now >= matchStart && now < matchEnd) {
-            console.log('[LiveSync] Match is LIVE now — starting poll immediately');
-            startPolling();
+        if (todaysMatches.length === 0) {
+            console.log(`[LiveSync] No matches scheduled for today (${todayIST})`);
             return;
         }
 
-        // If match is already over
-        if (now >= matchEnd) {
-            console.log('[LiveSync] Match already completed today — sync not needed');
-            return;
+        console.log(`[LiveSync] Found ${todaysMatches.length} match(es) for today`);
+
+        for (const match of todaysMatches) {
+            const matchStart = parseISTDate(match.MatchDate, match.MatchTime);
+            const matchEnd   = new Date(matchStart.getTime() + MATCH_DURATION_MS);
+
+            // If match is LIVE now
+            if (now >= matchStart && now < matchEnd) {
+                if (state.isLive && state.matchId === String(match.MatchID)) {
+                    console.log(`[LiveSync] Match ${match.MatchName} is already being synced`);
+                    continue;
+                }
+                console.log(`[LiveSync] Match ${match.MatchName} is LIVE — starting sync`);
+                state.matchId = String(match.MatchID);
+                state.matchName = match.MatchName;
+                state.startTime = matchStart.toISOString();
+                startPolling();
+                return; // Assume one match at a time as requested ("no overlap")
+            }
+
+            // If match is in the future
+            if (now < matchStart) {
+                const msUntilStart = matchStart.getTime() - now.getTime();
+                console.log(`[LiveSync] Scheduled ${match.MatchName} to start in ${Math.round(msUntilStart / 60000)} minutes`);
+                
+                setTimeout(() => {
+                    console.log(`[LiveSync] ⏰ Match start time reached for ${match.MatchName} — beginning sync`);
+                    state.matchId = String(match.MatchID);
+                    state.matchName = match.MatchName;
+                    state.startTime = matchStart.toISOString();
+                    startPolling();
+                }, msUntilStart);
+                return; // Assume one match at a time
+            }
         }
 
-        // Schedule to start at match time
-        const msUntilStart = matchStart.getTime() - now.getTime();
-        console.log(`[LiveSync] Scheduled to start in ${Math.round(msUntilStart / 60000)} minutes`);
-
-        setTimeout(() => {
-            console.log('[LiveSync] ⏰ Match start time reached — beginning sync');
-            startPolling();
-        }, msUntilStart);
+        console.log('[LiveSync] All matches for today have already concluded');
 
     } catch (err) {
         console.error('[LiveSync] Init failed:', err.message);
     }
+}
+
+/**
+ * Manual override triggered by Admin
+ */
+export async function manualTriggerSync() {
+    console.log('[LiveSync] Manual trigger received. Re-scanning schedule...');
+    // Stop any existing polling first
+    stopPolling();
+    // Re-run the startup logic
+    await startLivePointsSync();
+    return { success: true, isLive: state.isLive, matchName: state.matchName };
 }

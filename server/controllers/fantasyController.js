@@ -1,7 +1,7 @@
 import getFantasyMatchModel from '../models/FantasyMatch.js';
 import getFantasyPlayerModel from '../models/FantasyPlayer.js';
 import getFantasyTeamModel from '../models/FantasyTeam.js';
-import { getSyncState } from '../services/livePointsSync.js';
+import { getSyncState, manualTriggerSync } from '../services/livePointsSync.js';
 import {
     calculateFantasyTeamPoints,
     findFantasyMatchByIdentifier,
@@ -423,5 +423,15 @@ export const getExternalLivePoints = async (req, res) => {
     } catch (error) {
         console.error('Proxy live points failed:', error);
         res.status(500).json({ message: 'Failed to fetch external live points data.' });
+    }
+};
+
+export const manualTriggerSyncHandler = async (req, res) => {
+    try {
+        const result = await manualTriggerSync();
+        res.json(result);
+    } catch (error) {
+        console.error('Manual sync trigger failed:', error);
+        res.status(500).json({ message: 'Failed to trigger manual sync.' });
     }
 };

@@ -43,6 +43,10 @@ const AdminPage = () => {
     const [newTournamentName, setNewTournamentName] = useState('');
     const [isCreatingTournament, setIsCreatingTournament] = useState(false);
 
+    // Sync State
+    const [isSyncing, setIsSyncing] = useState(false);
+    const [syncStatus, setSyncStatus] = useState(null); // { success: bool, message: string }
+
     const handleCreateTournament = async (e) => {
         e.preventDefault();
         if (!newTournamentName.trim()) return;
@@ -353,6 +357,37 @@ const AdminPage = () => {
         }
     };
 
+    const handleManualSync = async () => {
+        if (!window.confirm("Force start the fantasy points sync. This will scan today's schedule and begin fetching from the external API if a match is found. Proceed?")) return;
+        
+        setIsSyncing(true);
+        setSyncStatus(null);
+        
+        const firebaseToken = (localStorage.getItem('firebase_token') || localStorage.getItem('token'));
+        try {
+            const res = await fetch(`${API_URL}/api/fantasy/admin/sync/manual`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${firebaseToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setSyncStatus({ success: true, message: data.isLive ? `Sync started for ${data.matchName}` : "No active match found in today's schedule." });
+            } else {
+                setSyncStatus({ success: false, message: data.message || "Failed to trigger sync" });
+            }
+        } catch (err) {
+            console.error(err);
+            setSyncStatus({ success: false, message: "Network Error" });
+        } finally {
+            setIsSyncing(false);
+            // Clear status after 5s
+            setTimeout(() => setSyncStatus(null), 5000);
+        }
+    };
+
     return (
         <div className="p-6 md:p-10 max-w-7xl mx-auto min-h-screen pb-40 bg-auction-bg text-white font-sans">
             {/* Top Bar */}
@@ -635,13 +670,40 @@ const AdminPage = () => {
                     </div>
 
                     {/* Queue Management */}
-                    <div className="bg-auction-surface p-6 rounded-3xl border border-white/5">
-                        <h3 className="font-bold text-white border-b border-white/5 pb-2 text-xs uppercase tracking-widest mb-4 text-gray-500">Queue</h3>
-                        <button onClick={() => setShowUnsoldModal(true)} className="w-full py-4 bg-white/5 text-gray-300 border-2 border-dashed border-white/10 rounded-xl font-bold hover:border-white/30 hover:bg-white/10 flex items-center justify-center gap-2 text-sm transition-all">
-                            <RotateCcw size={16} /> Manage Unsold ({unsoldPlayers.length})
-                        </button>
+                    <div className="bg-auction-surface p-6 rounded-3xl border border-white/5 space-y-4">
+                        <h3 className="font-bold text-white border-b border-white/5 pb-2 text-xs uppercase tracking-widest text-gray-500">System Controls</h3>
+                        
+                        <div className="space-y-3">
+                            <button 
+                                onClick={handleManualSync} 
+                                disabled={isSyncing}
+                                className={cn(
+                                    "w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 text-sm transition-all border",
+                                    isSyncing ? "bg-white/5 text-gray-500 cursor-not-allowed border-white/5" : "bg-blue-600/10 text-blue-400 border-blue-500/20 hover:bg-blue-600/20"
+                                )}
+                            >
+                                <RotateCcw size={16} className={isSyncing ? "animate-spin" : ""} />
+                                {isSyncing ? 'Syncing...' : 'Force Start Points Sync'}
+                            </button>
+                            
+                            {syncStatus && (
+                                <div className={cn(
+                                    "p-3 rounded-xl text-[10px] font-bold text-center animate-in fade-in zoom-in-95",
+                                    syncStatus.success ? "bg-green-500/10 text-green-500 border border-green-500/20" : "bg-red-500/10 text-red-500 border border-red-500/20"
+                                )}>
+                                    {syncStatus.message}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="pt-2">
+                             <button onClick={() => setShowUnsoldModal(true)} className="w-full py-4 bg-white/5 text-gray-300 border-2 border-dashed border-white/10 rounded-xl font-bold hover:border-white/30 hover:bg-white/10 flex items-center justify-center gap-2 text-sm transition-all">
+                                <RotateCcw size={16} /> Manage Unsold ({unsoldPlayers.length})
+                            </button>
+                        </div>
+
                         <div className="mt-4 flex items-center justify-between text-xs text-gray-500 font-bold uppercase tracking-wider">
-                            <span>Status</span>
+                            <span>Socket Status</span>
                             <span className={socket ? "text-green-500" : "text-red-500"}>{socket ? 'Connected' : 'Offline'}</span>
                         </div>
                     </div>
