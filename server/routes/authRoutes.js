@@ -549,7 +549,13 @@ router.get('/tournaments/:id/teams', protect, async (req, res) => {
                 isTaken: takenTeamCodes.has(team.id.toUpperCase()),
                 ownerUsername: takenTeamMap.get(team.id.toUpperCase()) || null,
                 isMyTeam: userAssignment?.teamCode === team.id.toUpperCase(),
-                logo: dbTeam?.logo || null
+                logo: dbTeam?.logo || null,
+                // Live DB values — override static config defaults
+                budget: dbTeam?.remainingPurse ?? team.budget,
+                remainingPurse: dbTeam?.remainingPurse ?? null,
+                squadSize: dbTeam?.squadSize ?? 0,
+                overseasCount: dbTeam?.overseasCount ?? 0,
+                totalSpent: dbTeam?.totalSpent ?? 0
             };
         });
 
