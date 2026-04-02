@@ -51,26 +51,51 @@ export const calculatePointsForWindow = async (team, startTime, endTime, snapsho
     if (windowMatchIds.length === 0) return 0;
 
     // Load all players in the snapshot to get their perMatchPoints
-    const playerIds = snapshot.players.map(id => id.toString());
+    const playerIds = snapshot.players.map(p => (p._id || p).toString());
     const players = await Player.find({ _id: { $in: playerIds } }).lean();
 
     let totalWeekPoints = 0;
 
+    const capId = snapshot.captain ? (snapshot.captain._id || snapshot.captain).toString() : null;
+    const vcId = snapshot.viceCaptain ? (snapshot.viceCaptain._id || snapshot.viceCaptain).toString() : null;
+
+    const playerWeekPoints = {};
+
     for (const player of players) {
-        // Sum points for matches in the window
-        const relevantPoints = (player.perMatchPoints || [])
-            .filter(mp => windowMatchIds.includes(Number(mp.matchId)))
-            .reduce((sum, mp) => sum + (mp.total || 0), 0);
+        // Find all match entries for this player that are in the current week's window
+        const relevantMatchEntries = (player.perMatchPoints || [])
+            .filter(mp => windowMatchIds.includes(Number(mp.matchId)));
 
-        // Apply multipliers from snapshot
+        // Calculate raw sums (before multipliers)
+        const rawPoints = {
+            total: relevantMatchEntries.reduce((sum, mp) => sum + (mp.total || 0), 0),
+            batting: relevantMatchEntries.reduce((sum, mp) => sum + (mp.batting || 0), 0),
+            bowling: relevantMatchEntries.reduce((sum, mp) => sum + (mp.bowling || 0), 0),
+            fielding: relevantMatchEntries.reduce((sum, mp) => sum + (mp.fielding || 0), 0)
+        };
+
+        // Determine multiplier
         let multiplier = 1;
-        if (player._id.toString() === snapshot.captain?.toString()) multiplier = 2;
-        else if (player._id.toString() === snapshot.viceCaptain?.toString()) multiplier = 1.5;
+        const pId = player._id.toString();
+        if (pId === capId) multiplier = 2;
+        else if (pId === vcId) multiplier = 1.5;
 
-        totalWeekPoints += (relevantPoints * multiplier);
+        // Add to team total (with multipliers)
+        totalWeekPoints += (rawPoints.total * multiplier);
+
+        // Store per-player breakdown with multipliers applied to the total
+        playerWeekPoints[pId] = {
+            total: Number((rawPoints.total * multiplier).toFixed(1)),
+            batting: Number(rawPoints.batting.toFixed(1)),
+            bowling: Number(rawPoints.bowling.toFixed(1)),
+            fielding: Number(rawPoints.fielding.toFixed(1))
+        };
     }
 
-    return Number(totalWeekPoints.toFixed(2));
+    return {
+        total: Number(totalWeekPoints.toFixed(2)),
+        playerPoints: playerWeekPoints
+    };
 };
 
 /**
@@ -158,7 +183,8 @@ export const finalizeWeek = async () => {
             continue;
         }
 
-        const weekPoints = await calculatePointsForWindow(team, tournament.weekStartTime, endTime, snapshot);
+        const result = await calculatePointsForWindow(team, tournament.weekStartTime, endTime, snapshot);
+        const weekPoints = result.total;
         
         // Persist weekly score
         team.weeklyPoints.push({ week: currentWeek, points: weekPoints });

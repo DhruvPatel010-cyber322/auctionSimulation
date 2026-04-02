@@ -11,9 +11,21 @@ const POINT_FILTERS = [
     { key: 'fielding', label: 'Fielding Points', color: 'text-purple-600',  bg: 'bg-purple-50',  border: 'border-purple-200' },
 ];
 
-const getPlayerPoints = (player, filterKey) => {
+const getPlayerPoints = (player, filterKey, scoring) => {
     if (!player) return 0;
-    // Points is now a nested object { total, batting, bowling, fielding, announcement }
+    
+    // Check if we have a server-side week-specific breakdown for this player
+    if (scoring && scoring.playerWeekPoints && scoring.playerWeekPoints[player._id]) {
+        const weekPts = scoring.playerWeekPoints[player._id];
+        switch (filterKey) {
+            case 'batting':  return weekPts.batting  ?? 0;
+            case 'bowling':  return weekPts.bowling  ?? 0;
+            case 'fielding': return weekPts.fielding ?? 0;
+            default:         return weekPts.total    ?? 0;
+        }
+    }
+
+    // Fallback to legacy/overall player.points if no week-specific data (unlikely in Auction)
     const pts = player.points || {};
     switch (filterKey) {
         case 'batting':  return pts.batting      ?? 0;
@@ -648,7 +660,7 @@ const SelectPlayingXI = () => {
                                         </div>
                                         {/* Points badge */}
                                         <div className={cn("absolute top-0 right-0 text-xs font-black px-3 py-1 rounded-bl-lg", activeFilter.bg, activeFilter.color)}>
-                                            {getPlayerPoints(p, pointsFilter)} pts
+                                            {getPlayerPoints(p, pointsFilter, scoring)} pts
                                         </div>
                                         <div className="flex items-center gap-4 mt-2">
                                             <div className="w-12 h-12 rounded-full bg-gray-100 border border-gray-200 overflow-hidden">
@@ -688,7 +700,7 @@ const SelectPlayingXI = () => {
                                             <p className="text-[10px] font-bold text-gray-400 uppercase">{p.role}</p>
                                         </div>
                                         <span className={cn("text-xs font-black px-2 py-0.5 rounded-lg shrink-0", activeFilter.bg, activeFilter.color)}>
-                                            {getPlayerPoints(p, pointsFilter)} pts
+                                            {getPlayerPoints(p, pointsFilter, scoring)} pts
                                         </span>
                                     </div>
                                 ))}

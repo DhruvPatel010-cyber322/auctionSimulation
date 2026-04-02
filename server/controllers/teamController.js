@@ -8,6 +8,7 @@ export const getTeamScoringSummary = async (team, tournament) => {
     // 1. Finalized total from past weeks (already includes Week 1 from migration)
     let totalFinalized = team.totalPoints || 0;
     let currentWeekLivePoints = 0;
+    let playerWeekPoints = {};
 
     // 2. Identify Current Week context
     const currentWeekNum = tournament?.currentWeek || 1;
@@ -18,12 +19,14 @@ export const getTeamScoringSummary = async (team, tournament) => {
         const snapshot = team.playing11History.find(h => h.week === currentWeekNum);
         
         if (snapshot) {
-            currentWeekLivePoints = await calculatePointsForWindow(
+            const result = await calculatePointsForWindow(
                 team, 
                 weekStartTime, 
                 new Date(), // Current live window
                 snapshot
             );
+            currentWeekLivePoints = result.total;
+            playerWeekPoints = result.playerPoints;
         }
     }
 
@@ -40,6 +43,7 @@ export const getTeamScoringSummary = async (team, tournament) => {
         totalPoints: Number((totalFinalized + currentWeekLivePoints).toFixed(2)),
         finalizedTotal: totalFinalized,
         livePoints: currentWeekLivePoints,
+        playerWeekPoints, // Map of { playerId: { total, batting, bowling, fielding } }
         weeklyBreakdown: pastWeeksMap, // e.g. { week1: 846.5 }
         playing11Count: team.playing11.length
     };
