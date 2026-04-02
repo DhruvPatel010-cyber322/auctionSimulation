@@ -383,6 +383,33 @@ const AdminPage = () => {
         }
     };
 
+    const handleClearAllPlaying11 = async () => {
+        if (!selectedTournamentId) return;
+        if (!window.confirm(`Are you absolutely sure you want to CLEAR the Playing 11 for ALL teams in this tournament? This cannot be undone.`)) return;
+
+        const firebaseToken = (localStorage.getItem('firebase_token') || localStorage.getItem('token'));
+        try {
+            const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${selectedTournamentId}/clear-all-playing11`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${firebaseToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (res.ok) {
+                alert('Playing 11 of all teams have been cleared successfully.');
+            } else {
+                const data = await res.json();
+                console.error("Failed to clear Playing 11:", data);
+                alert("Failed to clear Playing 11: " + (data.message || "Unknown error"));
+            }
+        } catch (e) {
+            console.error("Network Error:", e);
+            alert("Network Error");
+        }
+    };
+
     const handleManualSync = async () => {
         if (!window.confirm("Force start the fantasy points sync. This will scan today's schedule and begin fetching from the external API if a match is found. Proceed?")) return;
         
@@ -634,6 +661,13 @@ const AdminPage = () => {
                                         >
                                             <Lock size={14} />
                                             {tournaments.find(t => t._id === selectedTournamentId)?.isTradingOpen ? 'Trading Open' : 'Trading Closed'}
+                                        </button>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleClearAllPlaying11(); }}
+                                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20"
+                                        >
+                                            <AlertTriangle size={14} />
+                                            Clear All XI
                                         </button>
                                     </>
                                 )}

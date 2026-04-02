@@ -480,6 +480,29 @@ router.put('/tournaments/:id/lock-captaincy', firebaseAuth, async (req, res) => 
     }
 });
 
+// 3.11 Admin Clear All Playing 11
+router.post('/tournaments/:id/clear-all-playing11', firebaseAuth, async (req, res) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Only admins can clear all playing 11' });
+    }
+
+    try {
+        // Clear Playing 11 for all teams
+        await Team.updateMany({}, { $set: { playing11: [], captain: null, viceCaptain: null } });
+
+        // Update all players
+        await Player.updateMany(
+            {},
+            { $set: { isInPlaying11: false, isCaptain: false, isViceCaptain: false } }
+        );
+
+        res.json({ success: true, message: 'Cleared Playing XI for all teams successfully' });
+    } catch (err) {
+        console.error("Clear All Playing XI Error:", err);
+        res.status(500).json({ message: 'Failed to clear playing XI for all teams' });
+    }
+});
+
 // 4. Get Teams Availability for a Tournament
 router.get('/tournaments/:id/teams', firebaseAuth, async (req, res) => {
     console.log(`[API] Fetching teams for tournament: ${req.params.id}`);
