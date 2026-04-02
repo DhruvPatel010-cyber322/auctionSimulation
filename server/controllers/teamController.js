@@ -1,35 +1,66 @@
-
 import Team from '../models/Team.js';
+import Tournament from '../models/Tournament.js';
+import { calculatePointsForWindow } from '../utils/weekManager.js';
+
+
+// --- REUSABLE SCORING LOGIC ---
+export const getTeamScoringSummary = async (team, tournament) => {
+    // 1. Finalized total from past weeks (already includes Week 1 from migration)
+    let totalFinalized = team.totalPoints || 0;
+    let currentWeekLivePoints = 0;
+
+    // 2. Identify Current Week context
+    const currentWeekNum = tournament?.currentWeek || 1;
+    const weekStartTime = tournament?.weekStartTime;
+
+    // 3. Add live points only for Week 2+ (or if Week 1 snapshot somehow existed)
+    if (weekStartTime) {
+        const snapshot = team.playing11History.find(h => h.week === currentWeekNum);
+        
+        if (snapshot) {
+            currentWeekLivePoints = await calculatePointsForWindow(
+                team, 
+                weekStartTime, 
+                new Date(), // Current live window
+                snapshot
+            );
+        }
+    }
+
+    // Points breakdown for frontend
+    const pastWeeksMap = {};
+    (team.weeklyPoints || []).forEach(wp => {
+        pastWeeksMap[`week${wp.week}`] = wp.points;
+    });
+
+    return {
+        id: team.code,
+        name: team.name,
+        logo: team.logo,
+        totalPoints: Number((totalFinalized + currentWeekLivePoints).toFixed(2)),
+        finalizedTotal: totalFinalized,
+        livePoints: currentWeekLivePoints,
+        weeklyBreakdown: pastWeeksMap, // e.g. { week1: 846.5 }
+        playing11Count: team.playing11.length
+    };
+};
 
 export const getPointsTable = async (req, res) => {
     try {
-        // Fetch all teams and populate their playing 11
-        // We need 'points' from the player objects
+        const tournament = await Tournament.findOne().sort({ createdAt: -1 });
         const teams = await Team.find({}).populate('playing11');
 
-        const pointsTable = teams.map(team => {
-            const totalPoints    = team.playing11.reduce((sum, p) => sum + (p.points?.total    || 0), 0);
-            const battingPoints  = team.playing11.reduce((sum, p) => sum + (p.points?.batting  || 0), 0);
-            const bowlingPoints  = team.playing11.reduce((sum, p) => sum + (p.points?.bowling  || 0), 0);
-            const fieldingPoints = team.playing11.reduce((sum, p) => sum + (p.points?.fielding || 0), 0);
+        const pointsTable = await Promise.all(teams.map(async team => {
+            return await getTeamScoringSummary(team, tournament);
+        }));
 
-            return {
-                id: team.code,
-                name: team.name,
-                logo: team.logo,
-                totalPoints,
-                battingPoints,
-                bowlingPoints,
-                fieldingPoints,
-                playing11Count: team.playing11.length
-            };
-        });
-
-        // Sort by Total Points (Descending)
+        // Sort by Grand Total (Descending)
         pointsTable.sort((a, b) => b.totalPoints - a.totalPoints);
 
         res.json({
             success: true,
+            currentWeek: tournament?.currentWeek || 1,
+            isWeekActive: !!tournament?.weekStartTime,
             pointsTable
         });
 

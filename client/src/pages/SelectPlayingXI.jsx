@@ -76,6 +76,7 @@ const SelectPlayingXI = () => {
     const [playing11, setPlaying11] = useState([]); // Read-only Array
     const [captain, setCaptain] = useState(null); // ID of captain
     const [viceCaptain, setViceCaptain] = useState(null); // ID of vice-captain
+    const [scoring, setScoring] = useState(null); // NEW: Official server-side totals
 
     // Edit Mode State
     const [isEditMode, setIsEditMode] = useState(false);
@@ -175,6 +176,7 @@ const SelectPlayingXI = () => {
                     setViceCaptain(data.viceCaptain || null);
                     setIsLocked(data.isPlayingXILocked || false);
                     setIsCaptaincyLocked(data.isCaptaincyLocked || false);
+                    setScoring(data.scoring || null); // NEW: Official totals
 
                     // If switching to My Team and I have saved data, View Mode.
                     // If no saved data, maybe Auto-Edit? No, stick to View -> Edit.
@@ -204,6 +206,8 @@ const SelectPlayingXI = () => {
         };
 
         fetchSquad();
+        const interval = setInterval(fetchSquad, 60000); // 1 min auto-refresh
+        return () => clearInterval(interval);
     }, [selectedTeam, myTeamCode]);
 
 
@@ -540,29 +544,47 @@ const SelectPlayingXI = () => {
             {!isEditMode && (
                 <div className="space-y-8 animate-in fade-in">
 
-                    {/* ── Team Points Summary Bar ── */}
-                    {squad.length > 0 && (
-                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-wrap gap-3 items-center">
-                            <span className="text-xs font-black uppercase tracking-widest text-gray-400 mr-1">Team Points</span>
-                            {POINT_FILTERS.map(f => {
-                                const val = squad.reduce((sum, p) => sum + (getPlayerPoints(p, f.key)), 0);
-                                const isActive = pointsFilter === f.key;
-                                return (
+                    {/* ── Official Team Points Summary Bar ── */}
+                    {scoring && (
+                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-wrap gap-6 items-center animate-in fade-in slide-in-from-top-4">
+                            <div className="flex flex-col">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Total Score</span>
+                                <div className="text-3xl font-black text-blue-600 tracking-tight leading-none mt-1">
+                                    {scoring.totalPoints}
+                                </div>
+                            </div>
+                            
+                            <div className="h-10 w-px bg-gray-100 hidden md:block" />
+
+                            <div className="flex flex-col">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Finalized (Wk 1)</span>
+                                <div className="text-lg font-bold text-gray-900 mt-0.5">
+                                    {scoring.finalizedTotal}
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Live (Current)</span>
+                                <div className="text-lg font-bold text-green-600 mt-0.5">
+                                    +{scoring.livePoints}
+                                </div>
+                            </div>
+
+                            {/* Optional: Simple filter buttons for scouting player raw stats */}
+                            <div className="ml-auto flex items-center gap-2 bg-gray-50 p-1.5 rounded-xl border border-gray-100">
+                                {POINT_FILTERS.map(f => (
                                     <button
                                         key={f.key}
                                         onClick={() => setPointsFilter(f.key)}
                                         className={cn(
-                                            'flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-sm font-bold transition-all',
-                                            isActive
-                                                ? `${f.bg} ${f.border} ${f.color} shadow-sm scale-105`
-                                                : 'bg-gray-50 border-gray-100 text-gray-500 hover:bg-gray-100'
+                                            "px-3 py-1 rounded-lg text-xs font-bold transition-all",
+                                            pointsFilter === f.key ? "bg-white text-blue-600 shadow-sm border border-blue-100" : "text-gray-400 hover:text-gray-600"
                                         )}
                                     >
-                                        <span>{val}</span>
-                                        <span className="text-xs font-semibold opacity-70">{f.label.replace(' Points', '')}</span>
+                                        {f.label.replace(' Points', '')}
                                     </button>
-                                );
-                            })}
+                                ))}
+                            </div>
                         </div>
                     )}
 

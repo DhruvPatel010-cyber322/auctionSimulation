@@ -55,7 +55,7 @@ export const getTeams = async () => {
     try {
         const response = await api.get('/api/teams');
         return response.data;
-    } catch (error) {
+      } catch (error) {
         console.error("Error fetching teams:", error);
         throw error;
     }
@@ -73,8 +73,6 @@ export const getPlayers = async (filters = {}) => {
     }
 };
 
-
-
 export const startAuction = async () => {
     const response = await api.post('/api/auction/start');
     return response.data;
@@ -91,7 +89,6 @@ export const placeBid = async (amount) => {
     return response.data;
 };
 
-
 export const endTurn = async (winner = null, amount = 0) => {
     const response = await api.post('/api/auction/end', { winner, amount });
     return response.data;
@@ -102,8 +99,6 @@ export const controlTimer = async (action) => {
     const response = await api.post(`/api/auction/timer?action=${action}`);
     return response.data;
 };
-
-export default api;
 
 export const requeuePlayer = async (playerId) => {
     try {
@@ -162,3 +157,16 @@ export const getSquads = async () => {
     const response = await api.get('/api/schedule/squads');
     return response.data;
 };
+
+// --- ADMIN WEEK MANAGEMENT ---
+export const adminStartWeek = async () => {
+    const response = await api.post('/api/admin/start-week');
+    return response.data;
+};
+
+export const adminFinalizeWeek = async () => {
+    const response = await api.post('/api/admin/finalize-week');
+    return response.data;
+};
+
+export default api;

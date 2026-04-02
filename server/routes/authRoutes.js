@@ -20,6 +20,7 @@ import Team from '../models/Team.js'; // Singleton Team Model
 import { TEAMS } from '../data/teams.js'; // Static configs
 import { firebaseAuth } from '../middleware/firebaseAuth.js';
 import { protect } from '../middleware/auth.js';
+import { getTeamScoringSummary } from '../controllers/teamController.js';
 import * as teamController from '../controllers/teamController.js';
 import AuctionState from '../models/AuctionState.js';
 
@@ -1026,13 +1027,18 @@ router.get('/tournaments/:id/my-squad', protect, async (req, res) => {
         const team = await Team.findOne({ code: userAssignment.teamCode }).populate('playersBought').populate('playing11');
         if (!team) return res.status(404).json({ message: 'Team not found.' });
 
+        // NEW: Get Official Scoring Summary
+        const tournament = await Tournament.findById(tournamentId).lean();
+        const scoringSummary = await getTeamScoringSummary(team, tournament);
+
         res.json({
             success: true,
             players: team.playersBought,
             playing11: team.playing11, // Array of objects
             captain: team.captain,
             viceCaptain: team.viceCaptain,
-            teamCode: team.code
+            teamCode: team.code,
+            scoring: scoringSummary // Pass the full summary
         });
 
     } catch (err) {
@@ -1052,7 +1058,10 @@ router.get('/tournaments/:id/teams/:teamCode/squad', protect, async (req, res) =
 
         if (!team) return res.status(404).json({ message: 'Team not found.' });
 
-        const tournament = await Tournament.findById(tournamentId).select('isPlayingXILocked isCaptaincyLocked');
+        const tournament = await Tournament.findById(tournamentId).select('currentWeek weekStartTime isPlayingXILocked isCaptaincyLocked').lean();
+
+        // NEW: Get Official Scoring Summary
+        const scoringSummary = await getTeamScoringSummary(team, tournament);
 
         res.json({
             success: true,
@@ -1062,7 +1071,8 @@ router.get('/tournaments/:id/teams/:teamCode/squad', protect, async (req, res) =
             viceCaptain: team.viceCaptain,
             teamCode: team.code,
             isPlayingXILocked: tournament?.isPlayingXILocked || false,
-            isCaptaincyLocked: tournament?.isCaptaincyLocked || false
+            isCaptaincyLocked: tournament?.isCaptaincyLocked || false,
+            scoring: scoringSummary // Pass the full summary
         });
     } catch (err) {
         console.error("Get Team Squad Error:", err);

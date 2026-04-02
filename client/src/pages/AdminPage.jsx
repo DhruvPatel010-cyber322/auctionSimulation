@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSocket } from '../context/SocketContext';
 import { useAuth } from '../context/AuthContext';
 import { Shield, Play, RotateCcw, Lock, AlertTriangle, Users, Trophy, Edit2, Check, X as XIcon, ChevronDown, ChevronUp } from 'lucide-react';
-import { controlTimer, endTurn, nextPlayer, getPlayers, requeuePlayer, toggleTradingWindow } from '../services/api';
+import { controlTimer, endTurn, nextPlayer, getPlayers, requeuePlayer, toggleTradingWindow, adminStartWeek, adminFinalizeWeek } from '../services/api';
 import { toCr } from '../utils/formatCurrency';
 import TeamSelector from '../components/TeamSelector';
 import { cn } from '../lib/utils';
@@ -501,6 +501,39 @@ const AdminPage = () => {
             setTimeout(() => setSyncStatus(null), 5000);
         }
     };
+    
+    // --- WEEKLY MANAGEMENT HANDLERS ---
+    const [isWeekLoading, setIsWeekLoading] = useState(false);
+
+    const handleStartWeek = async () => {
+        if (!window.confirm("Are you sure you want to START a new week? This will LOCK the current Playing 11 for all teams as the historical snapshot for this week!")) return;
+        
+        setIsWeekLoading(true);
+        try {
+            const data = await adminStartWeek();
+            alert(data.message || "Week started successfully");
+        } catch (err) {
+            console.error(err);
+            alert("Failed to start week: " + (err.response?.data?.message || err.message));
+        } finally {
+            setIsWeekLoading(false);
+        }
+    };
+
+    const handleFinalizeWeek = async () => {
+        if (!window.confirm("Are you sure you want to FINALIZE the current week? This will FREEZE the live points into permanent history and move to the next week!")) return;
+        
+        setIsWeekLoading(true);
+        try {
+            const data = await adminFinalizeWeek();
+            alert(data.message || "Week finalized successfully");
+        } catch (err) {
+            console.error(err);
+            alert("Failed to finalize week: " + (err.response?.data?.message || err.message));
+        } finally {
+            setIsWeekLoading(false);
+        }
+    };
 
     return (
         <div className="p-6 md:p-10 max-w-7xl mx-auto min-h-screen pb-40 bg-auction-bg text-white font-sans">
@@ -598,6 +631,35 @@ const AdminPage = () => {
                                 {isCreatingTournament ? 'Creating...' : 'Create'}
                             </button>
                         </form>
+                    </div>
+
+                    {/* NEW: Weekly Scoring Management */}
+                    <div className="bg-auction-surface rounded-3xl border border-white/5 overflow-hidden p-6 animate-in slide-in-from-top-2">
+                        <div className="flex items-center gap-4 mb-4">
+                            <div className="p-3 bg-red-500/10 text-red-500 rounded-xl"><RotateCcw size={20} /></div>
+                            <div>
+                                <h3 className="font-bold text-white text-lg">Weekly Scoring Management</h3>
+                                <p className="text-xs text-gray-500 font-medium mt-0.5">Control match weeks and point finalization.</p>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <button
+                                onClick={handleStartWeek}
+                                disabled={isWeekLoading}
+                                className="flex items-center justify-center gap-3 py-4 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold rounded-2xl shadow-lg border border-white/10 transition-all active:scale-95"
+                            >
+                                <Lock size={20} />
+                                Start New Week (Lock Snapshot)
+                            </button>
+                            <button
+                                onClick={handleFinalizeWeek}
+                                disabled={isWeekLoading}
+                                className="flex items-center justify-center gap-3 py-4 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white font-bold rounded-2xl shadow-lg border border-white/10 transition-all active:scale-95"
+                            >
+                                <Check size={20} />
+                                Finalize Week (Freeze Points)
+                            </button>
+                        </div>
                     </div>
 
                     {/* NEW: Tournament Participants & Assignment Card */}

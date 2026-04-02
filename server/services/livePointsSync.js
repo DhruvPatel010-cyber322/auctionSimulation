@@ -122,49 +122,21 @@ async function pollAndUpdate() {
                 continue;
             }
 
-            const updateData = {};
+            // Extract raw points (NO MULTIPLIERS as per User rule)
+            updateData.points = {
+                total: Number(basePoints.toFixed(2)),
+                batting: Number((apiPlayer.bat || 0).toFixed(2)),
+                bowling: Number((apiPlayer.bowl || 0).toFixed(2)),
+                fielding: Number((apiPlayer.field || 0).toFixed(2)),
+                announcement: 0
+            };
+            
+            // Check for playerId update if missing
             if (!dbPlayer.playerId && apiPlayer.player_id) {
                 updateData.playerId = apiPlayer.player_id;
             }
 
-            // Check isInPlaying11 — skip if not in XI
-            if (!dbPlayer.isInPlaying11) {
-                if (Object.keys(updateData).length > 0) {
-                    await Player.findByIdAndUpdate(dbPlayer._id, { $set: updateData });
-                }
-                skipped++;
-                continue;
-            }
-
-            // Extract raw category points
-            let finalPoints   = basePoints;
-            let finalBatting  = Number(apiPlayer.bat) || 0;
-            let finalBowling  = Number(apiPlayer.bowl) || 0;
-            let finalFielding = Number(apiPlayer.field) || 0;
-
-            // Apply C/VC multiplier to all points
-            if (dbPlayer.isCaptain) {
-                finalPoints   *= 2;
-                finalBatting  *= 2;
-                finalBowling  *= 2;
-                finalFielding *= 2;
-            } else if (dbPlayer.isViceCaptain) {
-                finalPoints   *= 1.5;
-                finalBatting  *= 1.5;
-                finalBowling  *= 1.5;
-                finalFielding *= 1.5;
-            }
-
-            // Assign to new points object structure
-            updateData.points = {
-                total: Number(finalPoints.toFixed(2)),
-                batting: Number(finalBatting.toFixed(2)),
-                bowling: Number(finalBowling.toFixed(2)),
-                fielding: Number(finalFielding.toFixed(2)),
-                announcement: 0
-            };
-
-            // Update perMatchPoints array
+            // Update perMatchPoints array (RAW points)
             const matchIdNum = Number(state.matchId);
             let updatedPerMatchPoints = [...(dbPlayer.perMatchPoints || [])];
             const matchIdx = updatedPerMatchPoints.findIndex(m => m.matchId === matchIdNum);
@@ -185,7 +157,7 @@ async function pollAndUpdate() {
             }
             updateData.perMatchPoints = updatedPerMatchPoints;
 
-            // Override points and perMatchPoints ($set — not accumulate)
+            // Update DB with RAW points (Sets Player.points to current match scores)
             await Player.findByIdAndUpdate(dbPlayer._id, {
                 $set: updateData
             });

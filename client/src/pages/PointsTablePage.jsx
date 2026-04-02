@@ -57,6 +57,8 @@ const PointsTablePage = () => {
         };
 
         fetchPoints();
+        const interval = setInterval(fetchPoints, 60000); // 1 min auto-refresh
+        return () => clearInterval(interval);
     }, []);
 
     // Re-sort whenever filter changes
@@ -117,25 +119,32 @@ const PointsTablePage = () => {
                             <tr className="bg-gray-50 border-b border-gray-100 text-xs uppercase text-gray-400 font-bold tracking-wider">
                                 <th className="p-3 md:p-6">Pos</th>
                                 <th className="p-3 md:p-6">Team</th>
-                                <th className="p-3 md:p-6 text-center">Playing XI</th>
-                                <th className={cn('p-3 md:p-6 text-right', activeFilter.color)}>{activeFilter.label}</th>
+                                
+                                {/* Dynamic Week Columns */}
+                                {(() => {
+                                    const maxWeeks = Math.max(0, ...pointsTable.flatMap(t => 
+                                        Object.keys(t.weeklyBreakdown || {}).map(k => parseInt(k.replace('week', '')))
+                                    ));
+                                    return Array.from({ length: maxWeeks }, (_, i) => (
+                                        <th key={i} className="p-3 md:p-6 text-center">Wk {i + 1}</th>
+                                    ));
+                                })()}
+
+                                <th className="p-3 md:p-6 text-center text-blue-600 bg-blue-50/50">Live</th>
+                                <th className={cn('p-3 md:p-6 text-right font-black', activeFilter.color)}>Total Pts</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
                             {sortedTable.map((team, index) => {
                                 const pts = getTeamPoints(team, pointsFilter);
+                                const maxWeeks = Math.max(0, ...pointsTable.flatMap(t => 
+                                    Object.keys(t.weeklyBreakdown || {}).map(k => parseInt(k.replace('week', '')))
+                                ));
+
                                 return (
                                     <tr key={team.id} className="hover:bg-blue-50/50 transition-colors group">
                                         <td className="p-3 md:p-6 font-bold text-gray-400 group-hover:text-blue-600 transition-colors">
-                                            {index === 0 ? (
-                                                <span className="text-yellow-500 text-lg">🥇</span>
-                                            ) : index === 1 ? (
-                                                <span className="text-gray-400 text-lg">🥈</span>
-                                            ) : index === 2 ? (
-                                                <span className="text-amber-600 text-lg">🥉</span>
-                                            ) : (
-                                                `#${index + 1}`
-                                            )}
+                                            {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
                                         </td>
                                         <td className="p-3 md:p-6">
                                             <div className="flex items-center gap-2 md:gap-4">
@@ -148,14 +157,24 @@ const PointsTablePage = () => {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="p-3 md:p-6 text-center">
-                                            <span className={`px-2 py-1 rounded-full text-xs font-bold ${team.playing11Count === 11 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                                {team.playing11Count}/11
+                                        
+                                        {/* Weekly Data Cells */}
+                                        {Array.from({ length: maxWeeks }, (_, i) => (
+                                            <td key={i} className="p-3 md:p-6 text-center font-bold text-gray-500">
+                                                {team.weeklyBreakdown?.[`week${i + 1}`] || '-'}
+                                            </td>
+                                        ))}
+
+                                        <td className="p-3 md:p-6 text-center bg-blue-50/20">
+                                            <span className="font-black text-blue-600">
+                                                +{team.livePoints || 0}
                                             </span>
                                         </td>
+
                                         <td className="p-3 md:p-6 text-right">
-                                            <div className={cn('text-2xl md:text-3xl font-black group-hover:scale-110 transition-transform origin-right', activeFilter.color)}>{pts}</div>
-                                            <div className="text-xs font-bold text-gray-400 uppercase">Pts</div>
+                                            <div className={cn('text-2xl md:text-3xl font-black group-hover:scale-110 transition-transform origin-right', activeFilter.color)}>
+                                                {pts}
+                                            </div>
                                         </td>
                                     </tr>
                                 );

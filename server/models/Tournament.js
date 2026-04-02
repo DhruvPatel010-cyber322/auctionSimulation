@@ -30,7 +30,21 @@ const tournamentSchema = new mongoose.Schema({
     isCaptaincyLocked: {
         type: Boolean,
         default: false
-    }
+    },
+    currentWeek: {
+        type: Number,
+        default: 1
+    },
+    weekStartTime: {
+        type: Date,
+        default: null
+    },
+    weekData: [{
+        week: Number,
+        startTime: Date,
+        endTime: Date,
+        isFinalized: { type: Boolean, default: false }
+    }]
 }, {
     timestamps: true
 });

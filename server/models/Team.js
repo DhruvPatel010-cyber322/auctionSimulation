@@ -69,7 +69,23 @@ const teamSchema = new mongoose.Schema({
     lastLoginAt: {
         type: Date,
         default: null
-    }
+    },
+    // --- WEEKLY SCORING SYSTEM ---
+    totalPoints: {
+        type: Number,
+        default: 0 // Past weeks finalized total
+    },
+    weeklyPoints: [{
+        week: Number,
+        points: Number
+    }],
+    playing11History: [{
+        week: Number,
+        players: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Player' }],
+        captain: { type: mongoose.Schema.Types.ObjectId, ref: 'Player' },
+        viceCaptain: { type: mongoose.Schema.Types.ObjectId, ref: 'Player' },
+        isLocked: { type: Boolean, default: true }
+    }]
 }, {
     timestamps: true
 });

@@ -45,6 +45,7 @@ import { bootstrapDream11Data } from './services/dream11Bootstrap.js';
 import fantasyRoutes from './routes/fantasyRoutes.js';
 import { startLivePointsSync } from './services/livePointsSync.js';
 import { protect, adminOnly } from './middleware/auth.js';
+import { startNewWeek, finalizeWeek } from './utils/weekManager.js';
 dotenv.config();
 
 // Connect to Database
@@ -291,6 +292,27 @@ app.post('/api/auction/end', protect, adminOnly, auctionController.endTurn);
 app.post('/api/auction/next', protect, adminOnly, auctionController.nextPlayer);
 app.post('/api/auction/timer', protect, adminOnly, auctionController.resetTimer);
 app.post('/api/auction/requeue', protect, adminOnly, auctionController.requeueUnsoldPlayer);
+
+// --- ADMIN WEEK MANAGEMENT ---
+app.post('/api/admin/start-week', protect, adminOnly, async (req, res) => {
+    try {
+        const result = await startNewWeek();
+        res.json({ success: true, message: `Week ${result.week} started and Playing 11 locked.`, ...result });
+    } catch (error) {
+        console.error("Start Week Error:", error);
+        res.status(500).json({ message: error.message || 'Failed to start week' });
+    }
+});
+
+app.post('/api/admin/finalize-week', protect, adminOnly, async (req, res) => {
+    try {
+        const result = await finalizeWeek();
+        res.json({ success: true, message: `Week ${result.finalizedWeek} finalized successfully.`, ...result });
+    } catch (error) {
+        console.error("Finalize Week Error:", error);
+        res.status(500).json({ message: error.message || 'Failed to finalize week' });
+    }
+});
 
 // --- V2 AUTH ROUTES (Refactor) ---
 app.use('/api/v2/auth', authRoutes);
