@@ -12,7 +12,7 @@ const EmailLoginPage = () => {
 
     // Called after a successful Firebase Google popup
     const handleGoogleSuccess = async (user) => {
-        const firebaseToken = await user.getIdToken();
+        const firebaseToken = await user.getIdToken(true); // force refresh to guarantee fresh Firebase ID token
         try {
             const res = await fetch(`${API_BASE_URL}/api/v2/auth/login`, {
                 method: 'POST',

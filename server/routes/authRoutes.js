@@ -132,10 +132,12 @@ router.get('/profile-status', protect, async (req, res) => {
         if (!dbUser) return res.status(404).json({ message: 'User not found' });
 
         res.json({
+            _id: dbUser._id,
             hasPassword: !!dbUser.password,
             username: dbUser.username || null,
             email: dbUser.email || null,
-            name: dbUser.name || null
+            name: dbUser.name || null,
+            role: dbUser.role || 'user'
         });
     } catch (err) {
         res.status(500).json({ message: 'Failed to fetch profile status' });

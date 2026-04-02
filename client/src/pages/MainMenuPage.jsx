@@ -23,21 +23,19 @@ const MainMenuPage = () => {
             }
 
             try {
-                const userRes = await fetch(`${API_URL}/api/v2/auth/login`, { 
-                    method: 'POST', 
+                const userRes = await fetch(`${API_URL}/api/v2/auth/profile-status`, { 
+                    method: 'GET', 
                     headers: { 'Authorization': `Bearer ${token}` } 
                 });
 
                 if (userRes.ok) {
                     const userData = await userRes.json();
-                    if (userData.user) {
-                        setUser(userData.user);
-                        if (userData.user.username) {
-                            setUsername(userData.user.username);
-                        } else {
-                            // Automatically show modal if they don't have a username yet
-                            setShowUsernameModal(true);
-                        }
+                    setUser(userData);
+                    if (userData.username) {
+                        setUsername(userData.username);
+                    } else {
+                        // Automatically show modal if they don't have a username yet
+                        setShowUsernameModal(true);
                     }
                 } else {
                     // Token invalid/expired

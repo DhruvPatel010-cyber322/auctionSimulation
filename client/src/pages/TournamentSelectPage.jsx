@@ -35,7 +35,7 @@ const TournamentSelectPage = () => {
                 // Parallel fetch: Tournaments and User Info
                 const [tourRes, userRes] = await Promise.all([
                     fetch(`${API_URL}/api/v2/auth/tournaments`, { headers: { 'Authorization': `Bearer ${token}` } }),
-                    fetch(`${API_URL}/api/v2/auth/login`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } })
+                    fetch(`${API_URL}/api/v2/auth/profile-status`, { headers: { 'Authorization': `Bearer ${token}` } })
                 ]);
 
                 if (tourRes.ok) {
@@ -45,9 +45,7 @@ const TournamentSelectPage = () => {
 
                 if (userRes.ok) {
                     const userData = await userRes.json();
-                    if (userData.user) {
-                        setUserRole(userData.user.role || 'USER'); // Set role regardless of username
-                    }
+                    setUserRole(userData.role || 'user'); // profile-status returns role directly
                 }
 
             } catch (err) {
