@@ -147,6 +147,43 @@ const TeamsPage = () => {
         }
     }, [socket, user]);
 
+    // Fetch squad (playersBought) whenever selected team changes
+    // The /teams endpoint deliberately omits populated players for speed;
+    // this separate fetch loads them on demand per selected team.
+    useEffect(() => {
+        if (!selectedTeam) return;
+        const tournamentId = user?.tournamentId;
+        const token = localStorage.getItem('token');
+        if (!tournamentId || !token) return;
+
+        const teamCode = selectedTeam.id || selectedTeam.code;
+        if (!teamCode) return;
+
+        // Only fetch if playersBought is not yet populated (avoid double-fetching)
+        if (selectedTeam.playersBought && selectedTeam.playersBought.length > 0 && typeof selectedTeam.playersBought[0] === 'object') return;
+
+        const fetchSquad = async () => {
+            try {
+                const res = await fetch(
+                    `${API_URL}/api/v2/auth/tournaments/${tournamentId}/teams/${teamCode}/squad`,
+                    { headers: { 'Authorization': `Bearer ${token}` } }
+                );
+                if (!res.ok) return;
+                const data = await res.json();
+                // Merge populated players into selectedTeam
+                setSelectedTeam(prev => {
+                    if (!prev) return prev;
+                    const id = prev.id || prev.code;
+                    if (id?.toLowerCase() !== teamCode?.toLowerCase()) return prev; // stale
+                    return { ...prev, playersBought: data.players || [] };
+                });
+            } catch (e) {
+                console.error('Failed to fetch squad for team:', teamCode, e);
+            }
+        };
+        fetchSquad();
+    }, [selectedTeam?.id, selectedTeam?.code, user?.tournamentId]);
+
     // Group Players Logic
     const getGroupedPlayers = (players) => {
         if (!players) return { Batsman: [], Bowler: [], 'All Rounder': [], 'Wicket Keeper': [] };
