@@ -155,4 +155,6 @@ server/point\ system/
 # Modules and Pipelines
 dream-11-module/
 server/pipeline/
-server/point\ system.zip
+server/point\ system.zip
+
+server/api_docs.md

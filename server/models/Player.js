@@ -72,21 +72,20 @@ const playerSchema = new mongoose.Schema({
         default: null
     },
     points: {
-        type: Number,
-        default: 0
+        total: { type: Number, default: 0 },
+        batting: { type: Number, default: 0 },
+        bowling: { type: Number, default: 0 },
+        fielding: { type: Number, default: 0 },
+        announcement: { type: Number, default: 0 }
     },
-    battingPoints: {
-        type: Number,
-        default: 0
-    },
-    bowlingPoints: {
-        type: Number,
-        default: 0
-    },
-    fieldingPoints: {
-        type: Number,
-        default: 0
-    },
+    perMatchPoints: [{
+        matchId: { type: Number, required: true },
+        total: { type: Number, default: 0 },
+        batting: { type: Number, default: 0 },
+        bowling: { type: Number, default: 0 },
+        fielding: { type: Number, default: 0 },
+        announcement: { type: Number, default: 0 }
+    }],
     // ── Fantasy Selection Status (auto-updated when team saves Playing XI) ──
     isInPlaying11: {
         type: Boolean,

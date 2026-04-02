@@ -155,13 +155,37 @@ async function pollAndUpdate() {
                 finalFielding *= 1.5;
             }
 
-            // Assign to update object
-            updateData.points         = Number(finalPoints.toFixed(2));
-            updateData.battingPoints  = Number(finalBatting.toFixed(2));
-            updateData.bowlingPoints  = Number(finalBowling.toFixed(2));
-            updateData.fieldingPoints = Number(finalFielding.toFixed(2));
+            // Assign to new points object structure
+            updateData.points = {
+                total: Number(finalPoints.toFixed(2)),
+                batting: Number(finalBatting.toFixed(2)),
+                bowling: Number(finalBowling.toFixed(2)),
+                fielding: Number(finalFielding.toFixed(2)),
+                announcement: 0
+            };
 
-            // Override points ($set — not accumulate)
+            // Update perMatchPoints array
+            const matchIdNum = Number(state.matchId);
+            let updatedPerMatchPoints = [...(dbPlayer.perMatchPoints || [])];
+            const matchIdx = updatedPerMatchPoints.findIndex(m => m.matchId === matchIdNum);
+            
+            const matchPointsEntry = {
+                matchId: matchIdNum,
+                total: updateData.points.total,
+                batting: updateData.points.batting,
+                bowling: updateData.points.bowling,
+                fielding: updateData.points.fielding,
+                announcement: 0
+            };
+
+            if (matchIdx !== -1) {
+                updatedPerMatchPoints[matchIdx] = matchPointsEntry;
+            } else {
+                updatedPerMatchPoints.push(matchPointsEntry);
+            }
+            updateData.perMatchPoints = updatedPerMatchPoints;
+
+            // Override points and perMatchPoints ($set — not accumulate)
             await Player.findByIdAndUpdate(dbPlayer._id, {
                 $set: updateData
             });

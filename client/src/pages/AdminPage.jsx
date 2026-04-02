@@ -47,6 +47,12 @@ const AdminPage = () => {
     const [isSyncing, setIsSyncing] = useState(false);
     const [syncStatus, setSyncStatus] = useState(null); // { success: bool, message: string }
 
+    // Match Tools State
+    const [fantasyMatches, setFantasyMatches] = useState([]);
+    const [selectedManualMatchId, setSelectedManualMatchId] = useState('');
+    const [isManualTargetSync, setIsManualTargetSync] = useState(false);
+    const [isSummingPoints, setIsSummingPoints] = useState(false);
+
     const handleCreateTournament = async (e) => {
         e.preventDefault();
         if (!newTournamentName.trim()) return;
@@ -88,7 +94,27 @@ const AdminPage = () => {
     // Keep context for backend compatibility
     useEffect(() => {
         fetchTournaments();
+        fetchMatches();
     }, []);
+
+    const fetchMatches = async () => {
+        const firebaseToken = (localStorage.getItem('firebase_token') || localStorage.getItem('token'));
+        if (!firebaseToken) return;
+        try {
+            const res = await fetch(`${API_URL}/api/fantasy/matches`, {
+                headers: { 'Authorization': `Bearer ${firebaseToken}` }
+            });
+            const data = await res.json();
+            setFantasyMatches(data);
+            if (data && data.length > 0) {
+                // Pre-select most recent/upcoming by finding first not completed or last
+                const target = data.find(m => m.status !== 'Completed') || data[data.length - 1];
+                if (target) setSelectedManualMatchId(target.matchId);
+            }
+        } catch (err) {
+            console.error("Failed to fetch matches:", err);
+        }
+    };
 
     // Fetch Tournaments
     const fetchTournaments = async () => {
@@ -384,6 +410,67 @@ const AdminPage = () => {
         } finally {
             setIsSyncing(false);
             // Clear status after 5s
+            setTimeout(() => setSyncStatus(null), 5000);
+        }
+    };
+
+    const handleTargetedSync = async () => {
+        if (!selectedManualMatchId) return alert("Select a Match ID first.");
+        if (!window.confirm(`Run syncManualPoints script for match ID ${selectedManualMatchId}?`)) return;
+        
+        setIsManualTargetSync(true);
+        setSyncStatus(null);
+        
+        const firebaseToken = (localStorage.getItem('firebase_token') || localStorage.getItem('token'));
+        try {
+            const res = await fetch(`${API_URL}/api/fantasy/admin/sync-manual-match/${selectedManualMatchId}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${firebaseToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setSyncStatus({ success: true, message: data.message });
+            } else {
+                setSyncStatus({ success: false, message: data.message || "Failed to trigger targeted sync" });
+            }
+        } catch (err) {
+            console.error(err);
+            setSyncStatus({ success: false, message: "Network Error" });
+        } finally {
+            setIsManualTargetSync(false);
+            setTimeout(() => setSyncStatus(null), 5000);
+        }
+    };
+
+    const handleSumPoints = async () => {
+        if (!window.confirm(`Run sumPerMatchPoints to recalculate and overwrite all players' points from their perMatchPoints history?`)) return;
+        
+        setIsSummingPoints(true);
+        setSyncStatus(null);
+        
+        const firebaseToken = (localStorage.getItem('firebase_token') || localStorage.getItem('token'));
+        try {
+            const res = await fetch(`${API_URL}/api/fantasy/admin/sum-per-match-points`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${firebaseToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setSyncStatus({ success: true, message: data.message });
+            } else {
+                setSyncStatus({ success: false, message: data.message || "Failed to trigger sum operation" });
+            }
+        } catch (err) {
+            console.error(err);
+            setSyncStatus({ success: false, message: "Network Error" });
+        } finally {
+            setIsSummingPoints(false);
             setTimeout(() => setSyncStatus(null), 5000);
         }
     };
@@ -688,7 +775,7 @@ const AdminPage = () => {
                             
                             {syncStatus && (
                                 <div className={cn(
-                                    "p-3 rounded-xl text-[10px] font-bold text-center animate-in fade-in zoom-in-95",
+                                    "p-3 rounded-xl text-[10px] font-bold text-center animate-in fade-in zoom-in-95 mt-3",
                                     syncStatus.success ? "bg-green-500/10 text-green-500 border border-green-500/20" : "bg-red-500/10 text-red-500 border border-red-500/20"
                                 )}>
                                     {syncStatus.message}
@@ -696,7 +783,51 @@ const AdminPage = () => {
                             )}
                         </div>
 
-                        <div className="pt-2">
+                    </div>
+
+                    {/* NEW: Points Data Tools */}
+                    <div className="bg-auction-surface p-6 rounded-3xl border border-white/5 space-y-4">
+                        <h3 className="font-bold text-white border-b border-white/5 pb-2 text-xs uppercase tracking-widest text-gray-500">Points & Sync Tools</h3>
+
+                        <div className="space-y-3">
+                            <label className="text-[10px] font-bold text-gray-500 uppercase block mb-1">Targeted Match Sync</label>
+                            <select
+                                className="w-full p-3 mb-2 bg-white/5 border border-white/10 rounded-xl text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-auction-secondary/50"
+                                value={selectedManualMatchId}
+                                onChange={e => setSelectedManualMatchId(e.target.value)}
+                            >
+                                <option value="" className="bg-gray-900">Select Match ID...</option>
+                                {fantasyMatches.map(m => (
+                                    <option key={m._id} value={m.matchId} className="bg-gray-900">{m.matchId} - {m.matchName}</option>
+                                ))}
+                            </select>
+
+                            <button 
+                                onClick={handleTargetedSync} 
+                                disabled={isManualTargetSync || !selectedManualMatchId}
+                                className={cn(
+                                    "w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 text-sm transition-all border",
+                                    isManualTargetSync ? "bg-white/5 text-gray-500 cursor-not-allowed border-white/5" : "bg-purple-600/10 text-purple-400 border-purple-500/20 hover:bg-purple-600/20 hover:text-white"
+                                )}
+                            >
+                                <RotateCcw size={16} className={isManualTargetSync ? "animate-spin" : ""} />
+                                {isManualTargetSync ? 'Syncing...' : 'Sync Selected Match'}
+                            </button>
+
+                            <button 
+                                onClick={handleSumPoints} 
+                                disabled={isSummingPoints}
+                                className={cn(
+                                    "w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 text-sm transition-all border mt-4",
+                                    isSummingPoints ? "bg-white/5 text-gray-500 cursor-not-allowed border-white/5" : "bg-teal-500/10 text-teal-400 border-teal-500/20 hover:bg-teal-500/20 hover:text-white"
+                                )}
+                            >
+                                <Users size={16} className={isSummingPoints ? "animate-bounce" : ""} />
+                                {isSummingPoints ? 'Aggregating...' : 'Overwrite All Points with Sum'}
+                            </button>
+                        </div>
+
+                        <div className="pt-2 border-t border-white/5 mt-4">
                              <button onClick={() => setShowUnsoldModal(true)} className="w-full py-4 bg-white/5 text-gray-300 border-2 border-dashed border-white/10 rounded-xl font-bold hover:border-white/30 hover:bg-white/10 flex items-center justify-center gap-2 text-sm transition-all">
                                 <RotateCcw size={16} /> Manage Unsold ({unsoldPlayers.length})
                             </button>

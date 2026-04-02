@@ -435,3 +435,40 @@ export const manualTriggerSyncHandler = async (req, res) => {
         res.status(500).json({ message: 'Failed to trigger manual sync.' });
     }
 };
+
+import { exec } from 'child_process';
+import util from 'util';
+const execPromise = util.promisify(exec);
+
+export const triggerSumPerMatchPoints = async (req, res) => {
+    try {
+        console.log('Triggering sumPerMatchPoints script...');
+        // Run the script using node
+        const { stdout, stderr } = await execPromise('node server/scripts/sumPerMatchPoints.js');
+        if (stderr && !stdout.includes('Success')) {
+            console.warn('sumPerMatchPoints stderr:', stderr);
+        }
+        res.json({ success: true, message: 'Successfully aggregated per-match points.', output: stdout });
+    } catch (error) {
+        console.error('Failed to trigger sumPerMatchPoints:', error);
+        res.status(500).json({ message: 'Failed to aggregate points.', error: error.message });
+    }
+};
+
+export const triggerSyncManualPoints = async (req, res) => {
+    try {
+        const { matchId } = req.params;
+        if (!matchId) {
+            return res.status(400).json({ message: 'Match ID is required.' });
+        }
+        console.log(`Triggering syncManualPoints script for match ${matchId}...`);
+        const { stdout, stderr } = await execPromise(`node server/scripts/syncManualPoints.js ${matchId}`);
+        if (stderr && !stdout.includes('Updated')) {
+            console.warn('syncManualPoints stderr:', stderr);
+        }
+        res.json({ success: true, message: `Successfully synced manual points for match ${matchId}.`, output: stdout });
+    } catch (error) {
+        console.error(`Failed to trigger syncManualPoints for match ${req.params.matchId}:`, error);
+        res.status(500).json({ message: 'Failed to sync manual points.', error: error.message });
+    }
+};
