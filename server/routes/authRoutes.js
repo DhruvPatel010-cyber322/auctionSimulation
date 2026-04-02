@@ -1040,7 +1040,7 @@ router.get('/tournaments/:id/my-squad', protect, async (req, res) => {
 });
 
 // 9. Public Squad View (For "View Other Team")
-router.get('/tournaments/:id/teams/:teamCode/squad', firebaseAuth, async (req, res) => {
+router.get('/tournaments/:id/teams/:teamCode/squad', protect, async (req, res) => {
     const { teamCode, id: tournamentId } = req.params;
 
     try {
@@ -1069,6 +1069,6 @@ router.get('/tournaments/:id/teams/:teamCode/squad', firebaseAuth, async (req, r
 });
 
 // 10. Points Table
-router.get('/tournaments/:id/points-table', firebaseAuth, teamController.getPointsTable);
+router.get('/tournaments/:id/points-table', protect, teamController.getPointsTable);
 
 export default router;
