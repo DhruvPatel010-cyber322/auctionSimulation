@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
                     if (isExpired) {
                         // Token is expired — clear session and let user log in again
                         localStorage.removeItem('token');
-                        localStorage.removeItem('firebase_token');
+
                         localStorage.removeItem('user');
                     } else {
                         // Token is valid — restore user immediately, no server call needed

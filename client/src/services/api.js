@@ -33,7 +33,6 @@ api.interceptors.response.use(
         // Check if server sent forceLogout flag (session invalid)
         if (error.response?.data?.forceLogout) {
             localStorage.removeItem('token');
-            localStorage.removeItem('firebase_token');
             localStorage.removeItem('user');
             window.location.href = '/email-login?reason=session_expired';
         }

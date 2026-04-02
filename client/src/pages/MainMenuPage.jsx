@@ -16,7 +16,7 @@ const MainMenuPage = () => {
 
     useEffect(() => {
         const initValues = async () => {
-            const token = (localStorage.getItem('firebase_token') || localStorage.getItem('token'));
+            const token = localStorage.getItem('token');
             if (!token) {
                 navigate('/email-login');
                 return;
@@ -55,7 +55,7 @@ const MainMenuPage = () => {
     const handleSaveUsername = async () => {
         if (!newUsername.trim()) return;
         setError('');
-        const token = (localStorage.getItem('firebase_token') || localStorage.getItem('token'));
+        const token = localStorage.getItem('token');
         
         try {
             const res = await fetch(`${API_URL}/api/v2/auth/set-username`, {
@@ -81,7 +81,7 @@ const MainMenuPage = () => {
 
     const handleLogout = () => {
         localStorage.removeItem('token');
-        localStorage.removeItem('firebase_token');
+
         localStorage.removeItem('user');
         navigate('/email-login');
     };

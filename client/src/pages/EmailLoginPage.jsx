@@ -23,7 +23,7 @@ const EmailLoginPage = () => {
             if (res.ok && data.success) {
                 // Unify session tokens: local and google both now securely rely on backend JWT token
                 localStorage.setItem('token', data.token);
-                localStorage.setItem('firebase_token', data.token); // Keep for legacy component compatibility
+ // Keep for legacy component compatibility
                 localStorage.setItem('user', JSON.stringify(data.user)); // Store user for AuthContext
                 
                 // Hard redirect to force AuthContext to re-mount and pick up the new tokens and user
@@ -53,7 +53,7 @@ const EmailLoginPage = () => {
             if (res.ok && data.success) {
                 // Ensure BOTH keys hold our native JWT token to prevent logout desyncs
                 localStorage.setItem('token', data.token);
-                localStorage.setItem('firebase_token', data.token);
+
                 localStorage.setItem('user', JSON.stringify(data.user)); // Store user for AuthContext
                 
                 // Hard redirect to force AuthContext to re-mount and pick up the new tokens and user

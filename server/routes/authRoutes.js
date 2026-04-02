@@ -19,6 +19,7 @@ import Player from '../models/Player.js';
 import Team from '../models/Team.js'; // Singleton Team Model
 import { TEAMS } from '../data/teams.js'; // Static configs
 import { firebaseAuth } from '../middleware/firebaseAuth.js';
+import { protect } from '../middleware/auth.js';
 import * as teamController from '../controllers/teamController.js';
 import AuctionState from '../models/AuctionState.js';
 
@@ -40,7 +41,10 @@ router.post('/login', firebaseAuth, (req, res) => {
     // Generate token equivalent to /login-local so frontend has a unified token schema
     const token = jwt.sign({
         userId: req.user._id,
-        role: req.user.role
+        role: req.user.role,
+        teamCode: null,
+        tournamentId: null,
+        sessionId: null
     }, process.env.JWT_SECRET, { expiresIn: '24h' });
 
     res.json({
@@ -58,7 +62,7 @@ router.post('/login', firebaseAuth, (req, res) => {
 });
 
 // 1.5 Set Username
-router.post('/set-username', firebaseAuth, async (req, res) => {
+router.post('/set-username', protect, async (req, res) => {
     const { username } = req.body;
     if (!username || username.length < 3) {
         return res.status(400).json({ message: 'Username must be at least 3 characters' });
@@ -71,10 +75,13 @@ router.post('/set-username', firebaseAuth, async (req, res) => {
             return res.status(409).json({ message: 'Username already taken' });
         }
 
-        req.user.username = username.toLowerCase();
-        await req.user.save();
+        const user = await User.findById(req.user.userId);
+        if (!user) return res.status(404).json({ message: 'User not found' });
 
-        res.json({ success: true, username: req.user.username });
+        user.username = username.toLowerCase();
+        await user.save();
+
+        res.json({ success: true, username: user.username });
     } catch (err) {
         if (err.code === 11000) {
             return res.status(409).json({ message: 'Username already taken' });
@@ -84,14 +91,14 @@ router.post('/set-username', firebaseAuth, async (req, res) => {
 });
 
 // 1.6 Set Password (also handles change password — verifies currentPassword if user already has one)
-router.post('/set-password', authLimiter, firebaseAuth, async (req, res) => {
+router.post('/set-password', authLimiter, protect, async (req, res) => {
     const { password, currentPassword } = req.body;
     if (!password || password.length < 6) {
         return res.status(400).json({ message: 'Password must be at least 6 characters' });
     }
 
     try {
-        const userId = req.user._id;
+        const userId = req.user.userId;
         const dbUser = await User.findById(userId).select('+password');
         if (!dbUser) return res.status(404).json({ message: 'User not found' });
 
@@ -109,7 +116,7 @@ router.post('/set-password', authLimiter, firebaseAuth, async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         dbUser.password = await bcrypt.hash(password, salt);
         await dbUser.save();
-        
+
         res.json({ success: true, message: 'Password updated successfully' });
     } catch (err) {
         console.error('Set Password Error:', err);
@@ -118,9 +125,9 @@ router.post('/set-password', authLimiter, firebaseAuth, async (req, res) => {
 });
 
 // 1.65 Profile Status — tells the client whether the user has a password set
-router.get('/profile-status', firebaseAuth, async (req, res) => {
+router.get('/profile-status', protect, async (req, res) => {
     try {
-        const userId = req.user._id;
+        const userId = req.user.userId;
         const dbUser = await User.findById(userId).select('+password');
         if (!dbUser) return res.status(404).json({ message: 'User not found' });
 
@@ -144,8 +151,8 @@ router.post('/login-local', async (req, res) => {
     }
 
     try {
-        const user = await User.findOne({ 
-            $or: [{ username: username.toLowerCase() }, { email: username.toLowerCase() }] 
+        const user = await User.findOne({
+            $or: [{ username: username.toLowerCase() }, { email: username.toLowerCase() }]
         }).select('+password');
 
         if (!user || !user.password) {
@@ -160,7 +167,10 @@ router.post('/login-local', async (req, res) => {
 
         const token = jwt.sign({
             userId: user._id,
-            role: user.role
+            role: user.role,
+            teamCode: null,
+            tournamentId: null,
+            sessionId: null
         }, process.env.JWT_SECRET, { expiresIn: '24h' });
 
         res.json({
@@ -182,12 +192,12 @@ router.post('/login-local', async (req, res) => {
 });
 
 // 2. List Tournaments
-router.get('/tournaments', firebaseAuth, async (req, res) => {
+router.get('/tournaments', protect, async (req, res) => {
     try {
         const tournaments = await Tournament.find({ status: { $in: ['OPEN', 'ACTIVE', 'RUNNING'] } }).lean();
-        
+
         // Find user assignments
-        const assignments = await TournamentUser.find({ user: req.user._id }).lean();
+        const assignments = await TournamentUser.find({ user: req.user.userId }).lean();
         const assignedTournamentIds = new Map(assignments.map(a => [a.tournament.toString(), a.teamCode]));
 
         const enrichedTournaments = tournaments.map(t => {
@@ -207,7 +217,7 @@ router.get('/tournaments', firebaseAuth, async (req, res) => {
 
 // 2.2 Delete Tournament
 // 2.2 Delete Tournament (AND RESET GAME DATA)
-router.delete('/tournaments/:id', firebaseAuth, async (req, res) => {
+router.delete('/tournaments/:id', protect, async (req, res) => {
     if (req.user.role !== 'admin') {
         return res.status(403).json({ message: 'Access Denied: Only admins can delete tournaments.' });
     }
@@ -268,7 +278,7 @@ router.delete('/tournaments/:id', firebaseAuth, async (req, res) => {
 });
 
 // 2.5 Create Tournament
-router.post('/create-tournament', firebaseAuth, async (req, res) => {
+router.post('/create-tournament', protect, async (req, res) => {
     const { name, accessCode, selectionMode } = req.body;
 
     if (!name || !accessCode) {
@@ -284,7 +294,7 @@ router.post('/create-tournament', firebaseAuth, async (req, res) => {
             name,
             accessCode,
             selectionMode: selectionMode || 'USER_CHOICE',
-            createdBy: req.user._id
+            createdBy: req.user.userId
         });
         res.json({ success: true, tournament });
     } catch (err) {
@@ -294,13 +304,13 @@ router.post('/create-tournament', firebaseAuth, async (req, res) => {
 });
 
 // 3. Join Tournament (Check Code)
-router.post('/tournaments/:id/join', firebaseAuth, async (req, res) => {
+router.post('/tournaments/:id/join', protect, async (req, res) => {
     const { accessCode } = req.body;
     try {
         const tournament = await Tournament.findById(req.params.id);
         if (!tournament) return res.status(404).json({ message: 'Tournament not found' });
 
-        const userId = req.user._id;
+        const userId = req.user.userId;
 
         // Check if user is ALREADY assigned to this tournament/team
         const existingAssignment = await TournamentUser.findOne({
@@ -350,6 +360,9 @@ router.post('/tournaments/:id/join', firebaseAuth, async (req, res) => {
 
                 const teamConfig = TEAMS.find(t => t.id === dbTeam.code.toLowerCase()) || {};
 
+                // Fetch username since it's not in the token payload anymore
+                const userDoc = await User.findById(userId);
+
                 return res.json({
                     success: true,
                     message: 'Access Granted (Auto-Login)',
@@ -363,7 +376,7 @@ router.post('/tournaments/:id/join', firebaseAuth, async (req, res) => {
                         role: userRole,
                         code: dbTeam.code,
                         logo: dbTeam.logo,
-                        username: req.user.username
+                        username: userDoc ? userDoc.username : null
                     }
                 });
             }
@@ -377,7 +390,7 @@ router.post('/tournaments/:id/join', firebaseAuth, async (req, res) => {
 });
 
 // 3.5 Admin Assign Team
-router.post('/tournaments/:id/assign-team', firebaseAuth, async (req, res) => {
+router.post('/tournaments/:id/assign-team', protect, async (req, res) => {
     const { userId, teamCode } = req.body;
     const tournamentId = req.params.id;
 
@@ -408,7 +421,7 @@ router.post('/tournaments/:id/assign-team', firebaseAuth, async (req, res) => {
 });
 
 // 3.8 Admin Create Tournament
-router.post('/tournaments/create', firebaseAuth, async (req, res) => {
+router.post('/tournaments/create', protect, async (req, res) => {
     if (req.user.role !== 'admin') {
         return res.status(403).json({ message: 'Only admins can create tournaments' });
     }
@@ -421,7 +434,7 @@ router.post('/tournaments/create', firebaseAuth, async (req, res) => {
         const newTournament = new Tournament({
             name,
             accessCode: generatedAccessCode,
-            createdBy: req.user._id,
+            createdBy: req.user.userId,
             status: 'OPEN'
         });
         await newTournament.save();
@@ -433,7 +446,7 @@ router.post('/tournaments/create', firebaseAuth, async (req, res) => {
 });
 
 // 3.9 Admin Toggle Playing XI Lock
-router.put('/tournaments/:id/lock-playing-xi', firebaseAuth, async (req, res) => {
+router.put('/tournaments/:id/lock-playing-xi', protect, async (req, res) => {
     const tournamentId = req.params.id;
     if (req.user.role !== 'admin') {
         return res.status(403).json({ message: 'Only admins can toggle the Playing XI lock' });
@@ -457,7 +470,7 @@ router.put('/tournaments/:id/lock-playing-xi', firebaseAuth, async (req, res) =>
 });
 
 // 3.10 Admin Toggle Captaincy Lock
-router.put('/tournaments/:id/lock-captaincy', firebaseAuth, async (req, res) => {
+router.put('/tournaments/:id/lock-captaincy', protect, async (req, res) => {
     const tournamentId = req.params.id;
     if (req.user.role !== 'admin') {
         return res.status(403).json({ message: 'Only admins can toggle the Captaincy lock' });
@@ -481,7 +494,7 @@ router.put('/tournaments/:id/lock-captaincy', firebaseAuth, async (req, res) => 
 });
 
 // 3.11 Admin Clear All Playing 11
-router.post('/tournaments/:id/clear-all-playing11', firebaseAuth, async (req, res) => {
+router.post('/tournaments/:id/clear-all-playing11', protect, async (req, res) => {
     if (req.user.role !== 'admin') {
         return res.status(403).json({ message: 'Only admins can clear all playing 11' });
     }
@@ -504,7 +517,7 @@ router.post('/tournaments/:id/clear-all-playing11', firebaseAuth, async (req, re
 });
 
 // 4. Get Teams Availability for a Tournament
-router.get('/tournaments/:id/teams', firebaseAuth, async (req, res) => {
+router.get('/tournaments/:id/teams', protect, async (req, res) => {
     console.log(`[API] Fetching teams for tournament: ${req.params.id}`);
     try {
         const tournamentId = req.params.id;
@@ -519,7 +532,7 @@ router.get('/tournaments/:id/teams', firebaseAuth, async (req, res) => {
             Team.find({}).lean(), // Optimized: Removed heavy .populate('playersBought') as it delays initial page load 
             TournamentUser.findOne({
                 tournament: tournamentId,
-                user: req.user._id
+                user: req.user.userId
             }).lean()
         ]);
 
@@ -567,10 +580,10 @@ router.get('/tournaments/:id/teams', firebaseAuth, async (req, res) => {
 });
 
 // 5. Select Team (The Core Logic)
-router.post('/tournaments/:id/select-team', firebaseAuth, async (req, res) => {
+router.post('/tournaments/:id/select-team', protect, async (req, res) => {
     const { teamCode } = req.body;
     const tournamentId = req.params.id;
-    const userId = req.user._id;
+    const userId = req.user.userId;
 
     if (!teamCode) return res.status(400).json({ message: 'Team Code Required' });
 
@@ -654,12 +667,15 @@ router.post('/tournaments/:id/select-team', firebaseAuth, async (req, res) => {
         // We find static config for colors etc.
         const teamConfig = TEAMS.find(t => t.id === dbTeam.code.toLowerCase()) || {};
 
+        // Fetch username
+        const userDoc = await User.findById(userId);
+
         // 5. Emit Real-time Event
         if (req.io) {
             req.io.emit('tournament:team_taken', {
                 tournamentId,
                 teamCode: dbTeam.code,
-                ownerUsername: req.user.username,
+                ownerUsername: userDoc ? userDoc.username : null,
                 userId: userId
             });
         }
@@ -675,7 +691,7 @@ router.post('/tournaments/:id/select-team', firebaseAuth, async (req, res) => {
                 role: userRole,
                 code: dbTeam.code,
                 logo: dbTeam.logo,
-                username: req.user.username
+                username: userDoc ? userDoc.username : null
             }
         });
 
@@ -921,7 +937,7 @@ router.post('/tournaments/:id/playing11', firebaseAuth, async (req, res) => {
             }
         }
         // 5. Check Captain and Vice-Captain if provided
-        
+
         // Captaincy Lock Logic: If Captaincy is locked, Force Overwrite payload values with Team DB values
         if (tournament.isCaptaincyLocked) {
             selectedCaptain = team.captain;
@@ -1018,7 +1034,7 @@ router.get('/tournaments/:id/teams/:teamCode/squad', firebaseAuth, async (req, r
             .populate('playing11');
 
         if (!team) return res.status(404).json({ message: 'Team not found.' });
-        
+
         const tournament = await Tournament.findById(tournamentId).select('isPlayingXILocked isCaptaincyLocked');
 
         res.json({

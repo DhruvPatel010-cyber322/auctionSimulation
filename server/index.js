@@ -44,6 +44,7 @@ import { connectDream11DB } from './config/dream11Db.js';
 import { bootstrapDream11Data } from './services/dream11Bootstrap.js';
 import fantasyRoutes from './routes/fantasyRoutes.js';
 import { startLivePointsSync } from './services/livePointsSync.js';
+import { protect, adminOnly } from './middleware/auth.js';
 dotenv.config();
 
 // Connect to Database
@@ -76,95 +77,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Auth Middleware
-const protect = async (req, res, next) => {
-  let token;
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-    try {
-      token = req.headers.authorization.split(' ')[1];
-      
-      // Try verify with Firebase First (for V2 integrated users)
-      let decoded;
-      try {
-        const firebaseUser = await firebaseAdmin.auth().verifyIdToken(token);
-        // Find Mongo User
-        const user = await User.findOne({ firebaseUid: firebaseUser.uid });
-        if (user) {
-          decoded = {
-             userId: user._id,
-             role: user.role,
-             teamCode: user.role === 'admin' ? 'admin' : (req.body?.teamId || null) // Partial reconstruction
-          };
-        }
-      } catch (fbErr) {
-        // Fallback to local JWT
-        decoded = jwt.verify(token, process.env.JWT_SECRET);
-      }
-
-      if (!decoded) throw new Error('Invalid Token');
-
-      // Admin and Spectator bypass session validation
-      if (decoded.role === 'admin' || decoded.role === 'spectator') {
-        req.user = decoded;
-        return next();
-      }
-
-      // Team session validation
-      const teamCodeFromToken = decoded.teamCode;
-      if (!teamCodeFromToken) {
-        console.error('[Protect] Token missing teamCode');
-        return res.status(401).json({ message: 'Invalid token structure' });
-      }
-
-      const normalizedCode = teamCodeFromToken.toUpperCase();
-      const team = await Team.findOne({ code: normalizedCode });
-      
-      if (!team) {
-        console.error(`[Protect] Team not found for code: ${normalizedCode}`);
-        return res.status(401).json({ message: 'Team not found', forceLogout: true });
-      }
-
-      // Check for Multi-Tournament Flow
-      if (decoded.tournamentId) {
-        req.user = {
-          teamCode: normalizedCode,
-          role: decoded.role,
-          tournamentId: decoded.tournamentId,
-          userId: decoded.userId
-        };
-        return next();
-      }
-
-      // Legacy Session Validation
-      if (team.activeSessionId !== decoded.sessionId) {
-        return res.status(401).json({
-          message: 'Session invalid. You have been logged out from another location.',
-          forceLogout: true
-        });
-      }
-
-      req.user = {
-        teamCode: normalizedCode,
-        role: decoded.role,
-        sessionId: decoded.sessionId
-      };
-      next();
-    } catch (error) {
-      console.error('Token Failed:', error.message);
-      res.status(401).json({ message: 'Not authorized, token failed' });
-    }
-  } else {
-    res.status(401).json({ message: 'Not authorized, no token' });
-  }
-};
-
-const adminOnly = (req, res, next) => {
-  if (req.user && req.user.role === 'admin') {
-    next();
-  } else {
-    res.status(403).json({ message: 'Admin access required' });
-  }
-};
+// Auth Middleware - now imported from ./middleware/auth.js
 
 // --- AUTH API ---
 app.post('/api/auth/login', async (req, res) => {
@@ -244,7 +157,9 @@ app.post('/api/auth/login', async (req, res) => {
     const token = jwt.sign({
       teamCode: dbTeam.code, // Ensure we use DB code (should be uppercase)
       role: 'team',
-      sessionId
+      sessionId,
+      userId: null,
+      tournamentId: null
     }, process.env.JWT_SECRET, { expiresIn: '5d' });
 
     res.json({

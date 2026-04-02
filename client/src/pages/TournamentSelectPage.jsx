@@ -25,7 +25,7 @@ const TournamentSelectPage = () => {
 
     useEffect(() => {
         const initValues = async () => {
-            const token = (localStorage.getItem('firebase_token') || localStorage.getItem('token'));
+            const token = localStorage.getItem('token');
             if (!token) {
                 navigate('/email-login');
                 return;
@@ -66,7 +66,7 @@ const TournamentSelectPage = () => {
         const tourney = targetTournament || selectedTournament;
         if (!tourney) return;
 
-        const token = (localStorage.getItem('firebase_token') || localStorage.getItem('token'));
+        const token = localStorage.getItem('token');
         try {
             const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${tourney._id}/join`, {
                 method: 'POST',
@@ -109,7 +109,7 @@ const TournamentSelectPage = () => {
         setCreating(true);
         setError('');
 
-        const token = (localStorage.getItem('firebase_token') || localStorage.getItem('token'));
+        const token = localStorage.getItem('token');
         try {
             const res = await fetch(`${API_URL}/api/v2/auth/create-tournament`, {
                 method: 'POST',
@@ -147,7 +147,7 @@ const TournamentSelectPage = () => {
             return;
         }
 
-        const token = (localStorage.getItem('firebase_token') || localStorage.getItem('token'));
+        const token = localStorage.getItem('token');
         try {
             const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${tournamentId}`, {
                 method: 'DELETE',
