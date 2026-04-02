@@ -13,13 +13,11 @@ const tradeSchema = new mongoose.Schema({
     },
     offerPlayers: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Player',
-        required: true
+        ref: 'Player'
     }],
     requestPlayers: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Player',
-        required: true
+        ref: 'Player'
     }],
     status: {
         type: String,

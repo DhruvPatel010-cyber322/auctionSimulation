@@ -75,10 +75,23 @@ export const createProposal = async (req, res) => {
                 { offerPlayers: { $in: allInvolvedPlayerIds } },
                 { requestPlayers: { $in: allInvolvedPlayerIds } }
             ]
-        });
+        }).populate('offerPlayers', 'name').populate('requestPlayers', 'name');
 
         if (playerInPendingTrade) {
-            return res.status(400).json({ message: 'One or more selected players are already involved in an active pending trade proposal.' });
+            // Find which specific players are causing the conflict to give a better error message
+            const conflictingPlayers = [];
+            const checkPlayers = (players) => {
+                players.forEach(p => {
+                    if (allInvolvedPlayerIds.includes(p._id.toString())) {
+                        conflictingPlayers.push(p.name);
+                    }
+                });
+            };
+            if (playerInPendingTrade.offerPlayers) checkPlayers(playerInPendingTrade.offerPlayers);
+            if (playerInPendingTrade.requestPlayers) checkPlayers(playerInPendingTrade.requestPlayers);
+            
+            const playerNames = [...new Set(conflictingPlayers)].join(', ');
+            return res.status(400).json({ message: `Trade rejected: ${playerNames} ${conflictingPlayers.length > 1 ? 'are' : 'is'} already involved in an active pending trade proposal.` });
         }
 
         // 2. Validate Squad Limits & Overseas Limits pre-emptively
