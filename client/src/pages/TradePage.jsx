@@ -98,7 +98,14 @@ const TradePage = () => {
             fetchProposals(myTeam.id);
             setActiveTab('SENT');
         } catch (error) {
-            toast.error(error.response?.data?.message || "Failed to create trade proposal");
+            const errorMessage = error.response?.data?.message || "Failed to create trade proposal";
+            toast.error(
+                <div className="flex flex-col gap-1">
+                    <span className="font-bold text-gray-900">Trade Proposal Failed</span>
+                    <span className="text-sm text-gray-600 leading-tight">{errorMessage}</span>
+                </div>,
+                { duration: 5000, style: { minWidth: '350px' } }
+            );
         } finally {
             setSubmitting(false);
         }
@@ -117,7 +124,14 @@ const TradePage = () => {
                 setMyTeam(currentTeam);
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || `Failed to ${status.toLowerCase()} trade`);
+            const errorMessage = error.response?.data?.message || `Failed to ${status.toLowerCase()} trade`;
+            toast.error(
+                <div className="flex flex-col gap-1">
+                    <span className="font-bold text-gray-900">Trade Action Failed</span>
+                    <span className="text-sm text-gray-600 leading-tight">{errorMessage}</span>
+                </div>,
+                { duration: 5000, style: { minWidth: '350px' } }
+            );
         }
     };
 

@@ -53,17 +53,19 @@ export const createProposal = async (req, res) => {
         }
         
         // Validate ownership
-        const invalidOffer = offerPlayers.some(p => p.soldToTeam !== senderTeam.code);
-        if (invalidOffer) {
-            return res.status(400).json({ message: 'You do not own all the players you are offering' });
+        const invalidOffer = offerPlayers.filter(p => p.soldToTeam !== senderTeam.code);
+        if (invalidOffer.length > 0) {
+            const playerNames = invalidOffer.map(p => p.name).join(', ');
+            return res.status(400).json({ message: `Ownership Error: You do not own ${playerNames}.` });
         }
         
         const receiverTeam = await Team.findById(receiverTeamId);
         if (!receiverTeam) return res.status(404).json({ message: 'Receiver team not found' });
         
-        const invalidRequest = requestPlayers.some(p => p.soldToTeam !== receiverTeam.code);
-        if (invalidRequest) {
-            return res.status(400).json({ message: 'Requested players do not all belong to the target team' });
+        const invalidRequest = requestPlayers.filter(p => p.soldToTeam !== receiverTeam.code);
+        if (invalidRequest.length > 0) {
+            const playerNames = invalidRequest.map(p => p.name).join(', ');
+            return res.status(400).json({ message: `Ownership Error: Target team does not own ${playerNames}.` });
         }
 
         // --- NEW CONSTRAINTS (Prevent invalid trades from entering Pending state) ---
@@ -99,10 +101,10 @@ export const createProposal = async (req, res) => {
         const receiverSizeChange = offerPlayers.length - requestPlayers.length;
 
         if (senderTeam.squadSize + senderSizeChange > 25) {
-            return res.status(400).json({ message: 'Trade invalid: You would exceed the maximum squad size of 25' });
+            return res.status(400).json({ message: `Limit Exceeded: Your squad size would reach ${senderTeam.squadSize + senderSizeChange} (Limit: 25).` });
         }
         if (receiverTeam.squadSize + receiverSizeChange > 25) {
-            return res.status(400).json({ message: 'Trade invalid: Target team would exceed the maximum squad size of 25' });
+            return res.status(400).json({ message: `Limit Exceeded: Target team squad size would reach ${receiverTeam.squadSize + receiverSizeChange} (Limit: 25).` });
         }
 
         const offerOverseasCount = offerPlayers.filter(p => p.isOverseas).length;
@@ -112,10 +114,10 @@ export const createProposal = async (req, res) => {
         const receiverOverseasChange = offerOverseasCount - requestOverseasCount;
 
         if (senderTeam.overseasCount + senderOverseasChange > 8) {
-             return res.status(400).json({ message: 'Trade invalid: You would exceed the maximum of 8 overseas players' });
+             return res.status(400).json({ message: `Limit Exceeded: Your overseas players would reach ${senderTeam.overseasCount + senderOverseasChange} (Limit: 8).` });
         }
         if (receiverTeam.overseasCount + receiverOverseasChange > 8) {
-             return res.status(400).json({ message: 'Trade invalid: Target team would exceed the maximum of 8 overseas players' });
+             return res.status(400).json({ message: `Limit Exceeded: Target team overseas players would reach ${receiverTeam.overseasCount + receiverOverseasChange} (Limit: 8).` });
         }
         // --------------------------------------------------------------------------
         
@@ -225,10 +227,10 @@ export const updateProposalStatus = async (req, res) => {
         const receiverSizeChange = offerPlayers.length - requestPlayers.length;
 
         if (sender.squadSize + senderSizeChange > 25) {
-            return res.status(400).json({ message: 'Trade invalid: Sender team would exceed maximum squad size of 25' });
+            return res.status(400).json({ message: `Limit Exceeded: Sender team squad size would reach ${sender.squadSize + senderSizeChange} (Limit: 25).` });
         }
         if (receiver.squadSize + receiverSizeChange > 25) {
-            return res.status(400).json({ message: 'Trade invalid: You would exceed maximum squad size of 25' });
+            return res.status(400).json({ message: `Limit Exceeded: Your squad size would reach ${receiver.squadSize + receiverSizeChange} (Limit: 25).` });
         }
 
         // Overseas Validations
@@ -239,10 +241,10 @@ export const updateProposalStatus = async (req, res) => {
         const receiverOverseasChange = offerOverseasCount - requestOverseasCount;
 
         if (sender.overseasCount + senderOverseasChange > 8) {
-             return res.status(400).json({ message: 'Trade invalid: Sender team would exceed maximum of 8 overseas players' });
+             return res.status(400).json({ message: `Limit Exceeded: Sender team overseas players would reach ${sender.overseasCount + senderOverseasChange} (Limit: 8).` });
         }
         if (receiver.overseasCount + receiverOverseasChange > 8) {
-             return res.status(400).json({ message: 'Trade invalid: You would exceed maximum of 8 overseas players' });
+             return res.status(400).json({ message: `Limit Exceeded: Your overseas players would reach ${receiver.overseasCount + receiverOverseasChange} (Limit: 8).` });
         }
 
         // --- EXECUTE ---
