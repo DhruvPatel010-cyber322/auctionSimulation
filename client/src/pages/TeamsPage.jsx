@@ -26,11 +26,11 @@ const TeamsPage = () => {
                 let data = [];
                 // V2: Check if user is in a tournament
                 const tournamentId = user?.tournamentId;
-                const firebaseToken = localStorage.getItem('token');
+                const token = localStorage.getItem('token');
 
-                if (tournamentId && firebaseToken) {
+                if (tournamentId && token) {
                     const res = await fetch(`${API_URL}/api/v2/auth/tournaments/${tournamentId}/teams`, {
-                        headers: { 'Authorization': `Bearer ${firebaseToken}` }
+                        headers: { 'Authorization': `Bearer ${token}` }
                     });
                     const resData = await res.json();
                     data = resData.teams || [];

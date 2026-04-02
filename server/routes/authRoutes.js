@@ -663,20 +663,23 @@ router.post('/tournaments/:id/select-team', protect, async (req, res) => {
         // If the user has 'admin' role in DB, preserve it in the JWT
         const userRole = req.user.role === 'admin' ? 'admin' : 'team';
 
+        // Fetch user for username + firebaseUid
+        const userDoc = await User.findById(userId);
+
         const token = jwt.sign({
             teamCode: dbTeam.code,
             role: userRole,
             tournamentId: tournament._id, // Scope token to tournament
             userId: userId,
-            sessionId: sessionId // EMBED SESSION ID
+            sessionId: sessionId, // EMBED SESSION ID
+            firebaseUid: userDoc?.firebaseUid || null // Include for downstream context
         }, process.env.JWT_SECRET, { expiresIn: '24h' });
 
         // 4. Return Data expected by Frontend
         // We find static config for colors etc.
         const teamConfig = TEAMS.find(t => t.id === dbTeam.code.toLowerCase()) || {};
 
-        // Fetch username
-        const userDoc = await User.findById(userId);
+        // userDoc already fetched above
 
         // 5. Emit Real-time Event
         if (req.io) {

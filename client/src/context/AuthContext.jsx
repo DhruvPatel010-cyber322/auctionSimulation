@@ -26,7 +26,8 @@ export const AuthProvider = ({ children }) => {
                     teamCode: payload.teamCode || parsedUser.teamCode || null,
                     tournamentId: payload.tournamentId || parsedUser.tournamentId || null,
                     sessionId: payload.sessionId || parsedUser.sessionId || null,
-                    role: payload.role || parsedUser.role || 'user'
+                    role: payload.role || parsedUser.role || 'user',
+                    firebaseUid: payload.firebaseUid || parsedUser.firebaseUid || null
                 };
                 setUser(enrichedUser);
                 setToken(storedToken);
@@ -62,7 +63,8 @@ export const AuthProvider = ({ children }) => {
                             teamCode: payload.teamCode || parsedUser.teamCode || null,
                             tournamentId: payload.tournamentId || parsedUser.tournamentId || null,
                             sessionId: payload.sessionId || parsedUser.sessionId || null,
-                            role: payload.role || parsedUser.role || 'user'
+                            role: payload.role || parsedUser.role || 'user',
+                            firebaseUid: payload.firebaseUid || parsedUser.firebaseUid || null
                         };
                         setUser(enrichedUser);
                     }
