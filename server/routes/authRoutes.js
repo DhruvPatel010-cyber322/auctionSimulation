@@ -42,7 +42,7 @@ router.post('/login', firebaseAuth, (req, res) => {
     const token = jwt.sign({
         userId: req.user._id,
         role: req.user.role,
-        teamCode: null,
+        teamCode: req.user.teamCode || null,
         tournamentId: null,
         sessionId: null
     }, process.env.JWT_SECRET, { expiresIn: '24h' });
@@ -168,7 +168,7 @@ router.post('/login-local', async (req, res) => {
         const token = jwt.sign({
             userId: user._id,
             role: user.role,
-            teamCode: null,
+            teamCode: user.teamCode || null,
             tournamentId: null,
             sessionId: null
         }, process.env.JWT_SECRET, { expiresIn: '24h' });
@@ -746,9 +746,9 @@ router.post('/tournaments/:id/unassign-team', firebaseAuth, adminOnly, async (re
 });
 
 // 5.5 Watch Auction (Spectator Mode)
-router.post('/tournaments/:id/watch', firebaseAuth, async (req, res) => {
+router.post('/tournaments/:id/watch', protect, async (req, res) => {
     const tournamentId = req.params.id;
-    const userId = req.user._id;
+    const userId = req.user.userId;
 
     try {
         const tournament = await Tournament.findById(tournamentId);
@@ -764,6 +764,8 @@ router.post('/tournaments/:id/watch', firebaseAuth, async (req, res) => {
             sessionId: sessionId
         }, process.env.JWT_SECRET, { expiresIn: '24h' });
 
+        const spectatorUserDoc = await User.findById(userId);
+
         res.json({
             success: true,
             token,
@@ -774,7 +776,7 @@ router.post('/tournaments/:id/watch', firebaseAuth, async (req, res) => {
                 remainingPurse: 0,
                 squadSize: 0,
                 overseasCount: 0,
-                username: req.user.username
+                username: spectatorUserDoc ? spectatorUserDoc.username : null
             }
         });
 
@@ -785,6 +787,7 @@ router.post('/tournaments/:id/watch', firebaseAuth, async (req, res) => {
 });
 
 // 6. Admin Login (Exchange Firebase Token for Admin JWT)
+// Still uses firebaseAuth for the initial exchange
 router.post('/admin/login', firebaseAuth, async (req, res) => {
     try {
         if (req.user.role !== 'admin') {
@@ -795,8 +798,9 @@ router.post('/admin/login', firebaseAuth, async (req, res) => {
         const token = jwt.sign({
             teamCode: 'admin',
             role: 'admin',
+            tournamentId: null,
             sessionId,
-            userId: req.user._id
+            userId: req.user._id  // firebaseAuth attaches full Mongoose doc, so _id is valid here
         }, process.env.JWT_SECRET, { expiresIn: '24h' });
 
         res.json({
@@ -842,14 +846,14 @@ const validateBattingPositionRules = (player, position) => {
 };
 
 // 7. Save Playing XI
-router.post('/tournaments/:id/playing11', firebaseAuth, async (req, res) => {
+router.post('/tournaments/:id/playing11', protect, async (req, res) => {
     const { playerIds, captainId, viceCaptainId } = req.body; // updated payload structure: either Array from legacy or Object { players, captainId, viceCaptainId }
     let itemsToProcess = [];
     let selectedCaptain = null;
     let selectedViceCaptain = null;
 
     const tournamentId = req.params.id;
-    const userId = req.user._id;
+    const userId = req.user.userId;
 
     try {
         const tournament = await Tournament.findById(tournamentId);
@@ -996,9 +1000,9 @@ router.post('/tournaments/:id/playing11', firebaseAuth, async (req, res) => {
 });
 
 // 8. Get Playing XI (or Squad with status)
-router.get('/tournaments/:id/my-squad', firebaseAuth, async (req, res) => {
+router.get('/tournaments/:id/my-squad', protect, async (req, res) => {
     const tournamentId = req.params.id;
-    const userId = req.user._id;
+    const userId = req.user.userId;
 
     try {
         const userAssignment = await TournamentUser.findOne({ tournament: tournamentId, user: userId });

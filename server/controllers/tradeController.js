@@ -34,6 +34,10 @@ export const createProposal = async (req, res) => {
         const { receiverTeamId, offerPlayerIds, requestPlayerIds } = req.body;
         const senderTeamCode = req.user.teamCode;
         
+        if (!senderTeamCode) {
+            return res.status(403).json({ message: 'Team selection required to propose trades.' });
+        }
+        
         const senderTeam = await Team.findOne({ code: senderTeamCode });
         if (!senderTeam) return res.status(404).json({ message: 'Sender team not found' });
         
@@ -153,6 +157,9 @@ export const createProposal = async (req, res) => {
 export const getProposals = async (req, res) => {
     try {
         const teamCode = req.user.teamCode;
+        if (!teamCode) {
+            return res.status(403).json({ message: 'Team selection required to view trade proposals.' });
+        }
         const team = await Team.findOne({ code: teamCode });
         
         if (!team) return res.status(404).json({ message: 'Team not found' });
@@ -186,6 +193,9 @@ export const updateProposalStatus = async (req, res) => {
         const { proposalId } = req.params;
         const { status } = req.body; 
         const teamCode = req.user.teamCode;
+        if (!teamCode) {
+            return res.status(403).json({ message: 'Team selection required to respond to trades.' });
+        }
         
         if (!['ACCEPTED', 'REJECTED'].includes(status)) {
             return res.status(400).json({ message: 'Invalid status' });

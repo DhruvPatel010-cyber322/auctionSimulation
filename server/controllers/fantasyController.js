@@ -12,7 +12,7 @@ import {
     isMatchLocked
 } from '../utils/fantasyUtils.js';
 
-const getAuthenticatedUserId = (req) => req.user?._id || req.user?.id || null;
+const getAuthenticatedUserId = (req) => req.user?.userId || req.user?._id || req.user?.id || null;
 
 const ensureFantasyUser = async (req, res) => {
     const userId = getAuthenticatedUserId(req);
