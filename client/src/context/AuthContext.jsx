@@ -12,6 +12,30 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [loadingMessage, setLoadingMessage] = useState('Loading Auth...');
 
+    // Reads token + user from localStorage, decodes the JWT to extract teamCode/tournamentId/sessionId,
+    // and merges them into the user object so components always have the latest team context.
+    const refreshUser = () => {
+        const storedToken = localStorage.getItem('token');
+        const storedUser = localStorage.getItem('user');
+        if (storedToken && storedUser) {
+            try {
+                const payload = JSON.parse(atob(storedToken.split('.')[1]));
+                const parsedUser = JSON.parse(storedUser);
+                const enrichedUser = {
+                    ...parsedUser,
+                    teamCode: payload.teamCode || parsedUser.teamCode || null,
+                    tournamentId: payload.tournamentId || parsedUser.tournamentId || null,
+                    sessionId: payload.sessionId || parsedUser.sessionId || null,
+                    role: payload.role || parsedUser.role || 'user'
+                };
+                setUser(enrichedUser);
+                setToken(storedToken);
+            } catch (e) {
+                console.error('Failed to refresh user context:', e);
+            }
+        }
+    };
+
     useEffect(() => {
         const validateSession = () => {
             const storedToken = localStorage.getItem('token');
@@ -27,11 +51,20 @@ export const AuthProvider = ({ children }) => {
                     if (isExpired) {
                         // Token is expired — clear session and let user log in again
                         localStorage.removeItem('token');
-
                         localStorage.removeItem('user');
                     } else {
-                        // Token is valid — restore user immediately, no server call needed
-                        setUser(JSON.parse(storedUser));
+                        // Merge JWT fields (teamCode, tournamentId, sessionId) into the stored user
+                        // so components reading user.tournamentId always have the correct value
+                        // after team selection saves an enriched token.
+                        const parsedUser = JSON.parse(storedUser);
+                        const enrichedUser = {
+                            ...parsedUser,
+                            teamCode: payload.teamCode || parsedUser.teamCode || null,
+                            tournamentId: payload.tournamentId || parsedUser.tournamentId || null,
+                            sessionId: payload.sessionId || parsedUser.sessionId || null,
+                            role: payload.role || parsedUser.role || 'user'
+                        };
+                        setUser(enrichedUser);
                     }
                 } catch (e) {
                     // Malformed token — clear it
@@ -85,6 +118,7 @@ export const AuthProvider = ({ children }) => {
         token,
         login,
         logout,
+        refreshUser,
         loading,
         isAuthenticated: !!user
     };
