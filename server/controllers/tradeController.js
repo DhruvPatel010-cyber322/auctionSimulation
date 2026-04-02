@@ -212,6 +212,12 @@ export const updateProposalStatus = async (req, res) => {
             
         if (!trade) return res.status(404).json({ message: 'Trade proposal not found' });
         
+        // --- DEFENSIVE CHECK: Ensure teams populated correctly ---
+        if (!trade.senderTeam || !trade.receiverTeam) {
+            console.error('[Trade Error] Sender/Receiver Team population failed:', { sender: trade.senderTeam, receiver: trade.receiverTeam });
+            return res.status(400).json({ message: 'Incomplete trade data: One or more teams involved no longer exist.' });
+        }
+
         if (trade.status !== 'PENDING') {
             return res.status(400).json({ message: `Trade is already ${trade.status}` });
         }
@@ -229,8 +235,14 @@ export const updateProposalStatus = async (req, res) => {
         // ACCEPTED LOGIC (0-Cost True Trading)
         const sender = trade.senderTeam;
         const receiver = trade.receiverTeam;
-        const offerPlayers = trade.offerPlayers; // Array, going to receiver
-        const requestPlayers = trade.requestPlayers; // Array, going to sender
+        
+        // Filter out any players that failed to populate (e.g. were deleted from DB)
+        const offerPlayers = (trade.offerPlayers || []).filter(p => p !== null); 
+        const requestPlayers = (trade.requestPlayers || []).filter(p => p !== null); 
+        
+        if (offerPlayers.length !== (trade.offerPlayers?.length || 0) || requestPlayers.length !== (trade.requestPlayers?.length || 0)) {
+            return res.status(400).json({ message: 'One or more players in this trade proposal no longer exist in the database.' });
+        }
         
         // Squad Size Validations
         const senderSizeChange = requestPlayers.length - offerPlayers.length;
@@ -303,22 +315,33 @@ export const updateProposalStatus = async (req, res) => {
         
         // Clear Playing XI flags on all players involved in the trade (their XI was wiped above)
         const allTradedIds = [...offerIds, ...requestIds];
+        
         // Also clear flags for all squad members of both teams since XI was nullified
+        // Using filter(Boolean) to ensure no null values throw error on toString()
         const allAffectedPlayerIds = [
-            ...sender.playersBought.map(id => id.toString()),
-            ...receiver.playersBought.map(id => id.toString())
+            ...(sender.playersBought || []).filter(id => id).map(id => id.toString()),
+            ...(receiver.playersBought || []).filter(id => id).map(id => id.toString())
         ];
-        await Player.updateMany(
-            { _id: { $in: [...new Set([...allAffectedPlayerIds, ...allTradedIds])] } },
-            { $set: { isInPlaying11: false, isCaptain: false, isViceCaptain: false } }
-        );
+        
+        const uniqueAffectedIds = [...new Set([...allAffectedPlayerIds, ...allTradedIds])];
+        
+        if (uniqueAffectedIds.length > 0) {
+            await Player.updateMany(
+                { _id: { $in: uniqueAffectedIds } },
+                { $set: { isInPlaying11: false, isCaptain: false, isViceCaptain: false } }
+            );
+        }
+        
         
         // 4. Mark status
         trade.status = 'ACCEPTED';
         await trade.save();
         
         // 5. Auto-reject other pending trades involving these players
-        const allInvolvedIds = [...offerPlayers.map(p => p._id), ...requestPlayers.map(p => p._id)];
+        const allInvolvedIds = [
+            ...offerPlayers.filter(p => p?._id).map(p => p._id), 
+            ...requestPlayers.filter(p => p?._id).map(p => p._id)
+        ];
         
         await Trade.updateMany({
             status: 'PENDING',
