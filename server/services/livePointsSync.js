@@ -122,6 +122,8 @@ async function pollAndUpdate() {
                 continue;
             }
 
+            const updateData = {};
+
             // Extract raw points (NO MULTIPLIERS as per User rule)
             updateData.points = {
                 total: Number(basePoints.toFixed(2)),
