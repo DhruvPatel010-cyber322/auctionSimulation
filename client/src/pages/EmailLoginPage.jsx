@@ -16,7 +16,11 @@ const EmailLoginPage = () => {
         try {
             const res = await fetch(`${API_BASE_URL}/api/v2/auth/login`, {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${firebaseToken}` }
+                headers: { 
+                    'Authorization': `Bearer ${firebaseToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ firebaseToken })
             });
             const data = await res.json();
             
