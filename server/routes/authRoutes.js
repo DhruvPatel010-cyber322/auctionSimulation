@@ -797,9 +797,8 @@ router.post('/tournaments/:id/watch', protect, async (req, res) => {
     }
 });
 
-// 6. Admin Login (Exchange Firebase Token for Admin JWT)
-// Still uses firebaseAuth for the initial exchange
-router.post('/admin/login', firebaseAuth, async (req, res) => {
+// 6. Admin Login (Exchange Token for Admin Scope JWT)
+router.post('/admin/login', protect, async (req, res) => {
     try {
         if (req.user.role !== 'admin') {
             return res.status(403).json({ message: 'Access Denied: Admin role required.' });
@@ -811,13 +810,16 @@ router.post('/admin/login', firebaseAuth, async (req, res) => {
             role: 'admin',
             tournamentId: null,
             sessionId,
-            userId: req.user._id  // firebaseAuth attaches full Mongoose doc, so _id is valid here
+            userId: req.user.userId,
+            firebaseUid: req.user.firebaseUid || null
         }, process.env.JWT_SECRET, { expiresIn: '24h' });
 
+        const dbUser = await User.findById(req.user.userId);
+        
         res.json({
             success: true,
             token,
-            user: { ...req.user.toObject(), role: 'admin' }
+            user: { ...(dbUser ? dbUser.toObject() : req.user), role: 'admin' }
         });
     } catch (err) {
         console.error("Admin Login Error:", err);
