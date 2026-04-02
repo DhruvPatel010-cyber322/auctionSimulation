@@ -13,11 +13,13 @@ const POINT_FILTERS = [
 
 const getPlayerPoints = (player, filterKey) => {
     if (!player) return 0;
+    // Points is now a nested object { total, batting, bowling, fielding, announcement }
+    const pts = player.points || {};
     switch (filterKey) {
-        case 'batting':  return player.battingPoints  ?? 0;
-        case 'bowling':  return player.bowlingPoints  ?? 0;
-        case 'fielding': return player.fieldingPoints ?? 0;
-        default:         return player.points         ?? 0;
+        case 'batting':  return pts.batting      ?? 0;
+        case 'bowling':  return pts.bowling      ?? 0;
+        case 'fielding': return pts.fielding     ?? 0;
+        default:         return (typeof pts === 'number') ? pts : (pts.total ?? 0);
     }
 };
 
