@@ -103,8 +103,9 @@ export const calculatePointsForWindow = async (team, startTime, endTime, snapsho
  * 1. Locks current Playing 11 for all teams into their history for the current week.
  * 2. Sets weekStartTime to now in Tournament.
  */
-export const startNewWeek = async () => {
-    const tournament = await Tournament.findOne().sort({ createdAt: -1 });
+export const startNewWeek = async (tournamentId = null) => {
+    const query = tournamentId ? { _id: tournamentId } : {};
+    const tournament = await Tournament.findOne(query).sort({ createdAt: -1 });
     if (!tournament) throw new Error('Tournament not found');
 
     const teams = await Team.find({});
@@ -154,8 +155,9 @@ export const startNewWeek = async () => {
  * 2. Updates Team.totalPoints and Team.weeklyPoints.
  * 3. Increments Tournament.currentWeek.
  */
-export const finalizeWeek = async () => {
-    const tournament = await Tournament.findOne().sort({ createdAt: -1 });
+export const finalizeWeek = async (tournamentId = null) => {
+    const query = tournamentId ? { _id: tournamentId } : {};
+    const tournament = await Tournament.findOne(query).sort({ createdAt: -1 });
     if (!tournament || !tournament.weekStartTime) {
         throw new Error('Active week not found or not started.');
     }

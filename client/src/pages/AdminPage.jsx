@@ -506,11 +506,12 @@ const AdminPage = () => {
     const [isWeekLoading, setIsWeekLoading] = useState(false);
 
     const handleStartWeek = async () => {
+        if (!selectedTournamentId) return alert("Please select a tournament first.");
         if (!window.confirm("Are you sure you want to START a new week? This will LOCK the current Playing 11 for all teams as the historical snapshot for this week!")) return;
         
         setIsWeekLoading(true);
         try {
-            const data = await adminStartWeek();
+            const data = await adminStartWeek(selectedTournamentId);
             alert(data.message || "Week started successfully");
         } catch (err) {
             console.error(err);
@@ -521,11 +522,12 @@ const AdminPage = () => {
     };
 
     const handleFinalizeWeek = async () => {
+        if (!selectedTournamentId) return alert("Please select a tournament first.");
         if (!window.confirm("Are you sure you want to FINALIZE the current week? This will FREEZE the live points into permanent history and move to the next week!")) return;
         
         setIsWeekLoading(true);
         try {
-            const data = await adminFinalizeWeek();
+            const data = await adminFinalizeWeek(selectedTournamentId);
             alert(data.message || "Week finalized successfully");
         } catch (err) {
             console.error(err);

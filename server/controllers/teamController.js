@@ -51,7 +51,9 @@ export const getTeamScoringSummary = async (team, tournament) => {
 
 export const getPointsTable = async (req, res) => {
     try {
-        const tournament = await Tournament.findOne().sort({ createdAt: -1 });
+        const tournamentId = req.params.id;
+        const query = tournamentId ? { _id: tournamentId } : {};
+        const tournament = await Tournament.findOne(query).sort({ createdAt: -1 });
         const teams = await Team.find({}).populate('playing11');
 
         const pointsTable = await Promise.all(teams.map(async team => {

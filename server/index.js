@@ -296,7 +296,8 @@ app.post('/api/auction/requeue', protect, adminOnly, auctionController.requeueUn
 // --- ADMIN WEEK MANAGEMENT ---
 app.post('/api/admin/start-week', protect, adminOnly, async (req, res) => {
     try {
-        const result = await startNewWeek();
+        const { tournamentId } = req.body;
+        const result = await startNewWeek(tournamentId);
         res.json({ success: true, message: `Week ${result.week} started and Playing 11 locked.`, ...result });
     } catch (error) {
         console.error("Start Week Error:", error);
@@ -306,7 +307,8 @@ app.post('/api/admin/start-week', protect, adminOnly, async (req, res) => {
 
 app.post('/api/admin/finalize-week', protect, adminOnly, async (req, res) => {
     try {
-        const result = await finalizeWeek();
+        const { tournamentId } = req.body;
+        const result = await finalizeWeek(tournamentId);
         res.json({ success: true, message: `Week ${result.finalizedWeek} finalized successfully.`, ...result });
     } catch (error) {
         console.error("Finalize Week Error:", error);

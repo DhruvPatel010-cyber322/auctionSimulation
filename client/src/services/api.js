@@ -159,13 +159,13 @@ export const getSquads = async () => {
 };
 
 // --- ADMIN WEEK MANAGEMENT ---
-export const adminStartWeek = async () => {
-    const response = await api.post('/api/admin/start-week');
+export const adminStartWeek = async (tournamentId) => {
+    const response = await api.post('/api/admin/start-week', { tournamentId });
     return response.data;
 };
 
-export const adminFinalizeWeek = async () => {
-    const response = await api.post('/api/admin/finalize-week');
+export const adminFinalizeWeek = async (tournamentId) => {
+    const response = await api.post('/api/admin/finalize-week', { tournamentId });
     return response.data;
 };
 
