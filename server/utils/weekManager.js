@@ -33,9 +33,9 @@ export const calculatePointsForWindow = async (team, startTime, endTime, snapsho
     // Safety check: if snapshot is missing (e.g. for Week 1 transition)
     if (!snapshot) {
         console.warn(`[PointsCalc] Missing snapshot for team ${team.code}. Window: ${startTime} - ${endTime}`);
-        return 0;
+        return { total: 0, playerPoints: {} };
     }
-    if (!startTime) return 0;
+    if (!startTime) return { total: 0, playerPoints: {} };
     
     // Load schedule to find match timings
     const schedule = JSON.parse(fs.readFileSync(schedulePath, 'utf8'));
@@ -48,7 +48,7 @@ export const calculatePointsForWindow = async (team, startTime, endTime, snapsho
         })
         .map(m => Number(m.MatchID));
 
-    if (windowMatchIds.length === 0) return 0;
+    if (windowMatchIds.length === 0) return { total: 0, playerPoints: {} };
 
     // Load all players in the snapshot to get their perMatchPoints
     const playerIds = snapshot.players.map(p => (p._id || p).toString());
