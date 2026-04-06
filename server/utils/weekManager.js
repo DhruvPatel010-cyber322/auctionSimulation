@@ -166,6 +166,12 @@ export const finalizeWeek = async (tournamentId = null) => {
     const currentWeek = tournament.currentWeek;
     const teams = await Team.find({});
 
+    let actualStartTime = tournament.weekStartTime;
+    const prevWeek = tournament.weekData.find(w => w.week === currentWeek - 1);
+    if (prevWeek && prevWeek.endTime) {
+        actualStartTime = prevWeek.endTime;
+    }
+
     for (const team of teams) {
         const snapshot = team.playing11History.find(h => h.week === currentWeek);
         if (!snapshot) {
@@ -185,7 +191,7 @@ export const finalizeWeek = async (tournamentId = null) => {
             continue;
         }
 
-        const result = await calculatePointsForWindow(team, tournament.weekStartTime, endTime, snapshot);
+        const result = await calculatePointsForWindow(team, actualStartTime, endTime, snapshot);
         const weekPoints = result.total;
         
         // Persist weekly score

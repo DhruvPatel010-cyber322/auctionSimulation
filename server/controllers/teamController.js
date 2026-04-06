@@ -18,10 +18,16 @@ export const getTeamScoringSummary = async (team, tournament) => {
     if (weekStartTime) {
         const snapshot = team.playing11History.find(h => h.week === currentWeekNum);
         
+        let actualStartTime = weekStartTime;
+        const prevWeek = tournament?.weekData?.find(w => w.week === currentWeekNum - 1);
+        if (prevWeek && prevWeek.endTime) {
+            actualStartTime = prevWeek.endTime;
+        }
+
         if (snapshot) {
             const result = await calculatePointsForWindow(
                 team, 
-                weekStartTime, 
+                actualStartTime, 
                 new Date(), // Current live window
                 snapshot
             );
