@@ -1058,7 +1058,7 @@ router.get('/tournaments/:id/teams/:teamCode/squad', protect, async (req, res) =
 
         if (!team) return res.status(404).json({ message: 'Team not found.' });
 
-        const tournament = await Tournament.findById(tournamentId).select('currentWeek weekStartTime isPlayingXILocked isCaptaincyLocked').lean();
+        const tournament = await Tournament.findById(tournamentId).select('currentWeek weekStartTime weekData isPlayingXILocked isCaptaincyLocked').lean();
 
         // NEW: Get Official Scoring Summary
         const scoringSummary = await getTeamScoringSummary(team, tournament);
