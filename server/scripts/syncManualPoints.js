@@ -23,10 +23,11 @@ function normalizeApiName(raw) {
         .trim();
 }
 
-/** Fuzzy match */
+/** Fuzzy match - strips spaces and non-alphanumeric */
 function fuzzyMatch(dbName, apiName) {
-    const db = dbName.toLowerCase().trim();
-    const api = apiName.toLowerCase().trim();
+    const clean = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const db = clean(dbName || '');
+    const api = clean(apiName || '');
 
     return db === api || db.includes(api) || api.includes(db);
 }
@@ -67,35 +68,21 @@ async function syncPoints(matchId) {
                 continue;
             }
 
-            let base = Number(apiPlayer.total) || 0;
-            let bat = Number(apiPlayer.bat) || 0;
-            let bowl = Number(apiPlayer.bowl) || 0;
-            let field = Number(apiPlayer.field) || 0;
+            // Extract base points from API
+            const base = Number(apiPlayer.total) || 0;
+            const bat = Number(apiPlayer.bat) || 0;
+            const bowl = Number(apiPlayer.bowl) || 0;
+            const field = Number(apiPlayer.field) || 0;
 
             const updateData = {};
 
-            // Save playerId
+            // Check for playerId update if missing
             if (!dbPlayer.playerId && apiPlayer.player_id) {
                 updateData.playerId = apiPlayer.player_id;
             }
 
-            // Skip bench
-            if (!dbPlayer.isInPlaying11) {
-                if (Object.keys(updateData).length > 0) {
-                    await Player.findByIdAndUpdate(dbPlayer._id, { $set: updateData });
-                }
-                skipped++;
-                continue;
-            }
-
-            // Apply multipliers
-            if (dbPlayer.isCaptain) {
-                base *= 2; bat *= 2; bowl *= 2; field *= 2;
-            } else if (dbPlayer.isViceCaptain) {
-                base *= 1.5; bat *= 1.5; bowl *= 1.5; field *= 1.5;
-            }
-
-            updateData.points = {
+            // Prepare RAW points data
+            const rawPoints = {
                 total: Number(base.toFixed(2)),
                 batting: Number(bat.toFixed(2)),
                 bowling: Number(bowl.toFixed(2)),
@@ -103,17 +90,29 @@ async function syncPoints(matchId) {
                 announcement: 0
             };
 
+            // Apply multipliers ONLY for the live display (points field) if in Playing 11
+            let finalPoints = { ...rawPoints };
+            if (dbPlayer.isInPlaying11) {
+                let multiplier = 1;
+                if (dbPlayer.isCaptain) multiplier = 2;
+                else if (dbPlayer.isViceCaptain) multiplier = 1.5;
+
+                finalPoints.total = Number((rawPoints.total * multiplier).toFixed(2));
+                finalPoints.batting = Number((rawPoints.batting * multiplier).toFixed(2));
+                finalPoints.bowling = Number((rawPoints.bowling * multiplier).toFixed(2));
+                finalPoints.fielding = Number((rawPoints.fielding * multiplier).toFixed(2));
+            }
+
+            updateData.points = finalPoints;
+
             const matchIdNum = Number(matchId);
             let updatedPerMatchPoints = [...(dbPlayer.perMatchPoints || [])];
             const matchIdx = updatedPerMatchPoints.findIndex(m => m.matchId === matchIdNum);
 
+            // ALWAYS store RAW points in history to prevent double-multiplier in weekly calculations
             const matchPointsEntry = {
                 matchId: matchIdNum,
-                total: updateData.points.total,
-                batting: updateData.points.batting,
-                bowling: updateData.points.bowling,
-                fielding: updateData.points.fielding,
-                announcement: 0
+                ...rawPoints
             };
 
             if (matchIdx !== -1) {

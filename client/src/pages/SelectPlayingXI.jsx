@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { API_BASE_URL as API_URL } from '../config';
-import { Shield, Check, AlertCircle, X, User, Plane, AlertTriangle, Lock, Edit2, ChevronDown, Users, Star } from 'lucide-react';
+import { Shield, Check, AlertCircle, X, User, Plane, AlertTriangle, Lock, Edit2, ChevronDown, Users, Star, Info } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 const POINT_FILTERS = [
@@ -89,6 +89,7 @@ const SelectPlayingXI = () => {
     const [captain, setCaptain] = useState(null); // ID of captain
     const [viceCaptain, setViceCaptain] = useState(null); // ID of vice-captain
     const [scoring, setScoring] = useState(null); // NEW: Official server-side totals
+    const [expandedPlayerId, setExpandedPlayerId] = useState(null); // Which player's breakdown is open
 
     // Edit Mode State
     const [isEditMode, setIsEditMode] = useState(false);
@@ -291,7 +292,7 @@ const SelectPlayingXI = () => {
 
         const existingPlayerAtTarget = slots[targetPos];
 
-        // 🛑 NEW: Prevent dropping overwrites onto locked executives
+        // ðŸ›‘ NEW: Prevent dropping overwrites onto locked executives
         if (isCaptaincyLocked && existingPlayerAtTarget && (existingPlayerAtTarget._id === captain || existingPlayerAtTarget._id === viceCaptain)) {
             setError(`Cannot replace locked Captain/Vice-Captain`);
             setTimeout(() => setError(''), 2000);
@@ -338,7 +339,7 @@ const SelectPlayingXI = () => {
             return;
         }
 
-        // 🛑 NEW: If Captaincy is locked, bypass the popup entirely and just save existing C and VC.
+        // ðŸ›‘ NEW: If Captaincy is locked, bypass the popup entirely and just save existing C and VC.
         if (isCaptaincyLocked) {
             setTempCaptain(captain);
             setTempViceCaptain(viceCaptain);
@@ -463,6 +464,7 @@ const SelectPlayingXI = () => {
 
     if (loading && !squad.length && !allTeams.length) return <div className="min-h-screen flex items-center justify-center text-gray-400">Loading...</div>;
 
+
     // View Mode Data
     const benchPlayers = squad.filter(p => !playing11.find(xi => xi._id === p._id));
 
@@ -492,9 +494,15 @@ const SelectPlayingXI = () => {
         groupedAvailable[key].sort((a, b) => a.name.localeCompare(b.name));
     });
 
+    // Pre-compute drawer data (avoids IIFE inside JSX which Babel cannot parse)
+    const allSquadPlayers = [...playing11, ...benchPlayers];
+    const drawerPlayer = expandedPlayerId ? allSquadPlayers.find(p => p._id === expandedPlayerId) : null;
+    const drawerBd = expandedPlayerId ? scoring?.playerBreakdown?.[expandedPlayerId] : null;
+
     return (
-        <div className="max-w-7xl mx-auto p-4 md:p-8">
-            {/* Header & Controls */}
+        <>
+            <div className="max-w-7xl mx-auto p-4 md:p-8">
+                {/* Header & Controls */}
             <header className="mb-6 flex flex-col gap-3">
                 <div>
                     <h1 className="text-2xl md:text-3xl font-black text-gray-900 flex items-center gap-3">
@@ -556,7 +564,7 @@ const SelectPlayingXI = () => {
             {!isEditMode && (
                 <div className="space-y-8 animate-in fade-in">
 
-                    {/* ── Official Team Points Summary Bar ── */}
+                    {/* â”€â”€ Official Team Points Summary Bar â”€â”€ */}
                     {scoring && (
                         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-wrap gap-6 items-center animate-in fade-in slide-in-from-top-4">
                             <div className="flex flex-col">
@@ -658,20 +666,32 @@ const SelectPlayingXI = () => {
                                         <div className="absolute top-0 left-0 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-br-lg">
                                             #{i + 1}
                                         </div>
-                                        {/* Points badge */}
+                                        {/* Points badge â€” unchanged: still shows This Week */}
                                         <div className={cn("absolute top-0 right-0 text-xs font-black px-3 py-1 rounded-bl-lg", activeFilter.bg, activeFilter.color)}>
                                             {getPlayerPoints(p, pointsFilter, scoring)} pts
                                         </div>
                                         <div className="flex items-center gap-4 mt-2">
-                                            <div className="w-12 h-12 rounded-full bg-gray-100 border border-gray-200 overflow-hidden">
+                                            <div className="w-12 h-12 rounded-full bg-gray-100 border border-gray-200 overflow-hidden shrink-0">
                                                 {p.image ? <img src={p.image} className="w-full h-full object-cover" /> : <User className="w-full h-full p-2 text-gray-300" />}
                                             </div>
-                                            <div>
-                                                <div className="flex items-center gap-1">
-                                                    <h3 className="font-bold text-gray-900">{p.name}</h3>
-                                                    {p._id === captain && <span className="bg-orange-100 text-orange-700 text-[10px] font-black px-1.5 py-0.5 rounded ml-1">C</span>}
-                                                    {p._id === viceCaptain && <span className="bg-blue-100 text-blue-700 text-[10px] font-black px-1.5 py-0.5 rounded ml-1">VC</span>}
-                                                    {p.isOverseas && <Plane size={14} className="text-blue-500 fill-blue-500 ml-1" />}
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-1 justify-between">
+                                                    <div className="flex items-center gap-1 flex-wrap">
+                                                        <h3 className="font-bold text-gray-900 text-sm">{p.name}</h3>
+                                                        {p._id === captain && <span className="bg-orange-100 text-orange-700 text-[10px] font-black px-1.5 py-0.5 rounded">C</span>}
+                                                        {p._id === viceCaptain && <span className="bg-blue-100 text-blue-700 text-[10px] font-black px-1.5 py-0.5 rounded">VC</span>}
+                                                        {p.isOverseas && <Plane size={13} className="text-blue-500 fill-blue-500" />}
+                                                    </div>
+                                                    {/* â“˜ Info â€” opens side drawer */}
+                                                    {scoring?.playerBreakdown && (
+                                                        <button
+                                                            onClick={() => setExpandedPlayerId(prev => prev === p._id ? null : p._id)}
+                                                            title="View full points breakdown"
+                                                            className="p-1 rounded-full text-gray-300 hover:text-blue-500 hover:bg-blue-50 transition-colors shrink-0"
+                                                        >
+                                                            <Info size={14} />
+                                                        </button>
+                                                    )}
                                                 </div>
                                                 <p className="text-xs font-bold text-gray-500 uppercase">{p.role}</p>
                                             </div>
@@ -691,17 +711,30 @@ const SelectPlayingXI = () => {
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                                 {benchPlayers.map(p => (
-                                    <div key={p._id} className="bg-gray-50 p-3 rounded-xl border border-gray-200 opacity-75 hover:opacity-100 transition-opacity flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-full bg-white border border-gray-200 overflow-hidden shrink-0">
-                                            {p.image ? <img src={p.image} className="w-full h-full object-cover" /> : <User className="w-full h-full p-2 text-gray-300" />}
+                                    <div key={p._id} className="bg-gray-50 p-3 rounded-xl border border-gray-200 opacity-75 hover:opacity-100 transition-all">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full bg-white border border-gray-200 overflow-hidden shrink-0">
+                                                {p.image ? <img src={p.image} className="w-full h-full object-cover" /> : <User className="w-full h-full p-2 text-gray-300" />}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h4 className="font-bold text-sm text-gray-700 truncate">{p.name}</h4>
+                                                <p className="text-[10px] font-bold text-gray-400 uppercase">{p.role}</p>
+                                            </div>
+                                            <div className="flex items-center gap-1 shrink-0">
+                                                <span className={cn("text-xs font-black px-2 py-0.5 rounded-lg", activeFilter.bg, activeFilter.color)}>
+                                                    {getPlayerPoints(p, pointsFilter, scoring)} pts
+                                                </span>
+                                                {scoring?.playerBreakdown && (
+                                                    <button
+                                                        onClick={() => setExpandedPlayerId(prev => prev === p._id ? null : p._id)}
+                                                        title="View full points breakdown"
+                                                        className="p-1 rounded-full text-gray-300 hover:text-blue-500 hover:bg-blue-50 transition-colors"
+                                                    >
+                                                        <Info size={13} />
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
-                                        <div className="flex-1 min-w-0">
-                                            <h4 className="font-bold text-sm text-gray-700 truncate">{p.name}</h4>
-                                            <p className="text-[10px] font-bold text-gray-400 uppercase">{p.role}</p>
-                                        </div>
-                                        <span className={cn("text-xs font-black px-2 py-0.5 rounded-lg shrink-0", activeFilter.bg, activeFilter.color)}>
-                                            {getPlayerPoints(p, pointsFilter, scoring)} pts
-                                        </span>
                                     </div>
                                 ))}
                             </div>
@@ -762,7 +795,7 @@ const SelectPlayingXI = () => {
                                                             {p.image ? <img src={p.image} className="w-full h-full object-cover" /> : <User className="w-full h-full p-2 text-gray-300" />}
                                                         </div>
                                                         <div className="pointer-events-none">
-                                                            <div className="text-sm font-bold">{p.name} {p.isOverseas && '✈️'}</div>
+                                                            <div className="text-sm font-bold">{p.name} {p.isOverseas && 'âœˆï¸'}</div>
                                                             <div className="text-xs text-gray-500">{p.role}</div>
                                                         </div>
                                                     </div>
@@ -805,7 +838,7 @@ const SelectPlayingXI = () => {
                                                             {p.image ? <img src={p.image} className="w-full h-full object-cover" /> : <User className="w-full h-full p-2 text-gray-300" />}
                                                         </div>
                                                         <div>
-                                                            <div className="font-bold">{p.name} {p.isOverseas && '✈️'}</div>
+                                                            <div className="font-bold">{p.name} {p.isOverseas && 'âœˆï¸'}</div>
                                                             <div className="text-xs text-gray-500">{p.role}</div>
                                                         </div>
                                                     </div>
@@ -867,7 +900,7 @@ const SelectPlayingXI = () => {
                                                 {p.image ? <img src={p.image} className="w-full h-full object-cover" /> : <User className="w-full h-full p-2 text-gray-300" />}
                                             </div>
                                             <div className="min-w-0">
-                                                <div className="font-bold text-sm truncate">{p.name} {p.isOverseas && '✈️'}</div>
+                                                <div className="font-bold text-sm truncate">{p.name} {p.isOverseas && 'âœˆï¸'}</div>
                                                 <div className="text-xs text-gray-500">{p.role}</div>
                                             </div>
                                         </div>
@@ -915,6 +948,151 @@ const SelectPlayingXI = () => {
                 </div>
             )}
         </div>
+
+        {/* â”€â”€ PLAYER BREAKDOWN SIDE DRAWER â”€â”€ */}
+        {drawerPlayer && (
+            <>
+                {/* Backdrop */}
+                <div
+                    className="fixed inset-0 z-40 bg-black/30 backdrop-blur-[2px] animate-in fade-in duration-200"
+                    onClick={() => setExpandedPlayerId(null)}
+                />
+
+                {/* Side Drawer */}
+                <div className="fixed top-0 right-0 h-full w-full max-w-sm z-50 bg-white shadow-2xl flex flex-col animate-in slide-in-from-right duration-200">
+
+                    {/* Drawer Header */}
+                    <div className="flex items-center gap-3 p-5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white shrink-0">
+                        <div className="w-14 h-14 rounded-full bg-white/20 border-2 border-white/40 overflow-hidden shrink-0">
+                            {drawerPlayer.image
+                                ? <img src={drawerPlayer.image} className="w-full h-full object-cover" />
+                                : <User className="w-full h-full p-3 text-white/50" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                                <h3 className="font-black text-lg leading-tight truncate">{drawerPlayer.name}</h3>
+                                {drawerPlayer._id === captain && <span className="bg-orange-400 text-white text-[10px] font-black px-2 py-0.5 rounded-full">C</span>}
+                                {drawerPlayer._id === viceCaptain && <span className="bg-white/30 text-white text-[10px] font-black px-2 py-0.5 rounded-full">VC</span>}
+                                {drawerPlayer.isOverseas && <Plane size={13} className="fill-white text-white" />}
+                            </div>
+                            <p className="text-blue-100 text-xs font-bold uppercase tracking-wider mt-0.5">{drawerPlayer.role}</p>
+                        </div>
+                        <button
+                            onClick={() => setExpandedPlayerId(null)}
+                            className="shrink-0 p-2 hover:bg-white/20 rounded-full transition-colors"
+                        >
+                            <X size={20} />
+                        </button>
+                    </div>
+
+                    {/* Scrollable Content */}
+                    <div className="flex-1 overflow-y-auto p-5 space-y-5">
+                        {!drawerBd ? (
+                            <div className="text-center py-12 text-gray-400">
+                                <Info size={32} className="mx-auto mb-3 opacity-30" />
+                                <p className="text-sm">Detailed history not available yet.</p>
+                            </div>
+                        ) : (
+                            <>
+                                {/* Summary Cards Grid */}
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="rounded-2xl p-4 bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200">
+                                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">🏆 IPL Season</p>
+                                        <p className="text-3xl font-black text-slate-800 leading-none">{drawerBd.seasonTotal}</p>
+                                        <p className="text-xs text-slate-500 mt-1">Total Points</p>
+                                    </div>
+                                    <div className="rounded-2xl p-4 bg-gradient-to-br from-green-50 to-emerald-100 border border-green-200">
+                                        <p className="text-[10px] font-black uppercase text-green-500 tracking-widest mb-1">✅ Contributed</p>
+                                        <p className="text-3xl font-black text-green-700 leading-none">{drawerBd.contributed}</p>
+                                        <p className="text-xs text-green-600 mt-1">To Your Team</p>
+                                    </div>
+                                    {drawerBd.benched > 0 && (
+                                        <div className="rounded-2xl p-4 bg-gradient-to-br from-red-50 to-rose-100 border border-red-200">
+                                            <p className="text-[10px] font-black uppercase text-red-400 tracking-widest mb-1">🚫 Not Counted</p>
+                                            <p className="text-3xl font-black text-red-500 leading-none">{drawerBd.benched}</p>
+                                            <p className="text-xs text-red-400 mt-1">While Benched</p>
+                                        </div>
+                                    )}
+                                    {drawerBd.livePoints > 0 && (
+                                        <div className="rounded-2xl p-4 bg-gradient-to-br from-orange-50 to-amber-100 border border-orange-200">
+                                            <p className="text-[10px] font-black uppercase text-orange-500 tracking-widest mb-1">🔴 This Week</p>
+                                            <p className="text-3xl font-black text-orange-600 leading-none">+{drawerBd.livePoints}</p>
+                                            <p className="text-xs text-orange-500 mt-1">Live Points</p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Week-by-Week Timeline */}
+                                {drawerBd.weekBreakdown?.length > 0 && (
+                                    <div>
+                                        <h4 className="text-xs font-black uppercase text-gray-400 tracking-widest mb-3">📅 Week by Week</h4>
+                                        <div className="space-y-2">
+                                            {drawerBd.weekBreakdown.map(w => (
+                                                <div key={w.week} className={cn(
+                                                    "flex items-center gap-3 p-3 rounded-xl border",
+                                                    w.inXI === null
+                                                        ? "bg-gray-50 border-gray-100"
+                                                        : w.inXI
+                                                            ? "bg-green-50 border-green-100"
+                                                            : "bg-red-50 border-red-100"
+                                                )}>
+                                                    {/* Week Badge */}
+                                                    <div className={cn(
+                                                        "w-9 h-9 rounded-full flex items-center justify-center font-black text-xs shrink-0",
+                                                        w.inXI === null ? "bg-gray-200 text-gray-500" :
+                                                        w.inXI ? "bg-green-500 text-white" : "bg-red-300 text-white"
+                                                    )}>
+                                                        W{w.week}
+                                                    </div>
+
+                                                    {/* Status */}
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className={cn(
+                                                            "font-bold text-sm",
+                                                            w.inXI === null ? "text-gray-400" :
+                                                            w.inXI ? "text-green-700" : "text-red-500"
+                                                        )}>
+                                                            {w.inXI === null ? 'No History Data'
+                                                                : w.inXI ? `Playing · ${w.role}`
+                                                                : 'Benched'}
+                                                        </div>
+                                                        {w.inXI && w.role !== 'Player' && (
+                                                            <div className="text-[11px] text-green-600 font-semibold">
+                                                                {w.role === 'Captain' ? '2× Captain Bonus Applied' : '1.5× VC Bonus Applied'}
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Points */}
+                                                    <div className="text-right shrink-0">
+                                                        {w.inXI === null ? (
+                                                            <span className="text-gray-300 text-sm font-bold">—</span>
+                                                        ) : w.inXI ? (
+                                                            <div>
+                                                                <div className="font-black text-green-700 text-base">{w.withBonus} pts</div>
+                                                                {w.withBonus !== w.rawPoints && (
+                                                                    <div className="text-[10px] text-gray-400">{w.rawPoints} raw</div>
+                                                                )}
+                                                            </div>
+                                                        ) : (
+                                                            <div>
+                                                                <div className="font-bold text-red-400 text-base">{w.rawPoints} pts</div>
+                                                                <div className="text-[10px] text-red-300">not counted</div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </div>
+                </div>
+            </>
+        )}
+        </>
     );
 };
 

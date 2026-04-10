@@ -9,6 +9,111 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const schedulePath = path.join(__dirname, '..', '..', 'ipl_schedule_export.json');
 
+const EXTERNAL_API_BASE = 'https://a-bhavy-bot-bbheroku-5f1b58e25c41.herokuapp.com';
+
+/** Normalize API name */
+function normalizeApiName(raw) {
+    if (!raw) return '';
+    return raw
+        .replace(/\s*\((c|wk|ip|rp|impact\s*player)\)\s*/gi, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+/** 
+ * Fuzzy name match — strips spaces and non-alphanumeric for comparison
+ */
+function fuzzyMatch(dbName, apiName) {
+    const clean = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const db = clean(dbName || '');
+    const api = clean(apiName || '');
+    
+    if (db === api)             return true;
+    if (db.includes(api) || api.includes(db))       return true;
+    return false;
+}
+
+/**
+ * Synchronizes points for a single match from the external API to the DB (Used during Audit)
+ */
+async function syncMatchPointsForAudit(matchId) {
+    console.log(`[Audit] 🔍 Verifying points for match ${matchId}...`);
+    try {
+        const res = await fetch(`${EXTERNAL_API_BASE}/points?match_id=${matchId}`);
+        if (!res.ok) {
+            throw new Error(`Points API returned status ${res.status} for match ${matchId}`);
+        }
+
+        const json = await res.json();
+        const apiPlayers = json?.data;
+        if (!Array.isArray(apiPlayers) || apiPlayers.length === 0) {
+            console.warn(`[Audit] ⚠️ No data found for match ${matchId}. Skipping.`);
+            return;
+        }
+
+        // Fetch all players for matching
+        const dbPlayers = await Player.find({});
+        let updatedCount = 0;
+
+        for (const apiP of apiPlayers) {
+            const normalized = normalizeApiName(apiP.player);
+            // Case-insensitive fuzzy match
+            const dbPlayer = dbPlayers.find(p => fuzzyMatch(p.name, normalized));
+
+            if (!dbPlayer) continue;
+
+            const base = Number(apiP.total) || 0;
+            const bat = Number(apiP.bat) || 0;
+            const bowl = Number(apiP.bowl) || 0;
+            const field = Number(apiP.field) || 0;
+
+            // Prepare RAW points for history
+            const rawMatchPoints = {
+                matchId: Number(matchId),
+                total: Number(base.toFixed(2)),
+                batting: Number(bat.toFixed(2)),
+                bowling: Number(bowl.toFixed(2)),
+                fielding: Number(field.toFixed(2)),
+                announcement: 0
+            };
+
+            const updateData = {};
+            
+            // 1. Update perMatchPoints history (ALWAYS store raw)
+            let updatedPMP = [...(dbPlayer.perMatchPoints || [])];
+            const idx = updatedPMP.findIndex(m => Number(m.matchId) === Number(matchId));
+            if (idx !== -1) {
+                updatedPMP[idx] = rawMatchPoints;
+            } else {
+                updatedPMP.push(rawMatchPoints);
+            }
+            updateData.perMatchPoints = updatedPMP;
+
+            // 2. Update points field (Live display) with multipliers
+            let finalPoints = { ...rawMatchPoints };
+            if (dbPlayer.isInPlaying11) {
+                let multiplier = 1;
+                if (dbPlayer.isCaptain) multiplier = 2;
+                else if (dbPlayer.isViceCaptain) multiplier = 1.5;
+
+                finalPoints.total = Number((rawMatchPoints.total * multiplier).toFixed(2));
+                finalPoints.batting = Number((rawMatchPoints.batting * multiplier).toFixed(2));
+                finalPoints.bowling = Number((rawMatchPoints.bowling * multiplier).toFixed(2));
+                finalPoints.fielding = Number((rawMatchPoints.fielding * multiplier).toFixed(2));
+            }
+            updateData.points = finalPoints;
+
+            // Save to DB
+            await Player.findByIdAndUpdate(dbPlayer._id, { $set: updateData });
+            updatedCount++;
+        }
+        console.log(`[Audit] ✅ Sync Complete for match ${matchId}. Updated ${updatedCount} players.`);
+    } catch (err) {
+        console.error(`[Audit] ❌ Failed to sync match ${matchId}:`, err.message);
+        throw err; // Stop finalization if sync fails (per User requirement)
+    }
+}
+
 /**
  * Helper to parse IST date strings from schedule JSON
  */
@@ -172,6 +277,25 @@ export const finalizeWeek = async (tournamentId = null) => {
         actualStartTime = prevWeek.endTime;
     }
 
+    // --- PHASE 1: Audit & Repair ---
+    console.log(`[Finalize] 🚀 Starting Audit for Week ${currentWeek}...`);
+    const schedule = JSON.parse(fs.readFileSync(schedulePath, 'utf8'));
+    const windowMatchIds = schedule
+        .filter(m => {
+            const start = parseISTDate(m.MatchDate, m.MatchTime);
+            return start >= new Date(actualStartTime) && start <= endTime;
+        })
+        .map(m => Number(m.MatchID));
+
+    if (windowMatchIds.length > 0) {
+        console.log(`[Finalize] Found ${windowMatchIds.length} matches to audit: ${windowMatchIds.join(', ')}`);
+        for (const matchId of windowMatchIds) {
+            await syncMatchPointsForAudit(matchId);
+        }
+    } else {
+        console.log('[Finalize] No matches found in this week window. Skipping audit.');
+    }
+
     for (const team of teams) {
         const snapshot = team.playing11History.find(h => h.week === currentWeek);
         if (!snapshot) {
@@ -211,6 +335,23 @@ export const finalizeWeek = async (tournamentId = null) => {
     tournament.currentWeek += 1;
     tournament.weekStartTime = null; // Clear until next "Start Week"
     await tournament.save();
+
+    // --- PHASE 3: Universal Summation ---
+    // User requirement: Always run sumPerMatchPoints at the end to ensure 100% sync
+    console.log('[Finalize] 🔄 Running final universal summation...');
+    const allPlayers = await Player.find({});
+    for (const player of allPlayers) {
+        const sumPoints = (player.perMatchPoints || []).reduce((acc, mp) => {
+            acc.total += (mp.total || 0);
+            acc.batting += (mp.batting || 0);
+            acc.bowling += (mp.bowling || 0);
+            acc.fielding += (mp.fielding || 0);
+            return acc;
+        }, { total: 0, batting: 0, bowling: 0, fielding: 0, announcement: 0 });
+
+        await Player.findByIdAndUpdate(player._id, { $set: { points: sumPoints } });
+    }
+    console.log('[Finalize] ✅ Universal Summation Complete.');
 
     return { finalizedWeek: currentWeek, endTime };
 };

@@ -61,9 +61,14 @@ function normalizeApiName(raw) {
  * Fuzzy name match — same strategy as masterScript.js findDbPlayer()
  * exact → dbName contains apiName → apiName contains dbName
  */
+/**
+ * Fuzzy name match — strips spaces and non-alphanumeric for comparison
+ */
 function fuzzyMatch(dbName, apiName) {
-    const db  = dbName.toLowerCase().trim();
-    const api = apiName.toLowerCase().trim();
+    const clean = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const db = clean(dbName || '');
+    const api = clean(apiName || '');
+    
     if (db === api)             return true;
     if (db.includes(api))       return true;
     if (api.includes(db))       return true;
