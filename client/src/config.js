@@ -9,7 +9,7 @@ const getApiUrl = () => {
     }
 
     // 2. Fallback to Production (Default behavior for users)
-    return 'https://auction-arena-server.onrender.com';
+    return 'https://a-bhavy-bot-bbheroku-5f1b58e25c41.herokuapp.com';
 };
 
 export const API_BASE_URL = getApiUrl();

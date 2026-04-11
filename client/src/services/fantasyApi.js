@@ -1,6 +1,6 @@
 import api from './api';
 
-const EXTERNAL_API = 'https://a-bhavy-bot-bbheroku-5f1b58e25c41.herokuapp.com';
+// External API constant removed in favor of unified backend proxy
 
 export const getFantasyMatches = async () => {
     const response = await api.get('/api/fantasy/matches');

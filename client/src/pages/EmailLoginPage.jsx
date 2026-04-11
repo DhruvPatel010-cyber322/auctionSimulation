@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from '../firebase';
 import { Mail, Lock, ArrowRight, LogIn } from 'lucide-react';
+import api from '../services/api';
 import { API_BASE_URL } from '../config';
 
 const EmailLoginPage = () => {
@@ -14,17 +15,11 @@ const EmailLoginPage = () => {
     const handleGoogleSuccess = async (user) => {
         const firebaseToken = await user.getIdToken(true); // force refresh to guarantee fresh Firebase ID token
         try {
-            const res = await fetch(`${API_BASE_URL}/api/v2/auth/login`, {
-                method: 'POST',
-                headers: { 
-                    'Authorization': `Bearer ${firebaseToken}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ firebaseToken })
+            const data = await api.post('/api/v2/auth/login', { firebaseToken }, {
+                headers: { 'Authorization': `Bearer ${firebaseToken}` }
             });
-            const data = await res.json();
             
-            if (res.ok && data.success) {
+            if (data.success) {
                 // Unify session tokens: local and google both now securely rely on backend JWT token
                 localStorage.setItem('token', data.token);
  // Keep for legacy component compatibility
@@ -47,14 +42,12 @@ const EmailLoginPage = () => {
         setLoading(true);
 
         try {
-            const res = await fetch(`${API_BASE_URL}/api/v2/auth/login-local`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: identifier.trim(), password })
+            const data = await api.post('/api/v2/auth/login-local', { 
+                username: identifier.trim(), 
+                password 
             });
-            const data = await res.json();
 
-            if (res.ok && data.success) {
+            if (data.success) {
                 // Ensure BOTH keys hold our native JWT token to prevent logout desyncs
                 localStorage.setItem('token', data.token);
 

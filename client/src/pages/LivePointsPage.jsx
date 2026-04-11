@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { fetchLiveMatch, fetchLivePoints } from '../services/fantasyApi';
 
-const EXTERNAL_API = 'https://a-bhavy-bot-bbheroku-5f1b58e25c41.herokuapp.com';
+// Unified API context used via services/fantasyApi
 const POLL_MS = 2 * 60 * 1000; // 2 minutes (matches backend)
 const MATCH_DURATION_MS = (4 * 60 + 30) * 60 * 1000;
 
