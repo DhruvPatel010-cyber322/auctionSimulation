@@ -15,14 +15,14 @@ const EmailLoginPage = () => {
     const handleGoogleSuccess = async (user) => {
         const firebaseToken = await user.getIdToken(true); // force refresh to guarantee fresh Firebase ID token
         try {
-            const data = await api.post('/api/v2/auth/login', { firebaseToken }, {
+            const response = await api.post('/api/v2/auth/login', { firebaseToken }, {
                 headers: { 'Authorization': `Bearer ${firebaseToken}` }
             });
+            const data = response.data;
             
             if (data.success) {
                 // Unify session tokens: local and google both now securely rely on backend JWT token
                 localStorage.setItem('token', data.token);
- // Keep for legacy component compatibility
                 localStorage.setItem('user', JSON.stringify(data.user)); // Store user for AuthContext
                 
                 // Hard redirect to force AuthContext to re-mount and pick up the new tokens and user
@@ -42,10 +42,11 @@ const EmailLoginPage = () => {
         setLoading(true);
 
         try {
-            const data = await api.post('/api/v2/auth/login-local', { 
+            const response = await api.post('/api/v2/auth/login-local', { 
                 username: identifier.trim(), 
                 password 
             });
+            const data = response.data;
 
             if (data.success) {
                 // Ensure BOTH keys hold our native JWT token to prevent logout desyncs
