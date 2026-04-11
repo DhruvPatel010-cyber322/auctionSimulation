@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { API_BASE_URL as API_URL } from '../config';
 import { Shield, Check, AlertCircle, X, User, Plane, AlertTriangle, Lock, Edit2, ChevronDown, Users, Star, Info } from 'lucide-react';
@@ -160,7 +160,7 @@ const SelectPlayingXI = () => {
     useEffect(() => {
         if (!selectedTeam) return;
 
-        const fetchSquad = async () => {
+        const fetchSquad = async (isAutoRefresh = false) => {
             setLoading(true);
             setError('');
             const localToken = localStorage.getItem('token');
@@ -194,19 +194,21 @@ const SelectPlayingXI = () => {
                     // If switching to My Team and I have saved data, View Mode.
                     // If no saved data, maybe Auto-Edit? No, stick to View -> Edit.
 
-                    // Sync Slots for Edit Mode if it's my team
-                    if (selectedTeam === myTeamCode && data.playing11 && data.playing11.length > 0) {
-                        const newSlots = Array.from({ length: 11 }, (_, i) => i + 1).reduce((acc, pos) => ({ ...acc, [pos]: null }), {});
-                        data.playing11.forEach((p, idx) => {
-                            if (idx < 11) newSlots[idx + 1] = p;
-                        });
-                        setSlots(newSlots);
-                    } else if (selectedTeam === myTeamCode) {
-                        // Reset if empty
-                        setSlots(Array.from({ length: 11 }, (_, i) => i + 1).reduce((acc, pos) => ({ ...acc, [pos]: null }), {}));
-                    }
+                    // Sync Slots for Edit Mode if it's my team (only on initial load or manual switch, NOT auto-refresh)
+                    if (!isAutoRefresh) {
+                        if (selectedTeam === myTeamCode && data.playing11 && data.playing11.length > 0) {
+                            const newSlots = Array.from({ length: 11 }, (_, i) => i + 1).reduce((acc, pos) => ({ ...acc, [pos]: null }), {});
+                            data.playing11.forEach((p, idx) => {
+                                if (idx < 11) newSlots[idx + 1] = p;
+                            });
+                            setSlots(newSlots);
+                        } else if (selectedTeam === myTeamCode) {
+                            // Reset if empty
+                            setSlots(Array.from({ length: 11 }, (_, i) => i + 1).reduce((acc, pos) => ({ ...acc, [pos]: null }), {}));
+                        }
 
-                    setIsEditMode(false); // Always reset to View Mode on switch
+                        setIsEditMode(false); // Always reset to View Mode on manual switch
+                    }
                 } else {
                     setError('Failed to load team data.');
                 }
@@ -218,8 +220,8 @@ const SelectPlayingXI = () => {
             }
         };
 
-        fetchSquad();
-        const interval = setInterval(fetchSquad, 60000); // 1 min auto-refresh
+        fetchSquad(false); // Initial load or manual suite
+        const interval = setInterval(() => fetchSquad(true), 60000); // 1 min auto-refresh (background)
         return () => clearInterval(interval);
     }, [selectedTeam, myTeamCode]);
 
@@ -385,7 +387,9 @@ const SelectPlayingXI = () => {
                 setMsg('Saved Successfully!');
                 // Refresh Data to View Mode
                 const data = await res.json();
-                setPlaying11(data.playing11); // Optimistic update or from response
+                // Reconstruct full player objects from local slots instead of using API provided string IDs
+                const updatedPlayingXI = Object.values(slots).filter(p => p !== null);
+                setPlaying11(updatedPlayingXI); 
                 setCaptain(data.captain);
                 setViceCaptain(data.viceCaptain);
                 setIsEditMode(false);
@@ -441,7 +445,9 @@ const SelectPlayingXI = () => {
                 setMsg('Saved Successfully!');
                 // Refresh Data to View Mode
                 const data = await res.json();
-                setPlaying11(data.playing11); // Optimistic update or from response
+                // Reconstruct full player objects from local slots instead of using API provided string IDs
+                const updatedPlayingXI = Object.values(slots).filter(p => p !== null);
+                setPlaying11(updatedPlayingXI); 
                 setCaptain(data.captain);
                 setViceCaptain(data.viceCaptain);
                 setIsEditMode(false);
@@ -795,7 +801,7 @@ const SelectPlayingXI = () => {
                                                             {p.image ? <img src={p.image} className="w-full h-full object-cover" /> : <User className="w-full h-full p-2 text-gray-300" />}
                                                         </div>
                                                         <div className="pointer-events-none">
-                                                            <div className="text-sm font-bold">{p.name} {p.isOverseas && 'âœˆï¸'}</div>
+                                                            <div className="text-sm font-bold flex items-center gap-1">{p.name} {p.isOverseas && <Plane size={13} className="text-blue-500 fill-blue-500" />}</div>
                                                             <div className="text-xs text-gray-500">{p.role}</div>
                                                         </div>
                                                     </div>
@@ -838,7 +844,7 @@ const SelectPlayingXI = () => {
                                                             {p.image ? <img src={p.image} className="w-full h-full object-cover" /> : <User className="w-full h-full p-2 text-gray-300" />}
                                                         </div>
                                                         <div>
-                                                            <div className="font-bold">{p.name} {p.isOverseas && 'âœˆï¸'}</div>
+                                                            <div className="font-bold flex items-center gap-1">{p.name} {p.isOverseas && <Plane size={13} className="text-blue-500 fill-blue-500" />}</div>
                                                             <div className="text-xs text-gray-500">{p.role}</div>
                                                         </div>
                                                     </div>
@@ -900,7 +906,7 @@ const SelectPlayingXI = () => {
                                                 {p.image ? <img src={p.image} className="w-full h-full object-cover" /> : <User className="w-full h-full p-2 text-gray-300" />}
                                             </div>
                                             <div className="min-w-0">
-                                                <div className="font-bold text-sm truncate">{p.name} {p.isOverseas && 'âœˆï¸'}</div>
+                                                <div className="font-bold text-sm truncate flex items-center gap-1">{p.name} {p.isOverseas && <Plane size={13} className="text-blue-500 fill-blue-500 shrink-0" />}</div>
                                                 <div className="text-xs text-gray-500">{p.role}</div>
                                             </div>
                                         </div>
