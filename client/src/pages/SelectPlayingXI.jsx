@@ -615,16 +615,23 @@ const SelectPlayingXI = () => {
                         )}
 
                         {playing11.length === 0 ? (
-                            <div className="text-center py-12 bg-gray-50 rounded-3xl border border-dashed border-gray-300">
-                                <Shield size={48} className="mx-auto text-gray-300 mb-4" />
-                                <h3 className="text-xl font-bold text-gray-900">No Playing XI Selected</h3>
-                                <p className="text-gray-500 mb-6">{isMyTeam ? "You haven't finalized your team yet." : "This team hasn't announced their Playing XI."}</p>
-                                {isMyTeam && !isLocked && (
-                                    <button onClick={() => setIsEditMode(true)} className="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-colors">
-                                        Create Playing XI
-                                    </button>
-                                )}
-                            </div>
+                            loading ? (
+                                <div className="text-center py-12 bg-gray-50 rounded-3xl border border-dashed border-gray-200 flex flex-col items-center justify-center animate-in fade-in">
+                                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 mb-6 shadow-sm"></div>
+                                    <h3 className="text-xl font-bold text-gray-500 tracking-tight">Fetching Lineup...</h3>
+                                </div>
+                            ) : (
+                                <div className="text-center py-12 bg-gray-50 rounded-3xl border border-dashed border-gray-300">
+                                    <Shield size={48} className="mx-auto text-gray-300 mb-4" />
+                                    <h3 className="text-xl font-bold text-gray-900">No Playing XI Selected</h3>
+                                    <p className="text-gray-500 mb-6">{isMyTeam ? "You haven't finalized your team yet." : "This team hasn't announced their Playing XI."}</p>
+                                    {isMyTeam && !isLocked && (
+                                        <button onClick={() => setIsEditMode(true)} className="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-colors">
+                                            Create Playing XI
+                                        </button>
+                                    )}
+                                </div>
+                            )
                         ) : (
                             <div>
                                 {/* Playing XI Header with Points Dropdown */}
