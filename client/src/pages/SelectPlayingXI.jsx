@@ -5,33 +5,33 @@ import { Shield, Check, AlertCircle, X, User, Plane, AlertTriangle, Lock, Edit2,
 import { cn } from '../lib/utils';
 
 const POINT_FILTERS = [
-    { key: 'total',    label: 'Total Points',    color: 'text-indigo-600',  bg: 'bg-indigo-50',  border: 'border-indigo-200' },
-    { key: 'batting',  label: 'Batting Points',  color: 'text-green-600',   bg: 'bg-green-50',   border: 'border-green-200'  },
-    { key: 'bowling',  label: 'Bowling Points',  color: 'text-orange-600',  bg: 'bg-orange-50',  border: 'border-orange-200' },
-    { key: 'fielding', label: 'Fielding Points', color: 'text-purple-600',  bg: 'bg-purple-50',  border: 'border-purple-200' },
+    { key: 'total', label: 'Total Points', color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-200' },
+    { key: 'batting', label: 'Batting Points', color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200' },
+    { key: 'bowling', label: 'Bowling Points', color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-200' },
+    { key: 'fielding', label: 'Fielding Points', color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-200' },
 ];
 
 const getPlayerPoints = (player, filterKey, scoring) => {
     if (!player) return 0;
-    
+
     // Check if we have a server-side week-specific breakdown for this player
     if (scoring && scoring.playerWeekPoints && scoring.playerWeekPoints[player._id]) {
         const weekPts = scoring.playerWeekPoints[player._id];
         switch (filterKey) {
-            case 'batting':  return weekPts.batting  ?? 0;
-            case 'bowling':  return weekPts.bowling  ?? 0;
+            case 'batting': return weekPts.batting ?? 0;
+            case 'bowling': return weekPts.bowling ?? 0;
             case 'fielding': return weekPts.fielding ?? 0;
-            default:         return weekPts.total    ?? 0;
+            default: return weekPts.total ?? 0;
         }
     }
 
     // Fallback to legacy/overall player.points if no week-specific data (unlikely in Auction)
     const pts = player.points || {};
     switch (filterKey) {
-        case 'batting':  return pts.batting      ?? 0;
-        case 'bowling':  return pts.bowling      ?? 0;
-        case 'fielding': return pts.fielding     ?? 0;
-        default:         return (typeof pts === 'number') ? pts : (pts.total ?? 0);
+        case 'batting': return pts.batting ?? 0;
+        case 'bowling': return pts.bowling ?? 0;
+        case 'fielding': return pts.fielding ?? 0;
+        default: return (typeof pts === 'number') ? pts : (pts.total ?? 0);
     }
 };
 
@@ -306,7 +306,7 @@ const SelectPlayingXI = () => {
         setSlots(prev => {
             const newSlots = { ...prev };
             const existingPlayerAtTarget = newSlots[targetPos];
-            
+
             // If dragging from another slot and dropping here
             if (dragSourcePos !== null) {
                 // If there was someone already here, swap them if valid
@@ -323,7 +323,7 @@ const SelectPlayingXI = () => {
                     newSlots[dragSourcePos] = null; // Blank the old slot
                 }
             }
-            
+
             // Assign dragged player to target slot
             newSlots[targetPos] = draggedPlayer;
             return newSlots;
@@ -389,7 +389,7 @@ const SelectPlayingXI = () => {
                 const data = await res.json();
                 // Reconstruct full player objects from local slots instead of using API provided string IDs
                 const updatedPlayingXI = Object.values(slots).filter(p => p !== null);
-                setPlaying11(updatedPlayingXI); 
+                setPlaying11(updatedPlayingXI);
                 setCaptain(data.captain);
                 setViceCaptain(data.viceCaptain);
                 setIsEditMode(false);
@@ -447,7 +447,7 @@ const SelectPlayingXI = () => {
                 const data = await res.json();
                 // Reconstruct full player objects from local slots instead of using API provided string IDs
                 const updatedPlayingXI = Object.values(slots).filter(p => p !== null);
-                setPlaying11(updatedPlayingXI); 
+                setPlaying11(updatedPlayingXI);
                 setCaptain(data.captain);
                 setViceCaptain(data.viceCaptain);
                 setIsEditMode(false);
@@ -509,595 +509,595 @@ const SelectPlayingXI = () => {
         <>
             <div className="max-w-7xl mx-auto p-4 md:p-8">
                 {/* Header & Controls */}
-            <header className="mb-6 flex flex-col gap-3">
-                <div>
-                    <h1 className="text-2xl md:text-3xl font-black text-gray-900 flex items-center gap-3">
-                        <User className="text-blue-600" size={28} />
-                        Playing XI
-                    </h1>
-                    <p className="text-sm text-gray-500">View and manage squad lineups.</p>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-3">
-                    {/* Team Selector */}
-                    <div className="relative flex-1 min-w-[160px]">
-                        <select
-                            value={selectedTeam || ''}
-                            onChange={(e) => setSelectedTeam(e.target.value)}
-                            className="w-full appearance-none bg-white border border-gray-200 pl-4 pr-10 py-2 rounded-xl font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                        >
-                            {allTeams.map(t => (
-                                <option key={t.id} value={t.id}>{t.name} {t.id === myTeamCode ? '(You)' : ''}</option>
-                            ))}
-                        </select>
-                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                <header className="mb-6 flex flex-col gap-3">
+                    <div>
+                        <h1 className="text-2xl md:text-3xl font-black text-gray-900 flex items-center gap-3">
+                            <User className="text-blue-600" size={28} />
+                            Playing XI
+                        </h1>
+                        <p className="text-sm text-gray-500">View and manage squad lineups.</p>
                     </div>
 
-                    <div className="flex gap-2 shrink-0">
-                        {isLocked && (
-                            <div className="flex items-center gap-2 px-3 py-1.5 bg-red-50 text-red-600 rounded-xl text-sm font-bold border border-red-200">
-                                <Lock size={14} /> Locked
-                            </div>
-                        )}
-                        {isMyTeam && !isEditMode && !isLocked && (
-                            <button
-                                onClick={() => setIsEditMode(true)}
-                                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-bold transition-colors text-sm"
+                    <div className="flex flex-wrap items-center gap-3">
+                        {/* Team Selector */}
+                        <div className="relative flex-1 min-w-[160px]">
+                            <select
+                                value={selectedTeam || ''}
+                                onChange={(e) => setSelectedTeam(e.target.value)}
+                                className="w-full appearance-none bg-white border border-gray-200 pl-4 pr-10 py-2 rounded-xl font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                             >
-                                <Edit2 size={16} /> Edit XI
-                            </button>
-                        )}
-                    </div>
-
-                    {isEditMode && (
-                        <button
-                            onClick={() => {
-                                setIsEditMode(false);
-                                setShowCaptainModal(false);
-                            }}
-                            className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-2 rounded-xl font-bold transition-colors text-sm shrink-0"
-                        >
-                            <X size={16} /> Cancel
-                        </button>
-                    )}
-                </div>
-            </header>
-
-            {error && <div className="fixed top-24 right-8 z-50 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-lg animate-in fade-in slide-in-from-right">{error}</div>}
-            {msg && <div className="fixed top-24 right-8 z-50 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-lg animate-in fade-in slide-in-from-right">{msg}</div>}
-
-            {/* --- VIEW MODE --- */}
-            {!isEditMode && (
-                <div className="space-y-8 animate-in fade-in">
-
-                    {/* â”€â”€ Official Team Points Summary Bar â”€â”€ */}
-                    {scoring && (
-                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-wrap gap-6 items-center animate-in fade-in slide-in-from-top-4">
-                            <div className="flex flex-col">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Total Score</span>
-                                <div className="text-3xl font-black text-blue-600 tracking-tight leading-none mt-1">
-                                    {scoring.totalPoints}
-                                </div>
-                            </div>
-                            
-                            <div className="h-10 w-px bg-gray-100 hidden md:block" />
-
-                            <div className="flex flex-col">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Finalized (Wk 1)</span>
-                                <div className="text-lg font-bold text-gray-900 mt-0.5">
-                                    {scoring.finalizedTotal}
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Live (Current)</span>
-                                <div className="text-lg font-bold text-green-600 mt-0.5">
-                                    +{scoring.livePoints}
-                                </div>
-                            </div>
-
-                            {/* Optional: Simple filter buttons for scouting player raw stats */}
-                            <div className="ml-auto flex items-center gap-2 bg-gray-50 p-1.5 rounded-xl border border-gray-100">
-                                {POINT_FILTERS.map(f => (
-                                    <button
-                                        key={f.key}
-                                        onClick={() => setPointsFilter(f.key)}
-                                        className={cn(
-                                            "px-3 py-1 rounded-lg text-xs font-bold transition-all",
-                                            pointsFilter === f.key ? "bg-white text-blue-600 shadow-sm border border-blue-100" : "text-gray-400 hover:text-gray-600"
-                                        )}
-                                    >
-                                        {f.label.replace(' Points', '')}
-                                    </button>
+                                {allTeams.map(t => (
+                                    <option key={t.id} value={t.id}>{t.name} {t.id === myTeamCode ? '(You)' : ''}</option>
                                 ))}
-                            </div>
+                            </select>
+                            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
                         </div>
-                    )}
 
-                    {playing11.length === 0 ? (
-                        <div className="text-center py-12 bg-gray-50 rounded-3xl border border-dashed border-gray-300">
-                            <Shield size={48} className="mx-auto text-gray-300 mb-4" />
-                            <h3 className="text-xl font-bold text-gray-900">No Playing XI Selected</h3>
-                            <p className="text-gray-500 mb-6">{isMyTeam ? "You haven't finalized your team yet." : "This team hasn't announced their Playing XI."}</p>
-                            {isMyTeam && !isLocked && (
-                                <button onClick={() => setIsEditMode(true)} className="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-colors">
-                                    Create Playing XI
+                        <div className="flex gap-2 shrink-0">
+                            {isLocked && (
+                                <div className="flex items-center gap-2 px-3 py-1.5 bg-red-50 text-red-600 rounded-xl text-sm font-bold border border-red-200">
+                                    <Lock size={14} /> Locked
+                                </div>
+                            )}
+                            {isMyTeam && !isEditMode && !isLocked && (
+                                <button
+                                    onClick={() => setIsEditMode(true)}
+                                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-bold transition-colors text-sm"
+                                >
+                                    <Edit2 size={16} /> Edit XI
                                 </button>
                             )}
                         </div>
-                    ) : (
-                        <div>
-                            {/* Playing XI Header with Points Dropdown */}
-                            <div className="flex items-center justify-between gap-2 mb-4">
-                                <div className="flex items-center gap-2">
-                                    <Shield className="text-green-600" />
-                                    <h2 className="text-xl font-bold text-gray-800">Final 11</h2>
+
+                        {isEditMode && (
+                            <button
+                                onClick={() => {
+                                    setIsEditMode(false);
+                                    setShowCaptainModal(false);
+                                }}
+                                className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-2 rounded-xl font-bold transition-colors text-sm shrink-0"
+                            >
+                                <X size={16} /> Cancel
+                            </button>
+                        )}
+                    </div>
+                </header>
+
+                {error && <div className="fixed top-24 right-8 z-50 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-lg animate-in fade-in slide-in-from-right">{error}</div>}
+                {msg && <div className="fixed top-24 right-8 z-50 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-lg animate-in fade-in slide-in-from-right">{msg}</div>}
+
+                {/* --- VIEW MODE --- */}
+                {!isEditMode && (
+                    <div className="space-y-8 animate-in fade-in">
+
+                        {/* â”€â”€ Official Team Points Summary Bar â”€â”€ */}
+                        {scoring && (
+                            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-wrap gap-6 items-center animate-in fade-in slide-in-from-top-4">
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Total Score</span>
+                                    <div className="text-3xl font-black text-blue-600 tracking-tight leading-none mt-1">
+                                        {scoring.totalPoints}
+                                    </div>
                                 </div>
 
-                                {/* Points Filter Dropdown */}
-                                <div className="relative">
-                                    <button
-                                        onClick={() => setShowPointsDropdown(v => !v)}
-                                        className={cn(
-                                            "flex items-center gap-2 px-3 py-1.5 rounded-xl border text-sm font-bold transition-colors",
-                                            activeFilter.bg, activeFilter.border, activeFilter.color
-                                        )}
-                                    >
-                                        <Star size={13} />
-                                        {activeFilter.label}
-                                        <ChevronDown size={13} className={cn("transition-transform", showPointsDropdown && "rotate-180")} />
-                                    </button>
-                                    {showPointsDropdown && (
-                                        <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-2xl shadow-xl z-30 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-                                            {POINT_FILTERS.map(f => (
-                                                <button
-                                                    key={f.key}
-                                                    onClick={() => { setPointsFilter(f.key); setShowPointsDropdown(false); }}
-                                                    className={cn(
-                                                        "w-full text-left px-4 py-2.5 text-sm font-semibold transition-colors",
-                                                        pointsFilter === f.key ? `${f.bg} ${f.color}` : "hover:bg-gray-50 text-gray-700"
-                                                    )}
-                                                >
-                                                    {f.label}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    )}
+                                <div className="h-10 w-px bg-gray-100 hidden md:block" />
+
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Finalized (till last week)</span>
+                                    <div className="text-lg font-bold text-gray-900 mt-0.5">
+                                        {scoring.finalizedTotal}
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Live (Current)</span>
+                                    <div className="text-lg font-bold text-green-600 mt-0.5">
+                                        +{scoring.livePoints}
+                                    </div>
+                                </div>
+
+                                {/* Optional: Simple filter buttons for scouting player raw stats */}
+                                <div className="ml-auto flex items-center gap-2 bg-gray-50 p-1.5 rounded-xl border border-gray-100">
+                                    {POINT_FILTERS.map(f => (
+                                        <button
+                                            key={f.key}
+                                            onClick={() => setPointsFilter(f.key)}
+                                            className={cn(
+                                                "px-3 py-1 rounded-lg text-xs font-bold transition-all",
+                                                pointsFilter === f.key ? "bg-white text-blue-600 shadow-sm border border-blue-100" : "text-gray-400 hover:text-gray-600"
+                                            )}
+                                        >
+                                            {f.label.replace(' Points', '')}
+                                        </button>
+                                    ))}
                                 </div>
                             </div>
+                        )}
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                                {playing11.map((p, i) => (
-                                    <div key={p._id} className="bg-white p-4 rounded-xl border border-blue-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
-                                        <div className="absolute top-0 left-0 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-br-lg">
-                                            #{i + 1}
-                                        </div>
-                                        {/* Points badge â€” unchanged: still shows This Week */}
-                                        <div className={cn("absolute top-0 right-0 text-xs font-black px-3 py-1 rounded-bl-lg", activeFilter.bg, activeFilter.color)}>
-                                            {getPlayerPoints(p, pointsFilter, scoring)} pts
-                                        </div>
-                                        <div className="flex items-center gap-4 mt-2">
-                                            <div className="w-12 h-12 rounded-full bg-gray-100 border border-gray-200 overflow-hidden shrink-0">
-                                                {p.image ? <img src={p.image} className="w-full h-full object-cover" /> : <User className="w-full h-full p-2 text-gray-300" />}
+                        {playing11.length === 0 ? (
+                            <div className="text-center py-12 bg-gray-50 rounded-3xl border border-dashed border-gray-300">
+                                <Shield size={48} className="mx-auto text-gray-300 mb-4" />
+                                <h3 className="text-xl font-bold text-gray-900">No Playing XI Selected</h3>
+                                <p className="text-gray-500 mb-6">{isMyTeam ? "You haven't finalized your team yet." : "This team hasn't announced their Playing XI."}</p>
+                                {isMyTeam && !isLocked && (
+                                    <button onClick={() => setIsEditMode(true)} className="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-colors">
+                                        Create Playing XI
+                                    </button>
+                                )}
+                            </div>
+                        ) : (
+                            <div>
+                                {/* Playing XI Header with Points Dropdown */}
+                                <div className="flex items-center justify-between gap-2 mb-4">
+                                    <div className="flex items-center gap-2">
+                                        <Shield className="text-green-600" />
+                                        <h2 className="text-xl font-bold text-gray-800">Final 11</h2>
+                                    </div>
+
+                                    {/* Points Filter Dropdown */}
+                                    <div className="relative">
+                                        <button
+                                            onClick={() => setShowPointsDropdown(v => !v)}
+                                            className={cn(
+                                                "flex items-center gap-2 px-3 py-1.5 rounded-xl border text-sm font-bold transition-colors",
+                                                activeFilter.bg, activeFilter.border, activeFilter.color
+                                            )}
+                                        >
+                                            <Star size={13} />
+                                            {activeFilter.label}
+                                            <ChevronDown size={13} className={cn("transition-transform", showPointsDropdown && "rotate-180")} />
+                                        </button>
+                                        {showPointsDropdown && (
+                                            <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-2xl shadow-xl z-30 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+                                                {POINT_FILTERS.map(f => (
+                                                    <button
+                                                        key={f.key}
+                                                        onClick={() => { setPointsFilter(f.key); setShowPointsDropdown(false); }}
+                                                        className={cn(
+                                                            "w-full text-left px-4 py-2.5 text-sm font-semibold transition-colors",
+                                                            pointsFilter === f.key ? `${f.bg} ${f.color}` : "hover:bg-gray-50 text-gray-700"
+                                                        )}
+                                                    >
+                                                        {f.label}
+                                                    </button>
+                                                ))}
                                             </div>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-center gap-1 justify-between">
-                                                    <div className="flex items-center gap-1 flex-wrap">
-                                                        <h3 className="font-bold text-gray-900 text-sm">{p.name}</h3>
-                                                        {p._id === captain && <span className="bg-orange-100 text-orange-700 text-[10px] font-black px-1.5 py-0.5 rounded">C</span>}
-                                                        {p._id === viceCaptain && <span className="bg-blue-100 text-blue-700 text-[10px] font-black px-1.5 py-0.5 rounded">VC</span>}
-                                                        {p.isOverseas && <Plane size={13} className="text-blue-500 fill-blue-500" />}
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                    {playing11.map((p, i) => (
+                                        <div key={p._id} className="bg-white p-4 rounded-xl border border-blue-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
+                                            <div className="absolute top-0 left-0 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-br-lg">
+                                                #{i + 1}
+                                            </div>
+                                            {/* Points badge â€” unchanged: still shows This Week */}
+                                            <div className={cn("absolute top-0 right-0 text-xs font-black px-3 py-1 rounded-bl-lg", activeFilter.bg, activeFilter.color)}>
+                                                {getPlayerPoints(p, pointsFilter, scoring)} pts
+                                            </div>
+                                            <div className="flex items-center gap-4 mt-2">
+                                                <div className="w-12 h-12 rounded-full bg-gray-100 border border-gray-200 overflow-hidden shrink-0">
+                                                    {p.image ? <img src={p.image} className="w-full h-full object-cover" /> : <User className="w-full h-full p-2 text-gray-300" />}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-1 justify-between">
+                                                        <div className="flex items-center gap-1 flex-wrap">
+                                                            <h3 className="font-bold text-gray-900 text-sm">{p.name}</h3>
+                                                            {p._id === captain && <span className="bg-orange-100 text-orange-700 text-[10px] font-black px-1.5 py-0.5 rounded">C</span>}
+                                                            {p._id === viceCaptain && <span className="bg-blue-100 text-blue-700 text-[10px] font-black px-1.5 py-0.5 rounded">VC</span>}
+                                                            {p.isOverseas && <Plane size={13} className="text-blue-500 fill-blue-500" />}
+                                                        </div>
+                                                        {/* â“˜ Info â€” opens side drawer */}
+                                                        {scoring?.playerBreakdown && (
+                                                            <button
+                                                                onClick={() => setExpandedPlayerId(prev => prev === p._id ? null : p._id)}
+                                                                title="View full points breakdown"
+                                                                className="p-1 rounded-full text-gray-300 hover:text-blue-500 hover:bg-blue-50 transition-colors shrink-0"
+                                                            >
+                                                                <Info size={14} />
+                                                            </button>
+                                                        )}
                                                     </div>
-                                                    {/* â“˜ Info â€” opens side drawer */}
+                                                    <p className="text-xs font-bold text-gray-500 uppercase">{p.role}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Bench Section */}
+                        {benchPlayers.length > 0 && (
+                            <div>
+                                <div className="flex items-center gap-2 mb-4 mt-8">
+                                    <Users className="text-gray-400" />
+                                    <h2 className="text-xl font-bold text-gray-800">Bench ({benchPlayers.length})</h2>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                                    {benchPlayers.map(p => (
+                                        <div key={p._id} className="bg-gray-50 p-3 rounded-xl border border-gray-200 opacity-75 hover:opacity-100 transition-all">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-full bg-white border border-gray-200 overflow-hidden shrink-0">
+                                                    {p.image ? <img src={p.image} className="w-full h-full object-cover" /> : <User className="w-full h-full p-2 text-gray-300" />}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <h4 className="font-bold text-sm text-gray-700 truncate">{p.name}</h4>
+                                                    <p className="text-[10px] font-bold text-gray-400 uppercase">{p.role}</p>
+                                                </div>
+                                                <div className="flex items-center gap-1 shrink-0">
+                                                    <span className={cn("text-xs font-black px-2 py-0.5 rounded-lg", activeFilter.bg, activeFilter.color)}>
+                                                        {getPlayerPoints(p, pointsFilter, scoring)} pts
+                                                    </span>
                                                     {scoring?.playerBreakdown && (
                                                         <button
                                                             onClick={() => setExpandedPlayerId(prev => prev === p._id ? null : p._id)}
                                                             title="View full points breakdown"
-                                                            className="p-1 rounded-full text-gray-300 hover:text-blue-500 hover:bg-blue-50 transition-colors shrink-0"
+                                                            className="p-1 rounded-full text-gray-300 hover:text-blue-500 hover:bg-blue-50 transition-colors"
                                                         >
-                                                            <Info size={14} />
+                                                            <Info size={13} />
                                                         </button>
                                                     )}
                                                 </div>
-                                                <p className="text-xs font-bold text-gray-500 uppercase">{p.role}</p>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-                    )}
-
-                    {/* Bench Section */}
-                    {benchPlayers.length > 0 && (
-                        <div>
-                            <div className="flex items-center gap-2 mb-4 mt-8">
-                                <Users className="text-gray-400" />
-                                <h2 className="text-xl font-bold text-gray-800">Bench ({benchPlayers.length})</h2>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                                {benchPlayers.map(p => (
-                                    <div key={p._id} className="bg-gray-50 p-3 rounded-xl border border-gray-200 opacity-75 hover:opacity-100 transition-all">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-white border border-gray-200 overflow-hidden shrink-0">
-                                                {p.image ? <img src={p.image} className="w-full h-full object-cover" /> : <User className="w-full h-full p-2 text-gray-300" />}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <h4 className="font-bold text-sm text-gray-700 truncate">{p.name}</h4>
-                                                <p className="text-[10px] font-bold text-gray-400 uppercase">{p.role}</p>
-                                            </div>
-                                            <div className="flex items-center gap-1 shrink-0">
-                                                <span className={cn("text-xs font-black px-2 py-0.5 rounded-lg", activeFilter.bg, activeFilter.color)}>
-                                                    {getPlayerPoints(p, pointsFilter, scoring)} pts
-                                                </span>
-                                                {scoring?.playerBreakdown && (
-                                                    <button
-                                                        onClick={() => setExpandedPlayerId(prev => prev === p._id ? null : p._id)}
-                                                        title="View full points breakdown"
-                                                        className="p-1 rounded-full text-gray-300 hover:text-blue-500 hover:bg-blue-50 transition-colors"
-                                                    >
-                                                        <Info size={13} />
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
-            )}
-
-
-            {/* --- EDIT MODE --- */}
-            {isEditMode && (
-                <div className="animate-in slide-in-from-bottom-4">
-                    {/* Reuse existing Edit UI logic here */}
-
-                    {/* Stats Panel */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className={cn("p-3 rounded-xl border flex items-center justify-between", stats.count === 11 ? "bg-green-50 border-green-200" : "bg-gray-50 border-gray-200")}>
-                            <div><span className="text-xs font-bold uppercase text-gray-400 block">Players</span><span className={cn("font-bold text-lg", stats.count === 11 ? "text-green-700" : "text-gray-900")}>{stats.count}/11</span></div>
-                            {stats.count === 11 ? <Check size={20} className="text-green-600" /> : <Shield size={20} className="text-gray-300" />}
-                        </div>
-                        <div className={cn("p-3 rounded-xl border flex items-center justify-between", stats.overseas <= 4 ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200")}>
-                            <div><span className="text-xs font-bold uppercase text-gray-400 block">Overseas</span><span className={cn("font-bold text-lg", stats.overseas > 4 ? "text-red-600" : "text-gray-900")}>{stats.overseas}/4</span></div>
-                            {stats.overseas <= 4 ? <Check size={20} className="text-green-600" /> : <AlertTriangle size={20} className="text-red-600" />}
-                        </div>
-                        <div className={cn("p-3 rounded-xl border flex items-center justify-between", stats.wks >= 1 ? "bg-green-50 border-green-200" : "bg-orange-50 border-orange-200")}>
-                            <div><span className="text-xs font-bold uppercase text-gray-400 block">Keepers</span><span className={cn("font-bold text-lg", stats.wks >= 1 ? "text-green-700" : "text-gray-900")}>{stats.wks}/1 (Min)</span></div>
-                            {stats.wks >= 1 ? <Check size={20} className="text-green-600" /> : <AlertCircle size={20} className="text-orange-500" />}
-                        </div>
-                        <div className={cn("p-3 rounded-xl border flex items-center justify-between", stats.bowlers >= 5 ? "bg-green-50 border-green-200" : "bg-orange-50 border-orange-200")}>
-                            <div><span className="text-xs font-bold uppercase text-gray-400 block">Bowling</span><span className={cn("font-bold text-lg", stats.bowlers >= 5 ? "text-green-700" : "text-gray-900")}>{stats.bowlers}/5 (Min)</span></div>
-                            {stats.bowlers >= 5 ? <Check size={20} className="text-green-600" /> : <AlertCircle size={20} className="text-orange-500" />}
-                        </div>
+                        )}
                     </div>
+                )}
 
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                        {/* Sidebar - shows below on mobile, left on desktop */}
-                        <div className="lg:col-span-4 order-2 lg:order-1">
-                            <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 lg:sticky lg:top-24 max-h-64 lg:max-h-[calc(100vh-8rem)] overflow-y-auto">
-                                <h2 className="font-bold text-gray-800 mb-4">Available Squad ({availableForEdit.length})</h2>
-                                <div className="space-y-4">
-                                    {Object.entries(groupedAvailable).map(([groupName, players]) => {
-                                        if (players.length === 0) return null;
+
+                {/* --- EDIT MODE --- */}
+                {isEditMode && (
+                    <div className="animate-in slide-in-from-bottom-4">
+                        {/* Reuse existing Edit UI logic here */}
+
+                        {/* Stats Panel */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className={cn("p-3 rounded-xl border flex items-center justify-between", stats.count === 11 ? "bg-green-50 border-green-200" : "bg-gray-50 border-gray-200")}>
+                                <div><span className="text-xs font-bold uppercase text-gray-400 block">Players</span><span className={cn("font-bold text-lg", stats.count === 11 ? "text-green-700" : "text-gray-900")}>{stats.count}/11</span></div>
+                                {stats.count === 11 ? <Check size={20} className="text-green-600" /> : <Shield size={20} className="text-gray-300" />}
+                            </div>
+                            <div className={cn("p-3 rounded-xl border flex items-center justify-between", stats.overseas <= 4 ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200")}>
+                                <div><span className="text-xs font-bold uppercase text-gray-400 block">Overseas</span><span className={cn("font-bold text-lg", stats.overseas > 4 ? "text-red-600" : "text-gray-900")}>{stats.overseas}/4</span></div>
+                                {stats.overseas <= 4 ? <Check size={20} className="text-green-600" /> : <AlertTriangle size={20} className="text-red-600" />}
+                            </div>
+                            <div className={cn("p-3 rounded-xl border flex items-center justify-between", stats.wks >= 1 ? "bg-green-50 border-green-200" : "bg-orange-50 border-orange-200")}>
+                                <div><span className="text-xs font-bold uppercase text-gray-400 block">Keepers</span><span className={cn("font-bold text-lg", stats.wks >= 1 ? "text-green-700" : "text-gray-900")}>{stats.wks}/1 (Min)</span></div>
+                                {stats.wks >= 1 ? <Check size={20} className="text-green-600" /> : <AlertCircle size={20} className="text-orange-500" />}
+                            </div>
+                            <div className={cn("p-3 rounded-xl border flex items-center justify-between", stats.bowlers >= 5 ? "bg-green-50 border-green-200" : "bg-orange-50 border-orange-200")}>
+                                <div><span className="text-xs font-bold uppercase text-gray-400 block">Bowling</span><span className={cn("font-bold text-lg", stats.bowlers >= 5 ? "text-green-700" : "text-gray-900")}>{stats.bowlers}/5 (Min)</span></div>
+                                {stats.bowlers >= 5 ? <Check size={20} className="text-green-600" /> : <AlertCircle size={20} className="text-orange-500" />}
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                            {/* Sidebar - shows below on mobile, left on desktop */}
+                            <div className="lg:col-span-4 order-2 lg:order-1">
+                                <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 lg:sticky lg:top-24 max-h-64 lg:max-h-[calc(100vh-8rem)] overflow-y-auto">
+                                    <h2 className="font-bold text-gray-800 mb-4">Available Squad ({availableForEdit.length})</h2>
+                                    <div className="space-y-4">
+                                        {Object.entries(groupedAvailable).map(([groupName, players]) => {
+                                            if (players.length === 0) return null;
+                                            return (
+                                                <div key={groupName} className="space-y-2">
+                                                    <h3 className="text-xs font-bold uppercase text-gray-500 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100 shadow-sm">{groupName} ({players.length})</h3>
+                                                    {players.map(p => (
+                                                        <div
+                                                            key={p._id}
+                                                            onClick={() => handleAssign(p)}
+                                                            draggable
+                                                            onDragStart={(e) => handleDragStart(e, p, null)}
+                                                            className={cn(
+                                                                "p-3 border rounded-xl flex items-center gap-3 transition-all",
+                                                                draggedPlayer?._id === p._id ? "opacity-50 ring-2 ring-blue-500 cursor-grabbing bg-blue-50" : "hover:bg-blue-50 bg-white border-gray-100 cursor-grab hover:shadow-md"
+                                                            )}
+                                                        >
+                                                            <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden shrink-0 pointer-events-none">
+                                                                {p.image ? <img src={p.image} className="w-full h-full object-cover" /> : <User className="w-full h-full p-2 text-gray-300" />}
+                                                            </div>
+                                                            <div className="pointer-events-none">
+                                                                <div className="text-sm font-bold flex items-center gap-1">{p.name} {p.isOverseas && <Plane size={13} className="text-blue-500 fill-blue-500" />}</div>
+                                                                <div className="text-xs text-gray-500">{p.role}</div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Slots */}
+                            <div className="lg:col-span-8 order-1 lg:order-2">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {[...Array(11)].map((_, i) => {
+                                        const pos = i + 1;
+                                        const p = slots[pos];
+                                        const isExecutivesLocked = isCaptaincyLocked && p && (p._id === captain || p._id === viceCaptain);
+
                                         return (
-                                            <div key={groupName} className="space-y-2">
-                                                <h3 className="text-xs font-bold uppercase text-gray-500 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100 shadow-sm">{groupName} ({players.length})</h3>
-                                                {players.map(p => (
-                                                    <div 
-                                                        key={p._id} 
-                                                        onClick={() => handleAssign(p)} 
-                                                        draggable
-                                                        onDragStart={(e) => handleDragStart(e, p, null)}
-                                                        className={cn(
-                                                            "p-3 border rounded-xl flex items-center gap-3 transition-all",
-                                                            draggedPlayer?._id === p._id ? "opacity-50 ring-2 ring-blue-500 cursor-grabbing bg-blue-50" : "hover:bg-blue-50 bg-white border-gray-100 cursor-grab hover:shadow-md"
-                                                        )}
+                                            <div
+                                                key={pos}
+                                                onDragOver={handleDragOver}
+                                                onDrop={(e) => handleDrop(e, pos)}
+                                                className={cn(
+                                                    "relative p-4 rounded-2xl border-2 min-h-[90px] flex items-center transition-all",
+                                                    p ? "bg-white border-blue-500 shadow-sm" : "bg-gray-50 border-dashed",
+                                                    draggedPlayer && !p ? "border-blue-400 bg-blue-50/50" : ""
+                                                )}
+                                            >
+                                                <span className="absolute top-0 left-0 bg-blue-600 text-white text-xs px-2 py-0.5 rounded-br">{pos}</span>
+                                                {p ? (
+                                                    <div
+                                                        className={cn("w-full pl-6 flex justify-between items-center", draggedPlayer?._id === p._id ? "opacity-30 cursor-grabbing" : isExecutivesLocked ? "cursor-not-allowed" : "cursor-grab")}
+                                                        draggable={!isExecutivesLocked}
+                                                        onDragStart={!isExecutivesLocked ? ((e) => handleDragStart(e, p, pos)) : undefined}
                                                     >
-                                                        <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden shrink-0 pointer-events-none">
-                                                            {p.image ? <img src={p.image} className="w-full h-full object-cover" /> : <User className="w-full h-full p-2 text-gray-300" />}
+                                                        <div className="flex items-center gap-3 pointer-events-none">
+                                                            <div className="w-10 h-10 rounded-full bg-gray-100 overflow-hidden">
+                                                                {p.image ? <img src={p.image} className="w-full h-full object-cover" /> : <User className="w-full h-full p-2 text-gray-300" />}
+                                                            </div>
+                                                            <div>
+                                                                <div className="font-bold flex items-center gap-1">{p.name} {p.isOverseas && <Plane size={13} className="text-blue-500 fill-blue-500" />}</div>
+                                                                <div className="text-xs text-gray-500">{p.role}</div>
+                                                            </div>
                                                         </div>
-                                                        <div className="pointer-events-none">
-                                                            <div className="text-sm font-bold flex items-center gap-1">{p.name} {p.isOverseas && <Plane size={13} className="text-blue-500 fill-blue-500" />}</div>
-                                                            <div className="text-xs text-gray-500">{p.role}</div>
-                                                        </div>
+                                                        {isExecutivesLocked ? (
+                                                            <div className="p-2 text-gray-400">
+                                                                <Lock size={14} />
+                                                            </div>
+                                                        ) : (
+                                                            <button onClick={(e) => { e.stopPropagation(); handleRemove(pos); }} className="p-2 hover:bg-red-50 text-red-500 rounded-full"><X size={16} /></button>
+                                                        )}
                                                     </div>
-                                                ))}
+                                                ) : (
+                                                    <div className="w-full text-center text-xs text-gray-400 font-bold uppercase tracking-wider pl-6 pointer-events-none">
+                                                        Required: {getBattingGroupLabel(getRequiredGroupForPos(pos))}
+                                                    </div>
+                                                )}
                                             </div>
                                         );
                                     })}
                                 </div>
+
+                                <div className="mt-8 flex justify-end">
+                                    <button
+                                        onClick={handleProceedToCaptainModal}
+                                        disabled={!stats.isValid || saving}
+                                        className="bg-blue-600 hover:bg-blue-700 transition-colors text-white px-8 py-3 rounded-xl font-bold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        Select Captain & Vice-Captain
+                                    </button>
+                                </div>
                             </div>
                         </div>
+                    </div>
+                )}
 
-                        {/* Slots */}
-                        <div className="lg:col-span-8 order-1 lg:order-2">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {[...Array(11)].map((_, i) => {
-                                    const pos = i + 1;
-                                    const p = slots[pos];
-                                    const isExecutivesLocked = isCaptaincyLocked && p && (p._id === captain || p._id === viceCaptain);
-
-                                    return (
-                                        <div 
-                                            key={pos} 
-                                            onDragOver={handleDragOver}
-                                            onDrop={(e) => handleDrop(e, pos)}
-                                            className={cn(
-                                                "relative p-4 rounded-2xl border-2 min-h-[90px] flex items-center transition-all", 
-                                                p ? "bg-white border-blue-500 shadow-sm" : "bg-gray-50 border-dashed",
-                                                draggedPlayer && !p ? "border-blue-400 bg-blue-50/50" : ""
-                                            )}
-                                        >
-                                            <span className="absolute top-0 left-0 bg-blue-600 text-white text-xs px-2 py-0.5 rounded-br">{pos}</span>
-                                            {p ? (
-                                                <div 
-                                                    className={cn("w-full pl-6 flex justify-between items-center", draggedPlayer?._id === p._id ? "opacity-30 cursor-grabbing" : isExecutivesLocked ? "cursor-not-allowed" : "cursor-grab")}
-                                                    draggable={!isExecutivesLocked}
-                                                    onDragStart={!isExecutivesLocked ? ((e) => handleDragStart(e, p, pos)) : undefined}
-                                                >
-                                                    <div className="flex items-center gap-3 pointer-events-none">
-                                                        <div className="w-10 h-10 rounded-full bg-gray-100 overflow-hidden">
-                                                            {p.image ? <img src={p.image} className="w-full h-full object-cover" /> : <User className="w-full h-full p-2 text-gray-300" />}
-                                                        </div>
-                                                        <div>
-                                                            <div className="font-bold flex items-center gap-1">{p.name} {p.isOverseas && <Plane size={13} className="text-blue-500 fill-blue-500" />}</div>
-                                                            <div className="text-xs text-gray-500">{p.role}</div>
-                                                        </div>
-                                                    </div>
-                                                    {isExecutivesLocked ? (
-                                                        <div className="p-2 text-gray-400">
-                                                            <Lock size={14} />
-                                                        </div>
-                                                    ) : (
-                                                        <button onClick={(e) => { e.stopPropagation(); handleRemove(pos); }} className="p-2 hover:bg-red-50 text-red-500 rounded-full"><X size={16} /></button>
-                                                    )}
-                                                </div>
-                                            ) : (
-                                                <div className="w-full text-center text-xs text-gray-400 font-bold uppercase tracking-wider pl-6 pointer-events-none">
-                                                    Required: {getBattingGroupLabel(getRequiredGroupForPos(pos))}
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })}
+                {/* Captaincy Selection Modal */}
+                {isEditMode && showCaptainModal && (
+                    <div className="fixed inset-0 z-50 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+                        <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+                            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+                                <div>
+                                    <h2 className="text-2xl font-black text-gray-900">Select Leadership</h2>
+                                    <p className="text-gray-500 text-sm mt-1">Choose your Captain (C) and Vice-Captain (VC) from your selected 11.</p>
+                                </div>
+                                <button onClick={() => setShowCaptainModal(false)} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 object-top">
+                                    <X size={24} />
+                                </button>
                             </div>
 
-                            <div className="mt-8 flex justify-end">
+                            <div className="p-6 overflow-y-auto flex-1">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    {Object.values(slots).filter(p => p !== null).map(p => (
+                                        <div key={p._id} className={cn(
+                                            "p-3 rounded-xl border-2 flex items-center justify-between cursor-pointer transition-colors",
+                                            tempCaptain === p._id ? "border-orange-500 bg-orange-50" : tempViceCaptain === p._id ? "border-blue-500 bg-blue-50" : "border-gray-100 hover:border-gray-300"
+                                        )}>
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 shrink-0">
+                                                    {p.image ? <img src={p.image} className="w-full h-full object-cover" /> : <User className="w-full h-full p-2 text-gray-300" />}
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <div className="font-bold text-sm truncate flex items-center gap-1">{p.name} {p.isOverseas && <Plane size={13} className="text-blue-500 fill-blue-500 shrink-0" />}</div>
+                                                    <div className="text-xs text-gray-500">{p.role}</div>
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => {
+                                                        if (tempViceCaptain === p._id) setTempViceCaptain(null);
+                                                        setTempCaptain(tempCaptain === p._id ? null : p._id);
+                                                    }}
+                                                    className={cn("w-8 h-8 rounded-full font-black text-xs flex items-center justify-center transition-colors", tempCaptain === p._id ? "bg-orange-500 text-white shadow-md shadow-orange-500/30" : "bg-gray-100 text-gray-400 hover:bg-orange-100 hover:text-orange-600")}
+                                                >
+                                                    C
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        if (tempCaptain === p._id) setTempCaptain(null);
+                                                        setTempViceCaptain(tempViceCaptain === p._id ? null : p._id);
+                                                    }}
+                                                    className={cn("w-8 h-8 rounded-full font-black text-xs flex items-center justify-center transition-colors", tempViceCaptain === p._id ? "bg-blue-600 text-white shadow-md shadow-blue-600/30" : "bg-gray-100 text-gray-400 hover:bg-blue-100 hover:text-blue-600")}
+                                                >
+                                                    VC
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="p-6 bg-gray-50 border-t border-gray-100 flex justify-end gap-4">
                                 <button
-                                    onClick={handleProceedToCaptainModal}
-                                    disabled={!stats.isValid || saving}
-                                    className="bg-blue-600 hover:bg-blue-700 transition-colors text-white px-8 py-3 rounded-xl font-bold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                                    onClick={() => setShowCaptainModal(false)}
+                                    className="px-6 py-2.5 font-bold text-gray-500 hover:bg-gray-200 rounded-xl transition-colors"
                                 >
-                                    Select Captain & Vice-Captain
+                                    Back
+                                </button>
+                                <button
+                                    onClick={handleSaveFinal}
+                                    disabled={!tempCaptain || !tempViceCaptain || saving}
+                                    className="px-8 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg border border-blue-500 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                >
+                                    {saving ? 'Saving...' : 'Confirm & Save'} <Check size={18} />
                                 </button>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
+            </div>
 
-            {/* Captaincy Selection Modal */}
-            {isEditMode && showCaptainModal && (
-                <div className="fixed inset-0 z-50 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-                        <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-                            <div>
-                                <h2 className="text-2xl font-black text-gray-900">Select Leadership</h2>
-                                <p className="text-gray-500 text-sm mt-1">Choose your Captain (C) and Vice-Captain (VC) from your selected 11.</p>
+            {/* â”€â”€ PLAYER BREAKDOWN SIDE DRAWER â”€â”€ */}
+            {drawerPlayer && (
+                <>
+                    {/* Backdrop */}
+                    <div
+                        className="fixed inset-0 z-40 bg-black/30 backdrop-blur-[2px] animate-in fade-in duration-200"
+                        onClick={() => setExpandedPlayerId(null)}
+                    />
+
+                    {/* Side Drawer */}
+                    <div className="fixed top-0 right-0 h-full w-full max-w-sm z-50 bg-white shadow-2xl flex flex-col animate-in slide-in-from-right duration-200">
+
+                        {/* Drawer Header */}
+                        <div className="flex items-center gap-3 p-5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white shrink-0">
+                            <div className="w-14 h-14 rounded-full bg-white/20 border-2 border-white/40 overflow-hidden shrink-0">
+                                {drawerPlayer.image
+                                    ? <img src={drawerPlayer.image} className="w-full h-full object-cover" />
+                                    : <User className="w-full h-full p-3 text-white/50" />}
                             </div>
-                            <button onClick={() => setShowCaptainModal(false)} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 object-top">
-                                <X size={24} />
-                            </button>
-                        </div>
-
-                        <div className="p-6 overflow-y-auto flex-1">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                {Object.values(slots).filter(p => p !== null).map(p => (
-                                    <div key={p._id} className={cn(
-                                        "p-3 rounded-xl border-2 flex items-center justify-between cursor-pointer transition-colors",
-                                        tempCaptain === p._id ? "border-orange-500 bg-orange-50" : tempViceCaptain === p._id ? "border-blue-500 bg-blue-50" : "border-gray-100 hover:border-gray-300"
-                                    )}>
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 shrink-0">
-                                                {p.image ? <img src={p.image} className="w-full h-full object-cover" /> : <User className="w-full h-full p-2 text-gray-300" />}
-                                            </div>
-                                            <div className="min-w-0">
-                                                <div className="font-bold text-sm truncate flex items-center gap-1">{p.name} {p.isOverseas && <Plane size={13} className="text-blue-500 fill-blue-500 shrink-0" />}</div>
-                                                <div className="text-xs text-gray-500">{p.role}</div>
-                                            </div>
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => {
-                                                    if (tempViceCaptain === p._id) setTempViceCaptain(null);
-                                                    setTempCaptain(tempCaptain === p._id ? null : p._id);
-                                                }}
-                                                className={cn("w-8 h-8 rounded-full font-black text-xs flex items-center justify-center transition-colors", tempCaptain === p._id ? "bg-orange-500 text-white shadow-md shadow-orange-500/30" : "bg-gray-100 text-gray-400 hover:bg-orange-100 hover:text-orange-600")}
-                                            >
-                                                C
-                                            </button>
-                                            <button
-                                                onClick={() => {
-                                                    if (tempCaptain === p._id) setTempCaptain(null);
-                                                    setTempViceCaptain(tempViceCaptain === p._id ? null : p._id);
-                                                }}
-                                                className={cn("w-8 h-8 rounded-full font-black text-xs flex items-center justify-center transition-colors", tempViceCaptain === p._id ? "bg-blue-600 text-white shadow-md shadow-blue-600/30" : "bg-gray-100 text-gray-400 hover:bg-blue-100 hover:text-blue-600")}
-                                            >
-                                                VC
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="p-6 bg-gray-50 border-t border-gray-100 flex justify-end gap-4">
-                            <button
-                                onClick={() => setShowCaptainModal(false)}
-                                className="px-6 py-2.5 font-bold text-gray-500 hover:bg-gray-200 rounded-xl transition-colors"
-                            >
-                                Back
-                            </button>
-                            <button
-                                onClick={handleSaveFinal}
-                                disabled={!tempCaptain || !tempViceCaptain || saving}
-                                className="px-8 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg border border-blue-500 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                            >
-                                {saving ? 'Saving...' : 'Confirm & Save'} <Check size={18} />
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </div>
-
-        {/* â”€â”€ PLAYER BREAKDOWN SIDE DRAWER â”€â”€ */}
-        {drawerPlayer && (
-            <>
-                {/* Backdrop */}
-                <div
-                    className="fixed inset-0 z-40 bg-black/30 backdrop-blur-[2px] animate-in fade-in duration-200"
-                    onClick={() => setExpandedPlayerId(null)}
-                />
-
-                {/* Side Drawer */}
-                <div className="fixed top-0 right-0 h-full w-full max-w-sm z-50 bg-white shadow-2xl flex flex-col animate-in slide-in-from-right duration-200">
-
-                    {/* Drawer Header */}
-                    <div className="flex items-center gap-3 p-5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white shrink-0">
-                        <div className="w-14 h-14 rounded-full bg-white/20 border-2 border-white/40 overflow-hidden shrink-0">
-                            {drawerPlayer.image
-                                ? <img src={drawerPlayer.image} className="w-full h-full object-cover" />
-                                : <User className="w-full h-full p-3 text-white/50" />}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                                <h3 className="font-black text-lg leading-tight truncate">{drawerPlayer.name}</h3>
-                                {drawerPlayer._id === captain && <span className="bg-orange-400 text-white text-[10px] font-black px-2 py-0.5 rounded-full">C</span>}
-                                {drawerPlayer._id === viceCaptain && <span className="bg-white/30 text-white text-[10px] font-black px-2 py-0.5 rounded-full">VC</span>}
-                                {drawerPlayer.isOverseas && <Plane size={13} className="fill-white text-white" />}
-                            </div>
-                            <p className="text-blue-100 text-xs font-bold uppercase tracking-wider mt-0.5">{drawerPlayer.role}</p>
-                        </div>
-                        <button
-                            onClick={() => setExpandedPlayerId(null)}
-                            className="shrink-0 p-2 hover:bg-white/20 rounded-full transition-colors"
-                        >
-                            <X size={20} />
-                        </button>
-                    </div>
-
-                    {/* Scrollable Content */}
-                    <div className="flex-1 overflow-y-auto p-5 space-y-5">
-                        {!drawerBd ? (
-                            <div className="text-center py-12 text-gray-400">
-                                <Info size={32} className="mx-auto mb-3 opacity-30" />
-                                <p className="text-sm">Detailed history not available yet.</p>
-                            </div>
-                        ) : (
-                            <>
-                                {/* Summary Cards Grid */}
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div className="rounded-2xl p-4 bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200">
-                                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">🏆 IPL Season</p>
-                                        <p className="text-3xl font-black text-slate-800 leading-none">{drawerBd.seasonTotal}</p>
-                                        <p className="text-xs text-slate-500 mt-1">Total Points</p>
-                                    </div>
-                                    <div className="rounded-2xl p-4 bg-gradient-to-br from-green-50 to-emerald-100 border border-green-200">
-                                        <p className="text-[10px] font-black uppercase text-green-500 tracking-widest mb-1">✅ Contributed</p>
-                                        <p className="text-3xl font-black text-green-700 leading-none">{drawerBd.contributed}</p>
-                                        <p className="text-xs text-green-600 mt-1">To Your Team</p>
-                                    </div>
-                                    {drawerBd.benched > 0 && (
-                                        <div className="rounded-2xl p-4 bg-gradient-to-br from-red-50 to-rose-100 border border-red-200">
-                                            <p className="text-[10px] font-black uppercase text-red-400 tracking-widest mb-1">🚫 Not Counted</p>
-                                            <p className="text-3xl font-black text-red-500 leading-none">{drawerBd.benched}</p>
-                                            <p className="text-xs text-red-400 mt-1">While Benched</p>
-                                        </div>
-                                    )}
-                                    {drawerBd.livePoints > 0 && (
-                                        <div className="rounded-2xl p-4 bg-gradient-to-br from-orange-50 to-amber-100 border border-orange-200">
-                                            <p className="text-[10px] font-black uppercase text-orange-500 tracking-widest mb-1">🔴 This Week</p>
-                                            <p className="text-3xl font-black text-orange-600 leading-none">+{drawerBd.livePoints}</p>
-                                            <p className="text-xs text-orange-500 mt-1">Live Points</p>
-                                        </div>
-                                    )}
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                    <h3 className="font-black text-lg leading-tight truncate">{drawerPlayer.name}</h3>
+                                    {drawerPlayer._id === captain && <span className="bg-orange-400 text-white text-[10px] font-black px-2 py-0.5 rounded-full">C</span>}
+                                    {drawerPlayer._id === viceCaptain && <span className="bg-white/30 text-white text-[10px] font-black px-2 py-0.5 rounded-full">VC</span>}
+                                    {drawerPlayer.isOverseas && <Plane size={13} className="fill-white text-white" />}
                                 </div>
+                                <p className="text-blue-100 text-xs font-bold uppercase tracking-wider mt-0.5">{drawerPlayer.role}</p>
+                            </div>
+                            <button
+                                onClick={() => setExpandedPlayerId(null)}
+                                className="shrink-0 p-2 hover:bg-white/20 rounded-full transition-colors"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
 
-                                {/* Week-by-Week Timeline */}
-                                {drawerBd.weekBreakdown?.length > 0 && (
-                                    <div>
-                                        <h4 className="text-xs font-black uppercase text-gray-400 tracking-widest mb-3">📅 Week by Week</h4>
-                                        <div className="space-y-2">
-                                            {drawerBd.weekBreakdown.map(w => (
-                                                <div key={w.week} className={cn(
-                                                    "flex items-center gap-3 p-3 rounded-xl border",
-                                                    w.inXI === null
-                                                        ? "bg-gray-50 border-gray-100"
-                                                        : w.inXI
-                                                            ? "bg-green-50 border-green-100"
-                                                            : "bg-red-50 border-red-100"
-                                                )}>
-                                                    {/* Week Badge */}
-                                                    <div className={cn(
-                                                        "w-9 h-9 rounded-full flex items-center justify-center font-black text-xs shrink-0",
-                                                        w.inXI === null ? "bg-gray-200 text-gray-500" :
-                                                        w.inXI ? "bg-green-500 text-white" : "bg-red-300 text-white"
-                                                    )}>
-                                                        W{w.week}
-                                                    </div>
-
-                                                    {/* Status */}
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className={cn(
-                                                            "font-bold text-sm",
-                                                            w.inXI === null ? "text-gray-400" :
-                                                            w.inXI ? "text-green-700" : "text-red-500"
-                                                        )}>
-                                                            {w.inXI === null ? 'No History Data'
-                                                                : w.inXI ? `Playing · ${w.role}`
-                                                                : 'Benched'}
-                                                        </div>
-                                                        {w.inXI && w.role !== 'Player' && (
-                                                            <div className="text-[11px] text-green-600 font-semibold">
-                                                                {w.role === 'Captain' ? '2× Captain Bonus Applied' : '1.5× VC Bonus Applied'}
-                                                            </div>
-                                                        )}
-                                                    </div>
-
-                                                    {/* Points */}
-                                                    <div className="text-right shrink-0">
-                                                        {w.inXI === null ? (
-                                                            <span className="text-gray-300 text-sm font-bold">—</span>
-                                                        ) : w.inXI ? (
-                                                            <div>
-                                                                <div className="font-black text-green-700 text-base">{w.withBonus} pts</div>
-                                                                {w.withBonus !== w.rawPoints && (
-                                                                    <div className="text-[10px] text-gray-400">{w.rawPoints} raw</div>
-                                                                )}
-                                                            </div>
-                                                        ) : (
-                                                            <div>
-                                                                <div className="font-bold text-red-400 text-base">{w.rawPoints} pts</div>
-                                                                <div className="text-[10px] text-red-300">not counted</div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            ))}
+                        {/* Scrollable Content */}
+                        <div className="flex-1 overflow-y-auto p-5 space-y-5">
+                            {!drawerBd ? (
+                                <div className="text-center py-12 text-gray-400">
+                                    <Info size={32} className="mx-auto mb-3 opacity-30" />
+                                    <p className="text-sm">Detailed history not available yet.</p>
+                                </div>
+                            ) : (
+                                <>
+                                    {/* Summary Cards Grid */}
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="rounded-2xl p-4 bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200">
+                                            <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">🏆 IPL Season</p>
+                                            <p className="text-3xl font-black text-slate-800 leading-none">{drawerBd.seasonTotal}</p>
+                                            <p className="text-xs text-slate-500 mt-1">Total Points</p>
                                         </div>
+                                        <div className="rounded-2xl p-4 bg-gradient-to-br from-green-50 to-emerald-100 border border-green-200">
+                                            <p className="text-[10px] font-black uppercase text-green-500 tracking-widest mb-1">✅ Contributed</p>
+                                            <p className="text-3xl font-black text-green-700 leading-none">{drawerBd.contributed}</p>
+                                            <p className="text-xs text-green-600 mt-1">To Your Team</p>
+                                        </div>
+                                        {drawerBd.benched > 0 && (
+                                            <div className="rounded-2xl p-4 bg-gradient-to-br from-red-50 to-rose-100 border border-red-200">
+                                                <p className="text-[10px] font-black uppercase text-red-400 tracking-widest mb-1">🚫 Not Counted</p>
+                                                <p className="text-3xl font-black text-red-500 leading-none">{drawerBd.benched}</p>
+                                                <p className="text-xs text-red-400 mt-1">While Benched</p>
+                                            </div>
+                                        )}
+                                        {drawerBd.livePoints > 0 && (
+                                            <div className="rounded-2xl p-4 bg-gradient-to-br from-orange-50 to-amber-100 border border-orange-200">
+                                                <p className="text-[10px] font-black uppercase text-orange-500 tracking-widest mb-1">🔴 This Week</p>
+                                                <p className="text-3xl font-black text-orange-600 leading-none">+{drawerBd.livePoints}</p>
+                                                <p className="text-xs text-orange-500 mt-1">Live Points</p>
+                                            </div>
+                                        )}
                                     </div>
-                                )}
-                            </>
-                        )}
+
+                                    {/* Week-by-Week Timeline */}
+                                    {drawerBd.weekBreakdown?.length > 0 && (
+                                        <div>
+                                            <h4 className="text-xs font-black uppercase text-gray-400 tracking-widest mb-3">📅 Week by Week</h4>
+                                            <div className="space-y-2">
+                                                {drawerBd.weekBreakdown.map(w => (
+                                                    <div key={w.week} className={cn(
+                                                        "flex items-center gap-3 p-3 rounded-xl border",
+                                                        w.inXI === null
+                                                            ? "bg-gray-50 border-gray-100"
+                                                            : w.inXI
+                                                                ? "bg-green-50 border-green-100"
+                                                                : "bg-red-50 border-red-100"
+                                                    )}>
+                                                        {/* Week Badge */}
+                                                        <div className={cn(
+                                                            "w-9 h-9 rounded-full flex items-center justify-center font-black text-xs shrink-0",
+                                                            w.inXI === null ? "bg-gray-200 text-gray-500" :
+                                                                w.inXI ? "bg-green-500 text-white" : "bg-red-300 text-white"
+                                                        )}>
+                                                            W{w.week}
+                                                        </div>
+
+                                                        {/* Status */}
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className={cn(
+                                                                "font-bold text-sm",
+                                                                w.inXI === null ? "text-gray-400" :
+                                                                    w.inXI ? "text-green-700" : "text-red-500"
+                                                            )}>
+                                                                {w.inXI === null ? 'No History Data'
+                                                                    : w.inXI ? `Playing · ${w.role}`
+                                                                        : 'Benched'}
+                                                            </div>
+                                                            {w.inXI && w.role !== 'Player' && (
+                                                                <div className="text-[11px] text-green-600 font-semibold">
+                                                                    {w.role === 'Captain' ? '2× Captain Bonus Applied' : '1.5× VC Bonus Applied'}
+                                                                </div>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Points */}
+                                                        <div className="text-right shrink-0">
+                                                            {w.inXI === null ? (
+                                                                <span className="text-gray-300 text-sm font-bold">—</span>
+                                                            ) : w.inXI ? (
+                                                                <div>
+                                                                    <div className="font-black text-green-700 text-base">{w.withBonus} pts</div>
+                                                                    {w.withBonus !== w.rawPoints && (
+                                                                        <div className="text-[10px] text-gray-400">{w.rawPoints} raw</div>
+                                                                    )}
+                                                                </div>
+                                                            ) : (
+                                                                <div>
+                                                                    <div className="font-bold text-red-400 text-base">{w.rawPoints} pts</div>
+                                                                    <div className="text-[10px] text-red-300">not counted</div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
                     </div>
-                </div>
-            </>
-        )}
+                </>
+            )}
         </>
     );
 };
