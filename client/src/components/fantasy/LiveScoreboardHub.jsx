@@ -3,9 +3,11 @@ import axios from 'axios';
 import { useSocket } from '../../context/SocketContext';
 import { API_BASE_URL } from '../../config';
 import MatchScoreCard from './MatchScoreCard';
+import NextMatchCard from './NextMatchCard';
 
 const LiveScoreboardHub = () => {
     const [summaries, setSummaries] = useState([]);
+    const [nextMatch, setNextMatch] = useState(null);
     const { socket, isConnected } = useSocket();
 
     // 1. Initial Load from REST API
@@ -13,8 +15,13 @@ const LiveScoreboardHub = () => {
         const fetchInitialStatus = async () => {
             try {
                 const response = await axios.get(`${API_BASE_URL}/api/fantasy/live-status`);
-                if (response.data && response.data.summaries) {
-                    setSummaries(response.data.summaries);
+                if (response.data) {
+                    if (response.data.summaries) {
+                        setSummaries(response.data.summaries);
+                    }
+                    if (response.data.nextMatch) {
+                        setNextMatch(response.data.nextMatch);
+                    }
                 }
             } catch (err) {
                 console.error("Failed to fetch initial scores", err);
@@ -40,13 +47,17 @@ const LiveScoreboardHub = () => {
         };
     }, [socket]);
 
-    if (summaries.length === 0) return null;
+    if (summaries.length === 0 && !nextMatch) return null;
 
     return (
         <div className="live-scoreboard-hub">
-            {summaries.map((s) => (
-                <MatchScoreCard key={s.matchId} summary={s} />
-            ))}
+            {summaries.length > 0 ? (
+                summaries.map((s) => (
+                    <MatchScoreCard key={s.matchId} summary={s} />
+                ))
+            ) : (
+                <NextMatchCard match={nextMatch} />
+            )}
         </div>
     );
 };
