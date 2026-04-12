@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { API_BASE_URL as API_URL } from '../config';
 import { Shield, Check, AlertCircle, X, User, Plane, AlertTriangle, Lock, Edit2, ChevronDown, Users, Star, Info } from 'lucide-react';
 import { cn } from '../lib/utils';
+import LiveScoreboardHub from '../components/fantasy/LiveScoreboardHub';
 
 const POINT_FILTERS = [
     { key: 'total', label: 'Total Points', color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-200' },
@@ -508,6 +509,7 @@ const SelectPlayingXI = () => {
     return (
         <>
             <div className="max-w-7xl mx-auto p-4 md:p-8">
+                <LiveScoreboardHub />
                 {/* Header & Controls */}
                 <header className="mb-6 flex flex-col gap-3">
                     <div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { API_BASE_URL as API_URL } from '../config';
 import { Trophy, AlertCircle, ChevronDown, Star } from 'lucide-react';
 import { cn } from '../lib/utils';
+import LiveScoreboardHub from '../components/fantasy/LiveScoreboardHub';
 
 const POINT_FILTERS = [
     { key: 'total',    label: 'Total Points',    color: 'text-indigo-600',  bg: 'bg-indigo-50',  border: 'border-indigo-200' },
@@ -71,6 +72,7 @@ const PointsTablePage = () => {
 
     return (
         <div className="max-w-7xl mx-auto p-4 md:p-8">
+            <LiveScoreboardHub />
             <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h1 className="text-2xl md:text-3xl font-black text-gray-900 flex items-center gap-3">
